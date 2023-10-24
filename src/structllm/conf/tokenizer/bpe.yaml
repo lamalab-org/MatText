@@ -1,0 +1,8 @@
+path: 
+  root_path: "/crystal/slibert/src/slibert/tokenizer"
+  tokenizer_path: "${tokenizer.path.root_path}/tokenizer-slice.json"
+
+train: 
+  tokenizer_name : "tokenizer-slice.json"
+  train_files : ["${tokenizer.path.root_path}/train_data/result.sli"]
+  tokenizer_save_path : "${tokenizer.path.root_path}/${tokenizer.train.tokenizer_name}"

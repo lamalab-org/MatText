@@ -1,0 +1,54 @@
+finetune:
+  exp_name: "ft_jdft2d_1"
+  path:
+    pretrained_checkpoint: "/crystal/HTS/2_train_sample/bert_1_epoch_10/checkpoint-49000"
+    finetune_traindata: "/crystal/slibert/data/mb_1/train_matbench_jdft2d_0"
+    finetune_testdata:
+    root_path: "/crystal/slibert/data/bert/finetune"
+    output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
+    logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
+    finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
+
+  training_arguments:
+    output_dir: "${model.train.path.output_dir}"
+    overwrite_output_dir: True
+    epochs: 20
+    per_device_train_batch_size: 64
+    save_steps: 1000
+    save_total_limit: 2
+    learning_rate: 2e-5
+  
+
+pretrain:
+  exp_name: "pretrain_1"
+
+  bert_config:
+    hidden_size: 512
+    num_hidden_layers: 4
+    num_attention_heads: 8
+    is_decoder: False
+    add_cross_attention: False
+
+  path:
+    pretrained_checkpoint: 
+    traindata: "/crystal/HTS/1_augmentation/prior/workflow/result.csv"
+    testdata:
+    root_path: "/crystal/slibert/data/bert/pretrain"
+    output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
+    logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
+    finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
+
+  training_arguments:
+    output_dir: "${model.pretrain.path.output_dir}"   # Directory where model checkpoints and logs will be saved
+    logging_dir: "${model.pretrain.path.logging_dir}"
+    label_names: ["labels"]
+    save_total_limit: 5      # Maximum number of checkpoints to save
+    per_device_train_batch_size: 32
+    epochs: 20       # Number of training epochs
+    learning_rate: 2e-5
+    save_steps: 1000
+
+  mlm:
+    is_mlm: True 
+    mlm_probability: 0.15
+

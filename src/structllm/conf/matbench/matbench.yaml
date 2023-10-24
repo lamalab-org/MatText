@@ -1,0 +1,30 @@
+benchmarks : 
+  name: "mb_1"
+  dataset: [
+    #'matbench_perovskites',
+    # 'matbench_dielectric',
+      'matbench_jdft2d',
+    # 'matbench_log_gvrh',
+    # 'matbench_log_kvrh',
+    # 'matbench_mp_e_form',
+    # 'matbench_mp_gap',
+    # 'matbench_mp_is_metal',  
+      'matbench_phonons',
+  ]
+
+path: 
+  root: "/crystal/slibert/data"
+  save_path: "${matbench.path.root}/${matbench.benchmarks.name}"
+
+record_test:
+  benchmark_dataset: "matbench_phonons"
+  checkpoint: "/crystal/slibert/data/bert/finetune/checkpoints/finetuned_ft_jdft2d_1"
+  list_test_data: [
+    "/crystal/slibert/data/mb_1/test_matbench_phonons_0",
+    "/crystal/slibert/data/mb_1/test_matbench_phonons_1",
+    "/crystal/slibert/data/mb_1/test_matbench_phonons_2",
+    "/crystal/slibert/data/mb_1/test_matbench_phonons_3",
+    "/crystal/slibert/data/mb_1/test_matbench_phonons_4",
+
+  ]
+  benchmark_save_file: "${matbench.path.save_path}/${matbench.record_test.benchmark_dataset}.json.gz"
