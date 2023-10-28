@@ -1,11 +1,13 @@
 import lmdb
 import pickle
 import json
+import fire
 import numpy as np
 
 from tqdm import tqdm 
 from math import pi
 from pymatgen.core import Structure, Lattice
+
 
 
 scale_factor : int = 1e10
@@ -138,7 +140,7 @@ def prepare_dict(mat_dict:dict):
     return {"material_name": material_name, "method":method, "total_energy":total_energy,"fermi":fermi , "chemical_formula":chemical_formula, "structural_info" :structural,"electronic": electronic, "cif": cif_content}
     
         
-def prep_data(lmdb_path:str):
+def prep_data(lmdb_path:str,output_file:str)->None:
     materials_list = []
     dataset = Dataset(lmdb_path, 1)
 
@@ -149,12 +151,11 @@ def prep_data(lmdb_path:str):
         materials_list.append(data_dict)
 
 
-    output_file = "/home/nawaf/n0w0f/structllm/data/output.json"
     with open(output_file, 'w') as json_file:
         json.dump(materials_list, json_file)
 
 
 if __name__ == "__main__":
 
-    lmdb_path = "/home/nawaf/n0w0f/material_db/nomad/all/data.lmdb"   
-    prep_data(lmdb_path)
+   fire.Fire(prep_data)
+
