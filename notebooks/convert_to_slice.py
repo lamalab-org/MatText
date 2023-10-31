@@ -1,11 +1,12 @@
 import json
 import pandas as pd
-from concurrent.futures import ThreadPoolExecutor
+import fire
+
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from invcryrep.invcryrep import InvCryRep
 from pymatgen.core.structure import Structure
-import fire
-from typing import List, Dict
 
+from typing import List, Dict
 
 def read_json(json_file: str) -> List[Dict]:
     """Read JSON data from a file.
@@ -33,23 +34,37 @@ def give_slice(cif: str) -> str:
     pymatgen_struct = Structure.from_str(cif, "cif")
     return backend.structure2SLICES(pymatgen_struct)
 
-def process_entry(entry: Dict) -> Dict:
-    """Process a dictionary entry.
+
+
+def process_entry(entry: Dict, timeout: int) -> Dict:
+    """Process a dictionary entry with a timeout.
 
     Args:
         entry (Dict): A dictionary containing data.
+        timeout (int): Maximum time limit for give_slice in seconds.
 
     Returns:
-        Dict: A dictionary containing processed data.
+        Dict: A dictionary containing processed data, or None for rows with errors or timeouts.
     """
-    slice_result = give_slice(entry['cif'])
-    return {
-        'slice': slice_result,
-        'chemical_formula': entry['chemical_formula'],
-        'crystal_system': entry['structural_info']['crystal_system']
-    }
+    try:
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(give_slice, entry['cif'])
+            slice_result = future.result(timeout=timeout)
+            return {
+                'slice': slice_result,
+                'chemical_formula': entry['chemical_formula'],
+                'crystal_system': entry['structural_info']['crystal_system']
+            }
+    except TimeoutError:
+        print(f"Timeout error processing a row")
+        return None
+    except Exception as e:
+        print(f"Error processing a row: {e}")
+        return None
 
-def process_json_to_csv(json_file: str, csv_file: str, num_workers: int = 4):
+
+
+def process_json_to_csv(json_file: str, csv_file: str, num_workers: int = 4, timeout: int = 600):
     """Process JSON data and save it as a CSV file.
 
     Args:
@@ -63,6 +78,7 @@ def process_json_to_csv(json_file: str, csv_file: str, num_workers: int = 4):
         results = list(executor.map(process_entry, data))
 
     df = pd.DataFrame(results)
+    df = df.dropna()  # Exclude rows with None values
     df.to_csv(csv_file, index=False)
 
 if __name__ == "__main__":
