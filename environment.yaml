@@ -18,7 +18,6 @@ dependencies:
   - ipykernel=6.26.0=pyhf8b6a83_0
   - ipython=8.12.0=pyh41d4057_0
   - jedi=0.19.1=pyhd8ed1ab_0
-  - jupyter_client=7.3.4=pyhd8ed1ab_0
   - jupyter_core=5.4.0=py38h578d9bd_0
   - ld_impl_linux-64=2.38=h1181459_1
   - libffi=3.4.4=h6a678d5_0
@@ -52,7 +51,6 @@ dependencies:
   - sqlite=3.41.2=h5eee18b_0
   - stack_data=0.6.2=pyhd8ed1ab_0
   - tk=8.6.12=h1ccaba5_0
-  - tornado=6.1=py38h0a891b7_3
   - traitlets=5.12.0=pyhd8ed1ab_0
   - wcwidth=0.2.8=pyhd8ed1ab_0
   - wheel=0.41.2=py38h06a4308_0
@@ -61,19 +59,39 @@ dependencies:
   - zlib=1.2.13=h5eee18b_0
   - pip:
       - absl-py==2.0.0
+      - anyio==4.0.0
+      - argon2-cffi==23.1.0
+      - argon2-cffi-bindings==21.2.0
+      - arrow==1.3.0
       - ase==3.22.1
       - astunparse==1.6.3
+      - async-lru==2.0.4
+      - attrs==23.1.0
+      - babel==2.13.1
+      - beautifulsoup4==4.12.2
+      - bleach==6.1.0
       - cachetools==5.3.2
       - certifi==2023.7.22
+      - cffi==1.16.0
       - charset-normalizer==3.3.1
       - contourpy==1.1.1
       - cycler==0.12.1
+      - defusedxml==0.7.1
       - dill==0.3.7
       - emmet-core==0.68.0
+      - exceptiongroup==1.1.3
+      - fastjsonschema==2.18.1
       - fire==0.5.0
       - flatbuffers==23.5.26
       - fonttools==4.43.1
+      - fqdn==1.5.1
       - future==0.18.3
+      - gast==0.4.0
+      - google-auth==2.23.3
+      - google-auth-oauthlib==1.0.0
+      - google-pasta==0.2.0
+      - grpcio==1.59.2
+      - h5py==3.10.0
       - gast==0.4.0
       - google-auth==2.23.3
       - google-auth-oauthlib==1.0.0
@@ -82,8 +100,28 @@ dependencies:
       - h5py==3.10.0
       - idna==3.4
       - importlib-metadata==6.8.0
+      - importlib-metadata==6.8.0
       - importlib-resources==6.1.0
+      - ipython-genutils==0.2.0
+      - ipywidgets==8.1.1
+      - isoduration==20.11.0
+      - jinja2==3.1.2
       - joblib==1.3.2
+      - json5==0.9.14
+      - jsonpointer==2.4
+      - jsonschema==4.19.1
+      - jsonschema-specifications==2023.7.1
+      - jupyter==1.0.0
+      - jupyter-client==8.5.0
+      - jupyter-console==6.6.3
+      - jupyter-events==0.8.0
+      - jupyter-lsp==2.2.0
+      - jupyter-server==2.9.1
+      - jupyter-server-terminals==0.4.4
+      - jupyterlab==4.0.7
+      - jupyterlab-pygments==0.2.2
+      - jupyterlab-server==2.25.0
+      - jupyterlab-widgets==3.0.9
       - keras==2.13.1
       - kiwisolver==1.4.5
       - latexcodec==2.0.1
@@ -93,40 +131,61 @@ dependencies:
       - markdown==3.5
       - markupsafe==2.1.3
       - matplotlib==3.7.3
+      - mistune==3.0.2
       - monty==2023.9.25
       - mp-api==0.35.1
       - mpmath==1.3.0
       - msgpack==1.0.7
       - multiprocess==0.70.15
+      - nbclient==0.8.0
+      - nbconvert==7.10.0
+      - nbformat==5.9.2
       - networkx==3.1
+      - notebook==7.0.6
+      - notebook-shim==0.2.3
       - numpy==1.23.5
       - oauthlib==3.2.2
       - opt-einsum==3.3.0
+      - overrides==7.4.0
       - palettable==3.3.3
       - pandas==2.0.3
+      - pandocfilters==1.5.0
       - pathos==0.3.1
       - pillow==10.1.0
+      - pkgutil-resolve-name==1.3.10
       - plotly==5.18.0
       - pox==0.3.3
       - ppft==1.7.6.7
+      - prometheus-client==0.17.1
       - protobuf==4.24.4
       - pyasn1==0.5.0
       - pyasn1-modules==0.3.0
       - pybtex==0.24.0
+      - pycparser==2.21
       - pydantic==1.10.13
       - pymatgen==2023.8.10
       - pyparsing==3.1.1
+      - python-json-logger==2.0.7
       - pytz==2023.3.post1
       - pyyaml==6.0.1
+      - qtconsole==5.4.4
+      - qtpy==2.4.1
+      - referencing==0.30.2
       - requests==2.31.0
       - requests-oauthlib==1.3.1
+      - rfc3339-validator==0.1.4
+      - rfc3986-validator==0.1.1
+      - rpds-py==0.10.6
       - rsa==4.9
       - ruamel-yaml==0.18.2
       - ruamel-yaml-clib==0.2.8
       - scikit-learn==1.3.1
       - scipy==1.10.1
+      - send2trash==1.8.2
       - slices==1.4.4
       - smact==2.5.3
+      - sniffio==1.3.0
+      - soupsieve==2.5
       - spglib==2.1.0
       - sympy==1.12
       - tabulate==0.9.0
@@ -137,13 +196,23 @@ dependencies:
       - tensorflow-estimator==2.13.0
       - tensorflow-io-gcs-filesystem==0.34.0
       - termcolor==2.3.0
+      - terminado==0.17.1
       - threadpoolctl==3.2.0
+      - tinycss2==1.2.1
+      - tomli==2.0.1
+      - tornado==6.3.3
       - tqdm==4.66.1
+      - types-python-dateutil==2.8.19.14
       - typing-extensions==4.5.0
       - tzdata==2023.3
       - uncertainties==3.1.7
+      - uri-template==1.3.0
       - urllib3==2.0.7
+      - webcolors==1.13
+      - webencodings==0.5.1
+      - websocket-client==1.6.4
       - werkzeug==3.0.1
+      - widgetsnbextension==4.0.9
       - wrapt==1.15.0
       - zipp==3.17.0
-prefix: /home/nawaf/miniconda3/envs/structllm
+prefix: /home/so87pot/miniconda3/envs/structllm
