@@ -31,9 +31,9 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    traindata: "/crystal/HTS/1_augmentation/prior/workflow/result.csv"
+    traindata: "/home/so87pot/n0w0f/structllm/data/130k/slice.csv"
     testdata:
-    root_path: "/crystal/slibert/data/bert/pretrain"
+    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/bert/pretrain"
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
     finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
