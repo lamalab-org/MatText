@@ -113,7 +113,7 @@ def prepare_dict(mat_dict:dict):
     cif_content = create_cif(mat_dict)
 
     # crystal structure properties
-    material_name = mat_dict['material']['material_name']
+    #material_name = mat_dict['material']['material_name']
     chemical_formula = mat_dict['material']['chemical_formula_descriptive']
     structural = {
         "space_group_symbol": mat_dict['material']['symmetry']['space_group_symbol'],
@@ -123,12 +123,12 @@ def prepare_dict(mat_dict:dict):
 
     # Electronic structure properties
     elec_structure = mat_dict['properties']['electronic']['dos_electronic']
-    electronic = {
-        "spin_polarized" : elec_structure['spin_polarized'] ,
-        "energy_fermi" : elec_structure['energy_fermi'],
+    #electronic = {
+        #"spin_polarized" : elec_structure['spin_polarized'] ,
+        #"energy_fermi" : elec_structure['energy_fermi'],
         # "energy_highest_occupied" : elec_structure['band_gap'][0]['energy_highest_occupied'],
         # "energy_lowest_unoccupied" :elec_structure['band_gap'][0]['energy_lowest_unoccupied']
-    }
+    #}
 
     # Energy
     total_energy = mat_dict['energies']['total']['value']
@@ -137,7 +137,7 @@ def prepare_dict(mat_dict:dict):
     #method 
     method = mat_dict['method']
 
-    return {"material_name": material_name, "method":method, "total_energy":total_energy,"fermi":fermi , "chemical_formula":chemical_formula, "structural_info" :structural,"electronic": electronic, "cif": cif_content}
+    return { "method":method, "total_energy":total_energy,"fermi":fermi , "chemical_formula":chemical_formula, "structural_info" :structural, "cif": cif_content}
     
         
 def prep_data(lmdb_path:str,output_file:str)->None:
@@ -145,7 +145,7 @@ def prep_data(lmdb_path:str,output_file:str)->None:
     dataset = Dataset(lmdb_path, 1)
 
     #loop through data points in lmdb
-    for index in tqdm(range(10)):
+    for index in tqdm(range(dataset.len())):
         datapoint = dataset.get(index)
         data_dict = prepare_dict(datapoint)
         materials_list.append(data_dict)
@@ -158,4 +158,5 @@ def prep_data(lmdb_path:str,output_file:str)->None:
 if __name__ == "__main__":
 
    fire.Fire(prep_data)
+   print("Finished")
 
