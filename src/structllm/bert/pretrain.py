@@ -26,15 +26,15 @@ class PretrainBertModel:
             mask_token="[MASK]",
         )
 
-        slice_data = load_dataset("csv", data_files=self.cfg.model.pretrain.path.traindata)
-        train_dataset = slice_data.remove_columns('----9KNOtIZc9bDFEWxgjeSRsJrC')
-        train_dataset = train_dataset.rename_column(
-            original_column_name="error", new_column_name="train"
-        )
+        train_dataset = load_dataset("csv", data_files=self.cfg.model.pretrain.path.traindata)
+        # train_dataset = slice_data.remove_columns('----9KNOtIZc9bDFEWxgjeSRsJrC')
+        # train_dataset = train_dataset.rename_column(
+        #     original_column_name="error", new_column_name="train"
+        # )
         self.tokenized_datasets = train_dataset.map(self.tokenize_pad_and_truncate, batched=True)
 
     def tokenize_pad_and_truncate(self, texts):
-        return self.wrapped_tokenizer(texts["train"], truncation=True, padding="max_length", max_length=self.context_length)
+        return self.wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=self.context_length)
 
     def pretrain_mlm(self):
         config_path = self.cfg.model.pretrain.path
