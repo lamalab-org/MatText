@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=tokenizer
-#SBATCH --output=token1_out.log
-#SBATCH --error=token1_err.log
+#SBATCH --output=token2_out.log
+#SBATCH --error=token2_err.log
 #SBATCH --partition=standard
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=48
