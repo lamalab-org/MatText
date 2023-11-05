@@ -1,0 +1,38 @@
+Exception ignored in: <function WeakKeyDictionary.__init__.<locals>.remove at 0x14e8083d8ee0>
+Traceback (most recent call last):
+  File "/home/so87pot/miniconda3/envs/structllm/lib/python3.8/weakref.py", line 351, in remove
+    del self.data[k]
+KeyError: <weakref at 0x14e7ef6e7770; dead>
+Exception ignored in: <function WeakKeyDictionary.__init__.<locals>.remove at 0x14e8083d8ee0>
+Traceback (most recent call last):
+  File "/home/so87pot/miniconda3/envs/structllm/lib/python3.8/weakref.py", line 351, in remove
+    del self.data[k]
+KeyError: <weakref at 0x14e6bf649900; dead>
+Exception ignored in: <function WeakKeyDictionary.__init__.<locals>.remove at 0x14e8083d8ee0>
+Traceback (most recent call last):
+  File "/home/so87pot/miniconda3/envs/structllm/lib/python3.8/weakref.py", line 351, in remove
+    del self.data[k]
+KeyError: <weakref at 0x14e6b0701860; dead>
+Traceback (most recent call last):
+  File "convert_to_slice.py", line 90, in <module>
+    fire.Fire(process_json_to_csv)
+  File "/home/so87pot/miniconda3/envs/structllm/lib/python3.8/site-packages/fire/core.py", line 141, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  File "/home/so87pot/miniconda3/envs/structllm/lib/python3.8/site-packages/fire/core.py", line 475, in _Fire
+    component, remaining_args = _CallAndUpdateTrace(
+  File "/home/so87pot/miniconda3/envs/structllm/lib/python3.8/site-packages/fire/core.py", line 691, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+  File "convert_to_slice.py", line 85, in process_json_to_csv
+    df = pd.DataFrame(results)
+  File "/home/so87pot/miniconda3/envs/structllm/lib/python3.8/site-packages/pandas/core/frame.py", line 782, in __init__
+    arrays, columns, index = nested_data_to_arrays(
+  File "/home/so87pot/miniconda3/envs/structllm/lib/python3.8/site-packages/pandas/core/internals/construction.py", line 498, in nested_data_to_arrays
+    arrays, columns = to_arrays(data, columns, dtype=dtype)
+  File "/home/so87pot/miniconda3/envs/structllm/lib/python3.8/site-packages/pandas/core/internals/construction.py", line 832, in to_arrays
+    arr, columns = _list_of_dict_to_arrays(data, columns)
+  File "/home/so87pot/miniconda3/envs/structllm/lib/python3.8/site-packages/pandas/core/internals/construction.py", line 912, in _list_of_dict_to_arrays
+    pre_cols = lib.fast_unique_multiple_list_gen(gen, sort=sort)
+  File "pandas/_libs/lib.pyx", line 374, in pandas._libs.lib.fast_unique_multiple_list_gen
+  File "/home/so87pot/miniconda3/envs/structllm/lib/python3.8/site-packages/pandas/core/internals/construction.py", line 910, in <genexpr>
+    gen = (list(x.keys()) for x in data)
+AttributeError: 'NoneType' object has no attribute 'keys'
