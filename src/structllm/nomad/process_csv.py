@@ -5,6 +5,27 @@ import pandas as pd
 import fire
 from typing import List
 
+def save_slice_column(input_file: str, output_file: str) -> None:
+    """
+    Load an input CSV file, select and save only the "slice" column to a separate CSV file.
+
+    Args:
+        input_file (str): The path to the input CSV file.
+        output_file (str): The name of the output CSV file where the "slice" column will be saved.
+
+    Returns:
+        None
+    """
+    # Load the input CSV file into a DataFrame
+    df = pd.read_csv(input_file)
+
+    # Select and save only the "slice" column to a new CSV file
+    # Assuming df is your DataFrame with columns containing leading/trailing spaces
+    df.columns = df.columns.str.strip()
+    slice_column = df['slices']
+    slice_column.to_csv(output_file, header=["slices"], index=False)
+
+
 class CSVCombiner:
     def combine_csv_files(self, input_directory: str, output_filename: str) -> None:
         """
@@ -39,4 +60,5 @@ class CSVCombiner:
         print(f"Combined CSV files saved to '{output_filename}'.")
 
 if __name__ == "__main__":
-    fire.Fire(CSVCombiner)
+    #fire.Fire(CSVCombiner)
+    fire.Fire(save_slice_column)
