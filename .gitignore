@@ -194,3 +194,8 @@ logs/
 src/structllm/bert/finetune/
 src/structllm/bert/pretrain/
 src/structllm/bert/wandb/
+
+#slurm files
+*.sh
+*.err
+*.out
