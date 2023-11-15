@@ -73,7 +73,7 @@ class FinetuneBertModel:
 
         # Create a Trainer instance
         trainer = Trainer(
-            model=model,
+            model=model.to("cuda"),
             args=training_args,
             data_collator=None,  # We're using default data collation
             compute_metrics=self.compute_metrics,
