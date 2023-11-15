@@ -7,6 +7,16 @@ from transformers import Trainer, TrainingArguments
 from datasets import load_dataset
 import hydra
 from omegaconf import DictConfig
+import os
+import wandb
+
+from transformers import TrainerCallback, TrainerControl
+
+class CustomWandbCallback(TrainerCallback):
+    def on_log(self, args, state, control, model, logs, **kwargs):
+        if state.is_world_process_zero:
+            wandb.log({"train_loss": logs.get("loss")})  # Log training loss
+            wandb.log({"eval_loss": logs.get("eval_loss")})  # Log evaluation loss
 
 
 
@@ -27,11 +37,11 @@ class PretrainBertModel:
         )
 
         train_dataset = load_dataset("csv", data_files=self.cfg.model.pretrain.path.traindata)
-        # train_dataset = slice_data.remove_columns('----9KNOtIZc9bDFEWxgjeSRsJrC')
-        # train_dataset = train_dataset.rename_column(
-        #     original_column_name="error", new_column_name="train"
-        # )
-        self.tokenized_datasets = train_dataset.map(self.tokenize_pad_and_truncate, batched=True)
+        eval_dataset = load_dataset("csv", data_files=self.cfg.model.pretrain.path.evaldata)
+
+        self.tokenized_train_datasets = train_dataset.map(self.tokenize_pad_and_truncate, batched=True)
+        self.tokenized_eval_datasets = eval_dataset.map(self.tokenize_pad_and_truncate, batched=True)
+        
 
     def tokenize_pad_and_truncate(self, texts):
         return self.wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=self.context_length)
@@ -55,7 +65,7 @@ class PretrainBertModel:
                             is_decoder= bert_params.is_decoder,
                             add_cross_attention= bert_params.add_cross_attention)
         
-        model = BertForMaskedLM(config=config)
+        model = BertForMaskedLM(config=config).to("cuda")
         
         training_args = TrainingArguments(
             output_dir= config_path.output_dir,
@@ -66,13 +76,24 @@ class PretrainBertModel:
             per_device_train_batch_size= config_params.per_device_train_batch_size,
             save_steps= config_params.save_steps,
             save_total_limit= config_params.save_total_limit,
+            report_to= config_params.report_to,
+            evaluation_strategy = config_params.evaluation_strategy,          # check evaluation metrics at each epoch
+            logging_steps =config_params.logging_steps,                    # we will log every 100 steps
+            eval_steps = config_params.eval_steps,                      # we will perform evaluation every 500 steps
+            load_best_model_at_end = config_params.load_best_model_at_end,
         )
+        
+
+        # Use the custom callback for logging
+        callbacks = [CustomWandbCallback()]
 
         trainer = Trainer(
             model=model,
-            args=training_args,
             data_collator=data_collator,
-            train_dataset=self.tokenized_datasets['train'],
+            train_dataset=self.tokenized_train_datasets['train'],
+            eval_dataset=self.tokenized_eval_datasets['train'],
+            args=training_args,
+            callbacks=callbacks
         )
 
         trainer.train()
@@ -80,17 +101,25 @@ class PretrainBertModel:
         # Save the fine-tuned model
         model.save_pretrained(self.cfg.model.pretrain.path.finetuned_modelname)
 
-        
-        
+
 @hydra.main(version_base=None, config_path="../conf", config_name="config")
 def main(cfg: DictConfig) -> None:
+    os.environ["WANDB_PROJECT"] = cfg.logging.wandb_project
+    os.environ["WANDB_LOG_MODEL"] = cfg.logging.wandb_log_model
+
+    # Initialize W&B session
+    wandb.init(config=cfg.model.pretrain,
+            project=cfg.logging.wandb_project, 
+            name=cfg.model.pretrain.exp_name,)
     pretrain_bert = PretrainBertModel(cfg)
     pretrain_bert.pretrain_mlm()
 
-
 if __name__ == "__main__":
+    # Retrieve the API key from the environment variable
+    api_key = os.environ.get("WANDB_API_KEY")
+    if api_key:
+        # Log in to W&B using the retrieved API key
+        wandb.login(key=api_key)
+    else:
+        print("W&B API key not found. Please set the WANDB_API_KEY environment variable.")
     main()
-
-
-
-

@@ -13,18 +13,26 @@ benchmarks :
   ]
 
 path: 
-  root: "/crystal/slibert/data"
+  root: "/home/so87pot/n0w0f/structllm/src/structllm/matbench"
   save_path: "${matbench.path.root}/${matbench.benchmarks.name}"
 
 record_test:
-  benchmark_dataset: "matbench_phonons"
-  checkpoint: "/crystal/slibert/data/bert/finetune/checkpoints/finetuned_ft_jdft2d_1"
+  benchmark_dataset: "matbench_perovskites"
+#  checkpoint: "/crystal/slibert/data/bert/finetune/checkpoints/finetuned_ft_jdft2d_1"
+  checkpoints: [
+    "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune/checkpoints/train_matbench_perovskites_1/checkpoint-1500",
+    "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune/checkpoints/train_matbench_perovskites_2/checkpoint-1500",
+    "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune/checkpoints/train_matbench_perovskites_3/checkpoint-1500",
+    "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune/checkpoints/train_matbench_perovskites_3/checkpoint-1500",
+    "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune/checkpoints/train_matbench_perovskites_3/checkpoint-1500"
+
+  ] 
   list_test_data: [
-    "/crystal/slibert/data/mb_1/test_matbench_phonons_0",
-    "/crystal/slibert/data/mb_1/test_matbench_phonons_1",
-    "/crystal/slibert/data/mb_1/test_matbench_phonons_2",
-    "/crystal/slibert/data/mb_1/test_matbench_phonons_3",
-    "/crystal/slibert/data/mb_1/test_matbench_phonons_4",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/test_matbench_perovskites_0.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/test_matbench_perovskites_1.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/test_matbench_perovskites_2.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/test_matbench_perovskites_3.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/test_matbench_perovskites_4.csv",
 
   ]
-  benchmark_save_file: "${matbench.path.save_path}/${matbench.record_test.benchmark_dataset}.json.gz"
+  benchmark_save_file: "${matbench.path.save_path}/${matbench.record_test.benchmark_dataset}_all.json.gz"
