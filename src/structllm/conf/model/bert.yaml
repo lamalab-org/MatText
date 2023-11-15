@@ -1,26 +1,29 @@
 finetune:
-  exp_name: "ft_jdft2d_1"
+  exp_name: "train_matbench_perovskites_1"
   path:
-    pretrained_checkpoint: "/crystal/HTS/2_train_sample/bert_1_epoch_10/checkpoint-49000"
-    finetune_traindata: "/crystal/slibert/data/mb_1/train_matbench_jdft2d_0"
+    pretrained_checkpoint: "/home/so87pot/n0w0f/structllm/src/structllm/bert/pretrain/checkpoints/pretrain_130K/checkpoint-5000"
+    finetune_traindata: "/home/so87pot/n0w0f/structllm/data/mb_1/train_matbench_perovskites_0"
     finetune_testdata:
-    root_path: "/crystal/slibert/data/bert/finetune"
+    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune"
     output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
     logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
 
+  context_length: 128
   training_arguments:
     output_dir: "${model.train.path.output_dir}"
     overwrite_output_dir: True
-    epochs: 20
+    epochs: 50
     per_device_train_batch_size: 64
-    save_steps: 1000
+    save_steps: 500
+    logging_steps: 100  
+    report_to: "wandb"
     save_total_limit: 2
-    learning_rate: 2e-5
+    learning_rate: 2e-4
   
 
 pretrain:
-  exp_name: "pretrain_1"
+  exp_name: "pretrain_130K"
 
   bert_config:
     hidden_size: 512
@@ -31,8 +34,8 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    traindata: "/home/so87pot/n0w0f/structllm/data/130k/slice.csv"
-    testdata:
+    traindata: "/home/so87pot/n0w0f/structllm/data/130k/train.csv"
+    evaldata: "/home/so87pot/n0w0f/structllm/data/130k/val.csv"
     root_path: "/home/so87pot/n0w0f/structllm/src/structllm/bert/pretrain"
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
@@ -43,12 +46,16 @@ pretrain:
     logging_dir: "${model.pretrain.path.logging_dir}"
     label_names: ["labels"]
     save_total_limit: 5      # Maximum number of checkpoints to save
-    per_device_train_batch_size: 32
-    epochs: 20       # Number of training epochs
+    per_device_train_batch_size: 1024
+    epochs: 50       # Number of training epochs
     learning_rate: 2e-5
     save_steps: 1000
+    report_to: "wandb"
+    evaluation_strategy:  'steps'          # check evaluation metrics at each epoch
+    logging_steps: 100                    # we will log every 100 steps
+    eval_steps: 500                     # we will perform evaluation every 500 steps
+    load_best_model_at_end: True
 
   mlm:
     is_mlm: True 
     mlm_probability: 0.15
-
