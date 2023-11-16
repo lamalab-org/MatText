@@ -1,8 +1,8 @@
 finetune:
-  exp_name: "train_matbench_perovskites_4"
+  exp_name: "refractor"
   path:
     pretrained_checkpoint: "/home/so87pot/n0w0f/structllm/src/structllm/bert/pretrain/checkpoints/pretrain_130K/checkpoint-5000"
-    finetune_traindata: "/home/so87pot/n0w0f/structllm/data/mb_1/train_matbench_perovskites_3.csv"
+    finetune_traindata: "/home/so87pot/n0w0f/structllm/data/mb_1/train_matbench_perovskites_4.csv"
     finetune_testdata:
     root_path: "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune"
     output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
@@ -13,7 +13,7 @@ finetune:
   training_arguments:
     output_dir: "${model.train.path.output_dir}"
     overwrite_output_dir: True
-    epochs: 100
+    num_train_epochs: 100
     per_device_train_batch_size: 1024
     save_steps: 500
     logging_steps: 100  
