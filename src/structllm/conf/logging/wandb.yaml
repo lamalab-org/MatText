@@ -1,0 +1,2 @@
+wandb_project : "train_matbench_perovskites_1"
+wandb_log_model : "checkpoint"

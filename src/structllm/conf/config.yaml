@@ -2,5 +2,5 @@ defaults:
   - model: bert
   - tokenizer: bpe
   - matbench: matbench
+  - logging: wandb
 
-  
