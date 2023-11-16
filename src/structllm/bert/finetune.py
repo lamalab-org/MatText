@@ -1,4 +1,5 @@
 import torch
+import os
 from datasets import load_dataset
 from tokenizers import Tokenizer
 from tokenizers.models import BPE
@@ -6,6 +7,8 @@ from transformers import PreTrainedTokenizerFast
 from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer
 import hydra
 from omegaconf import DictConfig
+from transformers import TrainerCallback, TrainerControl
+import wandb
 
 
 class CustomWandbCallback(TrainerCallback):
@@ -56,7 +59,6 @@ class FinetuneBertModel:
             num_train_epochs=config_params.epochs,  # Number of training epochs
             learning_rate=config_params.learning_rate,
             save_steps= config_params.save_steps,
-            save_total_limit= config_params.save_total_limit,
             report_to= config_params.report_to,
             logging_steps =config_params.logging_steps,                    # we will log every 100 steps
             #eval_steps = config_params.eval_steps,                      # we will perform evaluation every 500 steps
@@ -94,7 +96,7 @@ def main(cfg: DictConfig) -> None:
     os.environ["WANDB_LOG_MODEL"] = cfg.logging.wandb_log_model
 
     # Initialize W&B session
-    wandb.init( config=cfg.model.finetune,
+    wandb.init( config=dict(cfg.model.finetune),
            project=cfg.logging.wandb_project, 
            name=cfg.model.finetune.exp_name,)
 

@@ -1,8 +1,8 @@
 finetune:
-  exp_name: "train_matbench_perovskites_1"
+  exp_name: "train_matbench_perovskites_4"
   path:
     pretrained_checkpoint: "/home/so87pot/n0w0f/structllm/src/structllm/bert/pretrain/checkpoints/pretrain_130K/checkpoint-5000"
-    finetune_traindata: "/home/so87pot/n0w0f/structllm/data/mb_1/train_matbench_perovskites_0"
+    finetune_traindata: "/home/so87pot/n0w0f/structllm/data/mb_1/train_matbench_perovskites_3.csv"
     finetune_testdata:
     root_path: "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune"
     output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
@@ -13,13 +13,14 @@ finetune:
   training_arguments:
     output_dir: "${model.train.path.output_dir}"
     overwrite_output_dir: True
-    epochs: 50
-    per_device_train_batch_size: 64
+    epochs: 100
+    per_device_train_batch_size: 1024
     save_steps: 500
     logging_steps: 100  
     report_to: "wandb"
-    save_total_limit: 2
+    save_total_limit: 5
     learning_rate: 2e-4
+    load_best_model_at_end: False
   
 
 pretrain:
