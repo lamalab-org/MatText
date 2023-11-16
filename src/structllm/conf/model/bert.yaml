@@ -24,9 +24,10 @@ finetune:
   
 
 pretrain:
-  exp_name: "pretrain_130K"
+  exp_name: "refractor"
+  model_name_or_path: "bert-base-uncased"
 
-  bert_config:
+  model_config:
     hidden_size: 512
     num_hidden_layers: 4
     num_attention_heads: 8
@@ -35,20 +36,22 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    traindata: "/home/so87pot/n0w0f/structllm/data/130k/train.csv"
-    evaldata: "/home/so87pot/n0w0f/structllm/data/130k/val.csv"
+    traindata: "/home/so87pot/n0w0f/structllm/data/27k/val.csv"
+    evaldata: "/home/so87pot/n0w0f/structllm/data/27k/val.csv"
     root_path: "/home/so87pot/n0w0f/structllm/src/structllm/bert/pretrain"
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
     finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
 
+  context_length: 128
   training_arguments:
     output_dir: "${model.pretrain.path.output_dir}"   # Directory where model checkpoints and logs will be saved
     logging_dir: "${model.pretrain.path.logging_dir}"
+    overwrite_output_dir: True     
     label_names: ["labels"]
     save_total_limit: 5      # Maximum number of checkpoints to save
-    per_device_train_batch_size: 1024
-    epochs: 50       # Number of training epochs
+    per_device_train_batch_size: 64
+    num_train_epochs: 5       # Number of training epochs
     learning_rate: 2e-5
     save_steps: 1000
     report_to: "wandb"
