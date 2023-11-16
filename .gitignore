@@ -191,9 +191,11 @@ pyrightconfig.json
 outputs/
 data/
 logs/
-src/structllm/bert/finetune/
-src/structllm/bert/pretrain/
-src/structllm/bert/wandb/
+src/structllm/model/finetune/
+src/structllm/model/pretrain/
+src/structllm/model/wandb/
+checkpoints
+
 
 #slurm files
 *.sh
