@@ -3,4 +3,6 @@ defaults:
   - tokenizer: bpe
   - matbench: matbench
   - logging: wandb
-
+tasks:
+  - pretrain
+  - finetune

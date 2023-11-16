@@ -1,3 +1,5 @@
+from typing import Any, List, Dict, Union
+
 import os
 import wandb
 import hydra
@@ -6,33 +8,32 @@ from omegaconf import DictConfig
 from tokenizers import Tokenizer
 from transformers import PreTrainedTokenizerFast
 from transformers import DataCollatorForLanguageModeling
-from transformers import  AutoModelForMaskedLM, AutoConfig
+from transformers import AutoModelForMaskedLM, AutoConfig
 from transformers import Trainer, TrainingArguments
-
 from datasets import load_dataset
-
-
-
 from transformers import TrainerCallback, TrainerControl
 
+
 class CustomWandbCallback(TrainerCallback):
-    def on_log(self, args, state, control, model, logs, **kwargs):
+    """Custom W&B callback for logging during training."""
+    def on_log(self, args: Any, state: Any, control: Any, model: Any, logs: Dict[str, Union[float, Any]], **kwargs: Any) -> None:
         if state.is_world_process_zero:
             wandb.log({"train_loss": logs.get("loss")})  # Log training loss
             wandb.log({"eval_loss": logs.get("eval_loss")})  # Log evaluation loss
 
 
-
 class PretrainModel:
-    def __init__(self, pretrain_config: DictConfig , tokenizer_config: DictConfig ):
-        self.cfg = pretrain_config
-        self.tokenizer_cfg = tokenizer_config
-        self.context_length = self.cfg.context_length
-        self.model_name_or_path = self.cfg.model_name_or_path
+    """Class to perform pretraining of a language model."""
+    def __init__(self, cfg: DictConfig):
+
+        self.cfg = cfg.model.pretrain
+        self.tokenizer_cfg = cfg.tokenizer
+        self.context_length: int = self.cfg.context_length
+        self.model_name_or_path: str = self.cfg.model_name_or_path
         
         # Load the custom tokenizer using tokenizers library
-        self._tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-        self._wrapped_tokenizer = PreTrainedTokenizerFast(
+        self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
+        self._wrapped_tokenizer: PreTrainedTokenizerFast = PreTrainedTokenizerFast(
             tokenizer_object=self._tokenizer,
             unk_token="[UNK]",
             pad_token="[PAD]",
@@ -47,39 +48,38 @@ class PretrainModel:
         self.tokenized_train_datasets = train_dataset.map(self._tokenize_pad_and_truncate, batched=True)
         self.tokenized_eval_datasets = eval_dataset.map(self._tokenize_pad_and_truncate, batched=True)
 
-    def _wandb_callbacks(self):
-        # Use the custom callback for logging
+    def _wandb_callbacks(self) -> List[TrainerCallback]:
+        """Returns a list of callbacks for logging."""
         return [CustomWandbCallback()]
 
-    
-    def _tokenize_pad_and_truncate(self, texts):
+    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any]) -> Dict[str, Any]:
+        """Tokenizes, pads, and truncates input texts."""
         return self._wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=self.context_length)
 
-    def pretrain_mlm(self):
+    def pretrain_mlm(self) -> None:
+        """Performs MLM pretraining of the language model."""
         config_mlm = self.cfg.mlm
         config_train_args = self.cfg.training_arguments
         config_model_args = self.cfg.model_config
         
         data_collator = DataCollatorForLanguageModeling(
-                                    tokenizer = self._wrapped_tokenizer,
-                                    mlm=config_mlm.is_mlm, 
-                                    mlm_probability=config_mlm.mlm_probability
-                                    )
+            tokenizer=self._wrapped_tokenizer,
+            mlm=config_mlm.is_mlm,
+            mlm_probability=config_mlm.mlm_probability
+        )
 
         callbacks = self._wandb_callbacks()
 
-       
         config = AutoConfig.from_pretrained(
             self.model_name_or_path,
-            **config_model_args)
+            **config_model_args
+        )
          
-        model = AutoModelForMaskedLM.from_config(
-            config
-            ).to("cuda")
+        model = AutoModelForMaskedLM.from_config(config).to("cuda")
         
         training_args = TrainingArguments(
             **config_train_args
-           )
+        )
     
         trainer = Trainer(
             model=model,
@@ -90,38 +90,12 @@ class PretrainModel:
             callbacks=callbacks
         )
 
-        print("-------------------")
-        print(config)
-        print("-------------------")
-        print(model)
-        print("-------------------")
+        wandb.log({"config_details": str(config)}) 
+        wandb.log({"Training Arguments": str(config_train_args)}) 
+        wandb.log({"model_summary": str(model)}) 
         
         trainer.train()
 
         # Save the fine-tuned model
         model.save_pretrained(self.cfg.path.finetuned_modelname)
 
-
-@hydra.main(version_base=None, config_path="../conf", config_name="config")
-def pretrainer(cfg: DictConfig) -> None:
-    os.environ["WANDB_PROJECT"] = cfg.logging.wandb_project
-    os.environ["WANDB_LOG_MODEL"] = cfg.logging.wandb_log_model
-
-    # Initialize W&B session
-    wandb.init(config= dict(cfg.model.pretrain),
-            project= cfg.logging.wandb_project, 
-            name= cfg.model.pretrain.exp_name,)
-
-    pretrain_config = cfg.model.pretrain
-    tokenizer_config = cfg.tokenizer
-    pretrain = PretrainModel( pretrain_config, tokenizer_config)
-    pretrain.pretrain_mlm()
-
-if __name__ == "__main__": 
-    # Retrieve the API key from the environment variable
-    api_key = os.environ.get("WANDB_API_KEY")
-    if api_key:
-        wandb.login(key=api_key)
-    else:
-        print("W&B API key not found. Please set the WANDB_API_KEY environment variable.")
-    pretrainer()
