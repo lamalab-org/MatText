@@ -202,3 +202,5 @@ checkpoints/*
 *.sh
 *.err
 *.out
+*.err.*
+*.out.*
