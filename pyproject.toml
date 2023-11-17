@@ -33,6 +33,7 @@ dependencies = [
     "datasets==2.14.6",
     "wandb==0.15.12",
     "slices",
+    "matbench",
     "fire",
     "hydra-core",
     "torch==2.1.0",
