@@ -1,5 +1,5 @@
 benchmarks : 
-  name: "mb_perovskite_1"
+  name: "mb_1"
   dataset: [
     #'matbench_perovskites',
     # 'matbench_dielectric',
@@ -13,7 +13,7 @@ benchmarks :
   ]
 
 path: 
-  root: "/home/so87pot/n0w0f/structllm/src/structllm/matbench"
+  root: "/home/so87pot/n0w0f/structllm/data"
   save_path: "${matbench.path.root}/${matbench.benchmarks.name}"
 
 record_test:
