@@ -1,17 +1,17 @@
 finetune:
-  exp_name: "refractor"
+  exp_name: "train_matbench_perovskites_6"
   path:
-    pretrained_checkpoint: "/home/so87pot/n0w0f/structllm/src/structllm/bert/pretrain/checkpoints/pretrain_130K/checkpoint-5000"
+    pretrained_checkpoint: "/home/so87pot/n0w0f/structllm/src/structllm/models/pretrain/checkpoints/pretrain_130K/checkpoint-5000"
     finetune_traindata: "/home/so87pot/n0w0f/structllm/data/mb_1/train_matbench_perovskites_4.csv"
     finetune_testdata:
-    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune"
+    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune"
     output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
     logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
 
   context_length: 128
   training_arguments:
-    output_dir: "${model.train.path.output_dir}"
+    output_dir: "${model.finetune.path.output_dir}"
     overwrite_output_dir: True
     num_train_epochs: 100
     per_device_train_batch_size: 1024
@@ -38,7 +38,7 @@ pretrain:
     pretrained_checkpoint: 
     traindata: "/home/so87pot/n0w0f/structllm/data/27k/val.csv"
     evaldata: "/home/so87pot/n0w0f/structllm/data/27k/val.csv"
-    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/bert/pretrain"
+    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/pretrain"
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
     finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"

@@ -30,6 +30,7 @@ if __name__ == "__main__":
     api_key = os.environ.get("WANDB_API_KEY")
     if api_key:
         wandb.login(key=api_key)
+        print("W&B API key found")
     else:
         print("W&B API key not found. Please set the WANDB_API_KEY environment variable.")
     main()
