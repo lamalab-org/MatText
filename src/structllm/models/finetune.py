@@ -22,10 +22,9 @@ class FinetuneModel:
     """Class to perform finetuning of a language model."""
     def __init__(self, cfg: DictConfig) -> None:
 
-        self.cfg = cfg.model.pretrain
+        self.cfg = cfg.model.finetune
         self.tokenizer_cfg = cfg.tokenizer
         self.context_length: int = self.cfg.context_length
-        self.model_name_or_path: str = self.cfg.model_name_or_path
 
         # Load the custom tokenizer using tokenizers library
         self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
@@ -38,7 +37,7 @@ class FinetuneModel:
             mask_token="[MASK]",
         )
 
-        train_dataset = load_dataset("csv", data_files=self.cfg.path.traindata)
+        train_dataset = load_dataset("csv", data_files=self.cfg.path.finetune_traindata)
         self.tokenized_train_datasets = train_dataset.map(self._tokenize_pad_and_truncate, batched=True)
 
     def _wandb_callbacks(self) -> List[TrainerCallback]:

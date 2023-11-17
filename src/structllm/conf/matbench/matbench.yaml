@@ -1,5 +1,5 @@
 benchmarks : 
-  name: "mb_1"
+  name: "mb_perovskite_1"
   dataset: [
     #'matbench_perovskites',
     # 'matbench_dielectric',
@@ -18,13 +18,13 @@ path:
 
 record_test:
   benchmark_dataset: "matbench_perovskites"
-#  checkpoint: "/crystal/slibert/data/bert/finetune/checkpoints/finetuned_ft_jdft2d_1"
+
   checkpoints: [
-    "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune/checkpoints/train_matbench_perovskites_1/checkpoint-1500",
-    "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune/checkpoints/train_matbench_perovskites_2/checkpoint-1500",
-    "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune/checkpoints/train_matbench_perovskites_3/checkpoint-1500",
-    "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune/checkpoints/train_matbench_perovskites_4/checkpoint-1500",
-    "/home/so87pot/n0w0f/structllm/src/structllm/bert/finetune/checkpoints/train_matbench_perovskites_5/checkpoint-500"
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_perovskites_1/checkpoint-1500",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_perovskites_2/checkpoint-1500",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_perovskites_3/checkpoint-1500",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_perovskites_4/checkpoint-1500",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_perovskites_6/checkpoint-1500"
 
   ] 
   list_test_data: [

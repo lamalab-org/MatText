@@ -4,5 +4,5 @@ defaults:
   - matbench: matbench
   - logging: wandb
 tasks:
-  - pretrain
+#  - pretrain
   - finetune
