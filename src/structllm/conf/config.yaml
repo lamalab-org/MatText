@@ -5,11 +5,13 @@ defaults:
   - logging: wandb
 
 runs:
+  - name: matbench_predict
+    tasks: [matbench_predict]
   # - name: pretrain_run
   #   tasks: [pretrain]
 
   # - name: finetune_run
   #   tasks: [finetune]
 
-  - name: predict
-    tasks: [predict]
+  # - name: predict
+  #   tasks: [predict]

@@ -4,6 +4,7 @@ from omegaconf import DictConfig
 from structllm.models.finetune import FinetuneModel
 from structllm.models.pretrain import PretrainModel
 from structllm.models.predict import Inference
+from structllm.matbenchmark.matbench_test import MatbenchPredict
 import wandb
 
 
@@ -12,6 +13,9 @@ class TaskRunner:
         self.wandb_api_key = os.environ.get("WANDB_API_KEY")
 
     def run_task(self, run: list , task_cfg: DictConfig) -> None:
+
+        if "matbench_predict" in run: 
+            self.run_matbench_prediction(task_cfg)
 
         if "predict" in run:
             print(task_cfg)
@@ -22,6 +26,11 @@ class TaskRunner:
 
         if "pretrain" in task_cfg.runs:
             self.run_pretraining(task_cfg)
+
+    def run_matbench_prediction(self, task_cfg: DictConfig) -> None:
+        print("performing benchmaking")
+        matbench_predictor = MatbenchPredict(task_cfg)
+        matbench_predictor.run_benchmark()
 
     def run_predictions(self,task_cfg: DictConfig) -> None:
         for exp_name, test_data_path, ckpt in zip(task_cfg.model.inference.exp_name, task_cfg.model.inference.path.test_data, task_cfg.model.inference.path.pretrained_checkpoint):
