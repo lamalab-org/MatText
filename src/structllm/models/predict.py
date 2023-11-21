@@ -1,11 +1,14 @@
 import json
+import os
 import torch
 from torch.nn import DataParallel
 import wandb
 import pandas as pd
+import numpy as np
 from tokenizers import Tokenizer
 from tokenizers.models import BPE
-from transformers import PreTrainedTokenizerFast, AutoModelForSequenceClassification, TrainerCallback
+from transformers import pipeline
+from transformers import PreTrainedTokenizerFast, AutoModelForSequenceClassification, TrainerCallback, Trainer
 from datasets import load_dataset
 from omegaconf import DictConfig
 from typing import Any, Dict, List, Union
@@ -18,8 +21,7 @@ class CustomWandbCallback_Inference(TrainerCallback):
         self.predictions = []
 
     def on_predict_end(self, args: Any, state: Any, control: Any, model: Any, predictions: Any, **kwargs: Any) -> None:
-        self.predictions.append(predictions)
-        wandb.log({"predictions": wandb.Table(dataframe=pd.Series(predictions))})
+        wandb.log({"predictions": predictions.predictions, })
 
 
 class Inference:
@@ -50,46 +52,59 @@ class Inference:
         """Tokenizes, pads, and truncates input texts."""
         return self._wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=self.context_length)
 
-    def predict(self) -> pd.Series:
+    def predict(self):
         pretrained_ckpt = self.cfg.path.pretrained_checkpoint
         callbacks = self._wandb_callbacks()
 
-        input_ids = torch.tensor(self.tokenized_test_datasets['train']['input_ids'])
-        attention_mask = torch.tensor(self.tokenized_test_datasets['train']['attention_mask'])
-
-        # Check for available devices
-        device_ids = [0]  # Set the device IDs for the GPUs you want to use
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         model = AutoModelForSequenceClassification.from_pretrained(
             pretrained_ckpt, 
             num_labels=1, 
-            ignore_mismatched_sizes=True)
-        
-        if torch.cuda.device_count() > 1:
-            print("Using", torch.cuda.device_count(), "GPUs!")
-            model = DataParallel(model, device_ids=device_ids)
-        model = model.to(device)
-        input_ids = input_ids.to(device)
-        attention_mask = attention_mask.to(device)
-       
-       # wandb.log({"model_summary": dict(model)})  # Log model summary
+            ignore_mismatched_sizes=True
+        )
 
-        predictions_path = f'{self.cfg.path.predictions}_predictions.json'
-        
+        trainer = Trainer(
+            model=model.to("cuda"),
+            data_collator=None,
+            callbacks = callbacks
+        )
 
-        with torch.no_grad():
-            outputs = model(input_ids, attention_mask=attention_mask)          
-            predictions = outputs.logits.squeeze().cpu().numpy()
-            for callback in callbacks:
+        predictions = trainer.predict(self.tokenized_test_datasets['train'])
+        for callback in callbacks:
                 callback.on_predict_end(None, None, None, model, predictions)  # Manually trigger callback
-        
         torch.cuda.empty_cache()
 
-        print(pd.Series(predictions)) 
-        predictions_list = predictions.tolist()
-        with open(predictions_path, 'w') as json_file:
-           json.dump(predictions_list, json_file)
 
-                    
-        predictions.to_json(predictions_path)
+        os.makedirs(self.cfg.path.predictions, exist_ok=True)
+        predictions_path = os.path.join(self.cfg.path.predictions, 'predictions.npy')
+        np.save(predictions_path, predictions.predictions)
+
+
+        return pd.Series(predictions.predictions.flatten())
+
+        
+        # Load the text classification pipeline with specified parameters
+        # classifier = pipeline(
+        #     "text-classification",
+        #     model=model,
+        #     tokenizer=self._wrapped_tokenizer,
+        #     device=0 if torch.cuda.is_available() else -1,  # Set device to GPU if available
+        #     framework="pt",  # Ensure PyTorch is used
+        #     batch_size=512,  # Set your desired batch size
+
+        # )
+
+        # def custom_processor(data_batch):
+        #     return [{"input_ids": batch["input_ids"], "attention_mask": batch["attention_mask"]} for batch in data_batch]
+        
+        # results = classifier(tokenized_test_datasets['train'])  # Pass your dataset
+        # print(results)
+
+        
+
+
+        
+        
+
+            
+
