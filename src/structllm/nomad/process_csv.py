@@ -1,33 +1,58 @@
-# csv_combiner.py
-
 import os
 import pandas as pd
 import fire
-from typing import List
+from sklearn.model_selection import train_test_split
 
-def save_slice_column(input_file: str, output_file: str) -> None:
-    """
-    Load an input CSV file, select and save only the "slice" column to a separate CSV file.
+def save_slice_column( input_file: str, output_file: str) -> None:
+        """
+        Load an input CSV file, select and save only the "slice" column to a separate CSV file.
 
-    Args:
-        input_file (str): The path to the input CSV file.
-        output_file (str): The name of the output CSV file where the "slice" column will be saved.
+        Args:
+            input_file (str): The path to the input CSV file.
+            output_file (str): The name of the output CSV file where the "slice" column will be saved.
 
-    Returns:
-        None
-    """
-    # Load the input CSV file into a DataFrame
-    df = pd.read_csv(input_file)
+        Returns:
+            None
+        """
+        # Load the input CSV file into a DataFrame
+        df = pd.read_csv(input_file)
 
-    # Select and save only the "slice" column to a new CSV file
-    # Assuming df is your DataFrame with columns containing leading/trailing spaces
-    df.columns = df.columns.str.strip()
-    slice_column = df['slices']
-    slice_column.to_csv(output_file, header=["slices"], index=False)
+        # Select and save only the "slice" column to a new CSV file
+        df.columns = df.columns.str.strip()
+        slice_column = df['slices']
+        slice_column.to_csv(output_file, header=["slices"], index=False)
 
+def split_csv(input_file: str, train_output_file: str, val_output_file: str, split_ratio: float = 0.8, random_state: int = None) -> None:
+        """
+        Split a CSV file into training and validation sets.
 
-class CSVCombiner:
-    def combine_csv_files(self, input_directory: str, output_filename: str) -> None:
+        Args:
+            input_file (str): Path to the input CSV file.
+            train_output_file (str): Path to save the training CSV file.
+            val_output_file (str): Path to save the validation CSV file.
+            split_ratio (float): Ratio to split the data into training and validation sets (default: 0.8).
+            random_state (int): Random seed for reproducibility (default: None).
+
+        Returns:
+            None
+        """
+        # Load the CSV data
+        try:
+            data = pd.read_csv(input_file)
+        except FileNotFoundError:
+            print(f"File '{input_file}' not found.")
+            return
+
+        # Split the data
+        train_data, val_data = train_test_split(data, test_size=(1 - split_ratio), random_state=random_state)
+
+        # Save the split datasets
+        train_data.to_csv(train_output_file, index=False)
+        val_data.to_csv(val_output_file, index=False)
+
+        print(f"Split complete: Train data saved to '{train_output_file}', Validation data saved to '{val_output_file}'.")
+
+def combine_csv_files(input_directory: str, output_filename: str) -> None:
         """
         Combine CSV files from the input directory into a single CSV file.
 
@@ -60,5 +85,10 @@ class CSVCombiner:
         print(f"Combined CSV files saved to '{output_filename}'.")
 
 if __name__ == "__main__":
-    #fire.Fire(CSVCombiner)
-    fire.Fire(save_slice_column)
+    fire.Fire({
+        'save_slice_column': save_slice_column,
+        'split_csv': split_csv,
+        'combine_csv_files': combine_csv_files
+    })
+
+

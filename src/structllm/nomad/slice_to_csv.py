@@ -70,11 +70,26 @@ def process_entry_train_matbench(entry: List, timeout: int) -> dict:
     except Exception as e:
         print(f"Error processing a row: {e}")
         return None
+    
+def process_entry_test_matbench(entry: List, timeout: int) -> dict:
+    # Ensure the give_slice function and necessary data are picklable
+    try:
+
+        slice_result = give_slice(entry)
+        return {
+                'slice': slice_result,
+            }
+    except TimeoutError:
+        print(f"Timeout error processing a row")
+        return None
+    except Exception as e:
+        print(f"Error processing a row: {e}")
+        return None
 
 
 def process_batch(num_workers,batch, timeout):
 
-    process_entry_with_timeout = partial(process_entry_train_matbench, timeout=timeout)
+    process_entry_with_timeout = partial(process_entry_test_matbench, timeout=timeout)
 
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         results = list(executor.map(process_entry_with_timeout, batch))
@@ -114,6 +129,8 @@ def process_json_to_csv(json_file: str, csv_file: str, log_file_path: str,  num_
             with open(log_file_path, "w") as log_file:
                 log_file.write(f"Last processed entry index: {last_processed_entry}\n")
                 log_file.write(f"Last processed batch number: {i}\n")
+
+    print(f"Finished !!! logging at {log_file_path}")
 
 
 
