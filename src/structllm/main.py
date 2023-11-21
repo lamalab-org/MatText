@@ -35,9 +35,10 @@ class TaskRunner:
             exp_cfg.model.inference.exp_name = exp_name
             exp_cfg.model.inference.path.test_data = test_data_path
             exp_cfg.model.inference.path.pretrained_checkpoint = ckpt
+            print(exp_cfg.model.inference.path.test_data)
 
             predict = Inference(exp_cfg)
-            predict.predict()
+            print(predict.predict())
             wandb.finish()
 
 

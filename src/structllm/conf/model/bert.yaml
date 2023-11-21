@@ -73,7 +73,12 @@ pretrain:
 
 
 inference:
-  exp_name: ["train_matbench_mp_e_form_0","train_matbench_mp_e_form_1","train_matbench_mp_e_form_2", "train_matbench_mp_e_form_3","train_matbench_mp_e_form_4"]
+  exp_name: [
+    "matbench_mp_e_form_0",
+    "matbench_mp_e_form_1",
+    "matbench_mp_e_form_2", 
+    "matbench_mp_e_form_3",
+    "matbench_mp_e_form_4"]
   path:
     pretrained_checkpoint: [
     "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_0/checkpoint-10000",
