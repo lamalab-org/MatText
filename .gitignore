@@ -196,6 +196,7 @@ src/structllm/models/pretrain/*
 src/structllm/models/wandb
 src/structllm/models/outputs
 checkpoints/*
+predictions/
 
 
 #slurm files
