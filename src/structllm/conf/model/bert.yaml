@@ -1,8 +1,14 @@
 finetune:
-  exp_name: "train_matbench_perovskites_6"
+  exp_name: ["train_matbench_phonons_0", "train_matbench_phonons_1", "train_matbench_phonons_2", "train_matbench_phonons_3","train_matbench_phonons_4"]
   path:
     pretrained_checkpoint: "/home/so87pot/n0w0f/structllm/src/structllm/models/pretrain/checkpoints/pretrain_130K/checkpoint-5000"
-    finetune_traindata: "/home/so87pot/n0w0f/structllm/data/mb_1/train_matbench_perovskites_4.csv"
+    finetune_traindata: [
+      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_phonons_0.csv",
+      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_phonons_1.csv",
+      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_phonons_2.csv",
+      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_phonons_3.csv",
+      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_phonons_4.csv",
+    ]
     finetune_testdata:
     root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune"
     output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
@@ -13,18 +19,18 @@ finetune:
   training_arguments:
     output_dir: "${model.finetune.path.output_dir}"
     overwrite_output_dir: True
-    num_train_epochs: 100
+    num_train_epochs: 400
     per_device_train_batch_size: 1024
-    save_steps: 500
+    save_steps: 50
     logging_steps: 100  
     report_to: "wandb"
-    save_total_limit: 5
+    save_total_limit: 20
     learning_rate: 2e-4
     load_best_model_at_end: False
   
 
 pretrain:
-  exp_name: "refractor"
+  exp_name: ["pretrain_396k_1"]
   model_name_or_path: "bert-base-uncased"
 
   model_config:
@@ -36,8 +42,8 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    traindata: "/home/so87pot/n0w0f/structllm/data/27k/val.csv"
-    evaldata: "/home/so87pot/n0w0f/structllm/data/27k/val.csv"
+    traindata: ["/home/so87pot/n0w0f/structllm/data/396k/slice/train.csv"]
+    evaldata: "/home/so87pot/n0w0f/structllm/data/396k/slice/val.csv"
     root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/pretrain"
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
@@ -50,8 +56,8 @@ pretrain:
     overwrite_output_dir: True     
     label_names: ["labels"]
     save_total_limit: 5      # Maximum number of checkpoints to save
-    per_device_train_batch_size: 64
-    num_train_epochs: 5       # Number of training epochs
+    per_device_train_batch_size: 512
+    num_train_epochs: 50       # Number of training epochs
     learning_rate: 2e-5
     save_steps: 1000
     report_to: "wandb"
@@ -63,3 +69,32 @@ pretrain:
   mlm:
     is_mlm: True 
     mlm_probability: 0.15
+
+
+
+inference:
+  exp_name: ["train_matbench_mp_e_form_0","train_matbench_mp_e_form_1","train_matbench_mp_e_form_2", "train_matbench_mp_e_form_3","train_matbench_mp_e_form_4"]
+  path:
+    pretrained_checkpoint: [
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_0/checkpoint-10000",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_1/checkpoint-10000",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_2/checkpoint-10000",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_3/checkpoint-10000",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_4/checkpoint-10000"
+  ] 
+
+    test_data: [
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_0.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_1.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_2.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_3.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_4.csv",
+
+  ]
+    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/predictions"
+    output_dir: "${model.inference.path.root_path}/checkpoints/${model.inference.exp_name}"
+    logging_dir: "${model.inference.path.root_path}/logs/${model.inference.exp_name}"
+    predictions: "${model.inference.path.root_path}/checkpoints/inference${model.inference.exp_name}"
+
+  context_length: 128
+ 
