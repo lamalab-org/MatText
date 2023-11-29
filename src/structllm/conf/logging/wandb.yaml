@@ -1,2 +1,2 @@
-wandb_project : "train_matbench_perovskites_1"
+wandb_project : "inference_check_form_e"
 wandb_log_model : "checkpoint"

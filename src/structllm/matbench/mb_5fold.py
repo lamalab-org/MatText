@@ -48,11 +48,13 @@ class MatbenchPredict:
         for i, fold in enumerate(self.tokenized_datasets): 
 
             # Prepare the input data
+            print(i,fold)
             input_ids = torch.tensor(fold['train']['input_ids'])
             attention_mask = torch.tensor(fold['train']['attention_mask'])
 
             # Perform inference to get predictions
             model = self.model[i]
+            print(model)
             with torch.no_grad():
                 outputs = model(input_ids, attention_mask=attention_mask)
                 predictions = outputs.logits.squeeze().numpy()
@@ -60,7 +62,7 @@ class MatbenchPredict:
                 predictions = pd.Series(predictions)
 
                 benchmark.record(i,predictions)
-            print(mb.is_recorded)
+        print(mb.is_recorded)
         
         benchmark.to_file(self.benchmark_save_path)
 

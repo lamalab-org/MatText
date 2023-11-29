@@ -14,7 +14,7 @@ class MatbenchPredict:
     def __init__(self, cfg: DictConfig):
         self.cfg = cfg
         self.context_length = 128
-        self.checkpoint = self.cfg.matbench.record_test.checkpoint
+        self.checkpoints = self.cfg.matbench.record_test.checkpoints
         self.benchmark = self.cfg.matbench.record_test.benchmark_dataset
         self.benchmark_save_path = self.cfg.matbench.record_test.benchmark_save_file
          
@@ -29,10 +29,7 @@ class MatbenchPredict:
             mask_token="[MASK]",
         )
 
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.checkpoint, 
-                                                                    num_labels=1,
-                                                                    ignore_mismatched_sizes=True)
-
+        self.model = [ckpt for ckpt in self.checkpoints]
         self.csv_datasets_list = cfg.matbench.record_test.list_test_data
         self.csv_datasets = [ load_dataset("csv", data_files=files)  for files in self.csv_datasets_list]   
         self.tokenized_datasets = [csv.map(self.tokenize_pad_and_truncate, batched=True) for csv in self.csv_datasets ] 
@@ -50,17 +47,22 @@ class MatbenchPredict:
         for i, fold in enumerate(self.tokenized_datasets): 
 
             # Prepare the input data
+            print(i,fold)
             input_ids = torch.tensor(fold['train']['input_ids'])
             attention_mask = torch.tensor(fold['train']['attention_mask'])
 
-                            # Perform inference to get predictions
+            # Perform inference to get predictions
+            model = AutoModelForSequenceClassification.from_pretrained(self.model[i], num_labels=1, ignore_mismatched_sizes=True)
+
+            print(model)
             with torch.no_grad():
-                outputs = self.model(input_ids, attention_mask=attention_mask)
+                outputs = model(input_ids, attention_mask=attention_mask)
                 predictions = outputs.logits.squeeze().numpy()
 
                 predictions = pd.Series(predictions)
 
                 benchmark.record(i,predictions)
+        print(mb.is_recorded)
         
         benchmark.to_file(self.benchmark_save_path)
 
