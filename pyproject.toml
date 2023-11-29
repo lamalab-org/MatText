@@ -30,8 +30,10 @@ requires-python = ">=3.8, <3.13"
 dependencies = [
     "transformers==4.35.0",
     "tokenizers==0.14.1",
+    "datasets==2.14.6",
     "wandb==0.15.12",
     "slices",
+    "matbench",
     "fire",
     "hydra-core",
     "torch==2.1.0",
