@@ -1,7 +1,7 @@
 import os
 from hydra import main as hydra_main, utils
 from omegaconf import DictConfig
-from structllm.models.finetune import FinetuneModel
+from structllm.models.finetune_val import FinetuneModelwithEval
 from structllm.models.pretrain import PretrainModel
 from structllm.models.predict import Inference
 from structllm.matbenchmark.matbench_test import MatbenchPredict
@@ -21,10 +21,10 @@ class TaskRunner:
             print(task_cfg)
             self.run_predictions(task_cfg)
 
-        if "finetune" in task_cfg.runs:
+        if "finetune" in run:
             self.run_finetuning(task_cfg)
 
-        if "pretrain" in task_cfg.runs:
+        if "pretrain" in run:
             self.run_pretraining(task_cfg)
 
     def run_matbench_prediction(self, task_cfg: DictConfig) -> None:
@@ -52,7 +52,7 @@ class TaskRunner:
 
 
     def run_finetuning(self, task_cfg: DictConfig) -> None:
-        for exp_name, train_data_path in zip(task_cfg.model.finetune.exp_name, task_cfg.model.finetune.path.traindata):
+        for exp_name, train_data_path in zip(task_cfg.model.finetune.exp_name, task_cfg.model.finetune.path.finetune_traindata):
             wandb.init(
                 config=dict(task_cfg.model.finetune), 
                 project=task_cfg.logging.wandb_project, name=exp_name)
@@ -62,11 +62,17 @@ class TaskRunner:
             exp_cfg.model.finetune.path.finetune_traindata = train_data_path
 
             
-            finetuner = FinetuneModel(exp_cfg)
+            finetuner = FinetuneModelwithEval(exp_cfg)
             finetuner.finetune()
             wandb.finish()
 
     def run_pretraining(self, task_cfg: DictConfig) -> None:
+
+        wandb.init(
+                config=dict(task_cfg.model.pretrain), 
+                project=task_cfg.logging.wandb_project, 
+                name=task_cfg.model.pretrain.exp_name
+                    )
         pretrainer = PretrainModel(task_cfg)
         pretrainer.pretrain_mlm()
 
@@ -83,6 +89,7 @@ def main(cfg: DictConfig) -> None:
     task_runner.initialize_wandb()
 
     if cfg.runs:
+        print(cfg)
         runs = utils.instantiate(cfg.runs)
         print(runs)
         for run in runs:
