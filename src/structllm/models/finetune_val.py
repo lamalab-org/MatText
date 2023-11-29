@@ -10,21 +10,35 @@ from omegaconf import DictConfig
 from typing import Any, Dict, List, Union
 import wandb
 
+import pandas as pd
+from datasets import Dataset, DatasetDict
+from sklearn.model_selection import train_test_split
+
 
 class CustomWandbCallback_FineTune(TrainerCallback):
     """Custom W&B callback for logging during training."""
     def on_log(self, args: Any, state: Any, control: Any, model: Any, logs: Dict[str, Union[float, Any]], **kwargs: Any) -> None:
         if state.is_world_process_zero:
-            wandb.log({"train_loss": logs.get("loss")})  # Log training loss
+            step = state.global_step  # Retrieve the current step
+            epoch = state.epoch  # Retrieve the current epoch
+
+            if "loss" in logs and "eval_loss" in logs:  # Both training and evaluation losses are present
+                wandb.log({"train_loss": logs.get("loss"), "eval_loss": logs.get("eval_loss")}, step=step)
+            
+            if "eval_loss" not in logs:
+                # Log eval_loss as NaN if it's missing to avoid issues with logging
+                wandb.log({"eval_loss": float('nan')}, step=step)
 
 
-class FinetuneModel:
+
+class FinetuneModelwithEval:
     """Class to perform finetuning of a language model."""
     def __init__(self, cfg: DictConfig) -> None:
 
         self.cfg = cfg.model.finetune
         self.tokenizer_cfg = cfg.tokenizer
         self.context_length: int = self.cfg.context_length
+
 
         # Load the custom tokenizer using tokenizers library
         self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
@@ -37,11 +51,29 @@ class FinetuneModel:
             mask_token="[MASK]",
         )
 
-        train_dataset = load_dataset("csv", data_files=self.cfg.path.finetune_traindata)
-        self.tokenized_train_datasets = train_dataset.map(self._tokenize_pad_and_truncate, batched=True)
+        train_df = pd.read_csv(self.cfg.path.finetune_traindata)
+        train_df, val_df = train_test_split(train_df, test_size=0.1)
+
+        # Convert DataFrames to Dataset objects
+        train_dataset = Dataset.from_pandas(train_df)
+        val_dataset = Dataset.from_pandas(val_df)
+
+        # Create a DatasetDict for training and validation
+        self.tokenized_train_datasets = DatasetDict({
+            'train': train_dataset,
+            'test': val_dataset
+        })
+
+        # Tokenize, pad, and truncate the datasets
+        self.tokenized_train_datasets = {
+            k: v.map(self._tokenize_pad_and_truncate, batched=True)
+            for k, v in self.tokenized_train_datasets.items()
+        }
+
 
     def _wandb_callbacks(self) -> List[TrainerCallback]:
         """Returns a list of callbacks for logging."""
+
         return [CustomWandbCallback_FineTune()]
 
     def _tokenize_pad_and_truncate(self, texts: Dict[str, Any]) -> Dict[str, Any]:
@@ -49,10 +81,17 @@ class FinetuneModel:
         return self._wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=self.context_length)
     
 
+    def _compute_metrics(self, p: Any, eval=True) -> Dict[str, float]:
+        preds = torch.tensor(p.predictions.squeeze())  # Convert predictions to PyTorch tensor
+        label_ids = torch.tensor(p.label_ids)  # Convert label_ids to PyTorch tensor
 
-    def _compute_metrics(self, p: Any) -> Dict[str, float]:
-        preds = p.predictions.squeeze()
-        return {"rmse": torch.sqrt(((preds - p.label_ids) ** 2).mean()).item()}
+        if eval:
+            return {"eval_rmse": torch.sqrt(((preds - label_ids) ** 2).mean()).item()}
+        else:
+            return {"train_rmse": torch.sqrt(((preds - label_ids) ** 2).mean()).item()}
+
+
+
 
     def finetune(self) -> None:
         pretrained_ckpt = self.cfg.path.pretrained_checkpoint
@@ -60,16 +99,23 @@ class FinetuneModel:
         config_train_args = self.cfg.training_arguments
         callbacks = self._wandb_callbacks()
 
+        train_dataset = self.tokenized_train_datasets['train']
+        eval_dataset = self.tokenized_train_datasets['test']
+
+    
+
         training_args = TrainingArguments(
-            **config_train_args
+            **config_train_args,
+            metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
+            greater_is_better=False,  # Lower eval_rmse is better
         )
 
         model = AutoModelForSequenceClassification.from_pretrained(pretrained_ckpt,
                                                                    num_labels=1,
                                                                    ignore_mismatched_sizes=True)
         
-        # for param in model.base_model.parameters():
-        #     param.requires_grad = False
+        for param in model.base_model.parameters():
+            param.requires_grad = False
 
 
         trainer = Trainer(
@@ -78,7 +124,8 @@ class FinetuneModel:
             data_collator=None,
             compute_metrics=self._compute_metrics,
             tokenizer=self._wrapped_tokenizer,
-            train_dataset=self.tokenized_train_datasets['train'],
+            train_dataset=train_dataset,
+            eval_dataset=eval_dataset,
             callbacks=callbacks
         )
 
@@ -86,6 +133,9 @@ class FinetuneModel:
         wandb.log({"model_summary": str(model)})
 
         trainer.train()
+
+        eval_result = trainer.evaluate(eval_dataset=eval_dataset)
+        wandb.log(eval_result)
 
         model.save_pretrained(self.cfg.path.finetuned_modelname)
 
