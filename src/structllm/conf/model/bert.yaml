@@ -1,16 +1,25 @@
 finetune:
-  exp_name: ["train_matbench_phonons_0", "train_matbench_phonons_1", "train_matbench_phonons_2", "train_matbench_phonons_3","train_matbench_phonons_4"]
-  path:
-    pretrained_checkpoint: "/home/so87pot/n0w0f/structllm/src/structllm/models/pretrain/checkpoints/pretrain_130K/checkpoint-5000"
-    finetune_traindata: [
-      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_phonons_0.csv",
-      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_phonons_1.csv",
-      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_phonons_2.csv",
-      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_phonons_3.csv",
-      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_phonons_4.csv",
+  model_name: scaleup_2m_ft
+  exp_name: [
+    "train_matbench_dielectric_0",
+    "train_matbench_dielectric_1",
+    "train_matbench_dielectric_2",
+    "train_matbench_dielectric_3",
+    "train_matbench_dielectric_4",
     ]
+  path:
+    pretrained_checkpoint: "/work/so87pot/structllm/model_outs/checkpoints/scaleup_2m/checkpoint-194000"
+    finetune_traindata: [
+      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_dielectric_0.csv",
+      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_dielectric_1.csv",
+      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_dielectric_2.csv",
+      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_dielectric_3.csv",
+      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_dielectric_4.csv",
+  
+          ]
+
     finetune_testdata:
-    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune"
+    root_path: "/work/so87pot/structllm/model_outs/finetune/${model.finetune.model_name}"
     output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
     logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
@@ -20,17 +29,21 @@ finetune:
     output_dir: "${model.finetune.path.output_dir}"
     overwrite_output_dir: True
     num_train_epochs: 400
-    per_device_train_batch_size: 1024
-    save_steps: 50
-    logging_steps: 100  
+    per_device_train_batch_size: 512
+    save_strategy: "epoch"
+    save_steps: 5
     report_to: "wandb"
     save_total_limit: 20
     learning_rate: 2e-4
-    load_best_model_at_end: False
-  
+    logging_steps: 20                    # we will log every 100 steps
+    # eval_steps: 1                     # we will perform evaluation every 500 steps
+    # load_best_model_at_end: True
+    # evaluation_strategy:  "epoch"          # check evaluation metrics at each epoch
+
+
 
 pretrain:
-  exp_name: ["pretrain_396k_1"]
+  exp_name: 27k_256
   model_name_or_path: "bert-base-uncased"
 
   model_config:
@@ -42,23 +55,23 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    traindata: ["/home/so87pot/n0w0f/structllm/data/396k/slice/train.csv"]
-    evaldata: "/home/so87pot/n0w0f/structllm/data/396k/slice/val.csv"
-    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/pretrain"
+    traindata: ["/home/so87pot/n0w0f/structllm/data/27k/train.csv"]
+    evaldata: "/home/so87pot/n0w0f/structllm/data/130k/val.csv"
+    root_path: "/work/so87pot/structllm/model_outs/checkpoints"
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
     finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
 
-  context_length: 128
+  context_length: 256
   training_arguments:
     output_dir: "${model.pretrain.path.output_dir}"   # Directory where model checkpoints and logs will be saved
     logging_dir: "${model.pretrain.path.logging_dir}"
     overwrite_output_dir: True     
     label_names: ["labels"]
     save_total_limit: 5      # Maximum number of checkpoints to save
-    per_device_train_batch_size: 512
+    per_device_train_batch_size: 128 # Batch size per device during training
     num_train_epochs: 50       # Number of training epochs
-    learning_rate: 2e-5
+    learning_rate: 2e-4
     save_steps: 1000
     report_to: "wandb"
     evaluation_strategy:  'steps'          # check evaluation metrics at each epoch

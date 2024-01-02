@@ -197,6 +197,10 @@ src/structllm/models/wandb
 src/structllm/models/outputs
 checkpoints/*
 predictions/
+checkpoints/
+embeddings/
+wandb/
+*.png 
 
 
 #slurm files

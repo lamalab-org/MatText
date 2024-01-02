@@ -13,6 +13,8 @@ import wandb
 import pandas as pd
 from datasets import Dataset, DatasetDict
 from sklearn.model_selection import train_test_split
+from transformers import EarlyStoppingCallback
+
 
 
 class CustomWandbCallback_FineTune(TrainerCallback):
@@ -101,6 +103,7 @@ class FinetuneModelwithEval:
 
         train_dataset = self.tokenized_train_datasets['train']
         eval_dataset = self.tokenized_train_datasets['test']
+        early_stopping = EarlyStoppingCallback(early_stopping_patience=6)
 
     
 
@@ -114,8 +117,8 @@ class FinetuneModelwithEval:
                                                                    num_labels=1,
                                                                    ignore_mismatched_sizes=True)
         
-        for param in model.base_model.parameters():
-            param.requires_grad = False
+        # for param in model.base_model.parameters():
+        #     param.requires_grad = False
 
 
         trainer = Trainer(
@@ -126,7 +129,7 @@ class FinetuneModelwithEval:
             tokenizer=self._wrapped_tokenizer,
             train_dataset=train_dataset,
             eval_dataset=eval_dataset,
-            callbacks=callbacks
+            callbacks=[early_stopping] + callbacks,
         )
 
         wandb.log({"Training Arguments": str(config_train_args)})

@@ -1,2 +1,2 @@
-wandb_project : "inference_check_form_e"
+wandb_project : "scaleup_2m_ft"
 wandb_log_model : "checkpoint"

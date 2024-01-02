@@ -14,41 +14,54 @@ class EmbeddingClustering:
         self.data = data
         self.num_clusters = num_clusters
 
+    def _mean_pooling(self, model_output, attention_mask):
+        token_embeddings = model_output[0]  # First element of model_output contains all token embeddings
+        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+
     def generate_embeddings(self):
         embeddings = []
         batch_size = 512  # Adjust this value to a smaller batch size
-
+    
         for i in tqdm(range(0, len(self.data), batch_size)):
             batch = self.data['slices'].iloc[i:i+batch_size].tolist()
             tokenized_data = self.tokenizer(batch, padding=True, truncation=True, return_tensors="pt", max_length=128)
             with torch.no_grad():
                 outputs = self.model(**tokenized_data)
-    
-            # Extract embeddings from BERT
-            batch_embeddings = outputs.last_hidden_state[:, 0, :].numpy()
             
-            embeddings.extend(batch_embeddings)
+            # Extract embeddings from BERT
+            batch_embeddings = self._mean_pooling(outputs, tokenized_data['attention_mask'])
     
-        return np.array(embeddings)
+            # Convert tensors to NumPy arrays and append
+            batch_embeddings_np = batch_embeddings.detach().cpu().numpy()
+            embeddings.append(batch_embeddings_np)
+    
+        # Concatenate or stack the embeddings to form a 2D array
+        embeddings = np.concatenate(embeddings, axis=0)  # Adjust axis=0 if needed
+    
+        return embeddings
 
-    def _mean_pooling(self, model_output, attention_mask):
-        token_embeddings = model_output[0]  # First element of model_output contains all token embeddings
-        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-        return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
-        
     def cluster_embeddings(self):
         embeddings = self.generate_embeddings()
         kmeans = KMeans(n_clusters=self.num_clusters)
         kmeans.fit(embeddings)
-        return kmeans.labels_
+        return embeddings, kmeans.labels_
 
-    def save_clustered_results(self, labels: np.ndarray, output_file: str):
-        self.data['cluster'] = labels
-        self.data.to_csv(output_file, sep='\t', index=False)
+    # def cluster_embeddings(self):
+    #     embeddings = self.generate_embeddings()
+    #     kmeans = KMeans(n_clusters=self.num_clusters)
+    #     kmeans.fit(embeddings)
+        
+    #     # Assign class names to cluster labels
+    #     cluster_classes = ['hexagonal', 'cubic', 'tetragonal', 'trigonal', 'orthorhombic', 'triclinic', 'monoclinic']
+    #     cluster_labels = [cluster_classes[label] for label in kmeans.labels_]
+    
+    #     return embeddings, cluster_labels
 
-    def save_clustered_results_with_embeddings(self, embeddings: np.ndarray, labels: np.ndarray, output_file: str):
+    def save_clustered_results(self, embeddings: np.ndarray, labels: np.ndarray, output_file: str):
         df = pd.DataFrame(embeddings, columns=[f'embedding_{i}' for i in range(embeddings.shape[1])])
         df['cluster'] = labels
+        df = pd.concat([self.data, df], axis=1)
         df.to_csv(output_file, sep='\t', index=False)
 
 # Example usage:
@@ -76,12 +89,13 @@ if __name__ == "__main__":
     unique_crystals = data['crystal'].unique()
     num_clusters = len(unique_crystals)
 
-    model_path = "/home/so87pot/n0w0f/structllm/src/structllm/models/pretrain/checkpoints/27k_new/checkpoint-2000"
+    model_path = "/home/so87pot/n0w0f/structllm/src/structllm/models/pretrain/checkpoints/pretrain_27K/checkpoint-1000"
     
     clustering = EmbeddingClustering(model_path, PreTrainedTokenizerFast, data, num_clusters)
     
-    cluster_labels = clustering.cluster_embeddings()
-    embeddings = clustering.generate_embeddings()
     
-    output_file = "clustered_embeddings_27_combined.csv"  # Change this to your desired file path
-    clustering.save_clustered_results_with_embeddings(embeddings, cluster_labels, output_file)
+    #embeddings = clustering.generate_embeddings()
+    embeddings, cluster_labels = clustering.cluster_embeddings()
+    
+    output_file = "combined_27_emb.csv"  # Change this to your desired file path
+    clustering.save_clustered_results(embeddings, cluster_labels, output_file)

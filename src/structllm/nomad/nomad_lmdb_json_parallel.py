@@ -189,29 +189,68 @@ def prepare_dict(mat_dict:dict):
         "electronic" :electronic, 
     }
 
-def prep_data(lmdb_path:str,output_file:str)->None:
+# def prep_data(lmdb_path:str,output_file:str)->None:
+#     materials_list = []
+#     dataset = Dataset(lmdb_path, 1)
+
+#     #loop through data points in lmdb
+#     for index in tqdm(range(dataset.len())):
+#         datapoint = dataset.get(index)
+#         if datapoint is not None:
+#             try:
+#                 data_dict = prepare_dict(datapoint)
+#                 materials_list.append(data_dict)
+#             except Exception as e:
+#                 print(f"An error occurred for index {index}: {e}. Skipping this entry.")
+#                 continue
+#             materials_list.append(data_dict)
+#         else:
+#             print(datapoint)
+
+#     with open(output_file, 'w') as json_file:
+#         json.dump(materials_list, json_file)
+
+
+# if __name__ == "__main__":
+
+#    fire.Fire(prep_data)
+#    print("Finished")
+
+from multiprocessing import Pool
+
+def process_data(args):
+    lmdb_path, index = args
+    env = lmdb.open(lmdb_path, subdir=False, readonly=True, lock=False, readahead=False, meminit=False, max_readers=1)
+    with env.begin() as txn:
+        id = f"{index}".encode("ascii")
+        datapoint = pickle.loads(txn.get(id))
+
+    if datapoint is not None:
+        try:
+            data_dict = prepare_dict(datapoint)
+            return data_dict
+        except Exception as e:
+            print(f"An error occurred for index {index}: {e}. Skipping this entry.")
+            return None
+    else:
+        print(f"Data point for index {index} is None. Skipping this entry.")
+        return None
+
+def prep_data(lmdb_path: str, output_file: str, num_processes: int = 4) -> None:
     materials_list = []
     dataset = Dataset(lmdb_path, 1)
+    total_entries = dataset.len()
 
-    #loop through data points in lmdb
-    for index in tqdm(range(dataset.len())):
-        datapoint = dataset.get(index)
-        if datapoint is not None:
-            try:
-                data_dict = prepare_dict(datapoint)
-                materials_list.append(data_dict)
-            except Exception as e:
-                print(f"An error occurred for index {index}: {e}. Skipping this entry.")
-                continue
-            materials_list.append(data_dict)
-        else:
-            print(datapoint)
+    with Pool(processes=num_processes) as pool:
+        results = list(tqdm(pool.imap(process_data, [(lmdb_path, i) for i in range(total_entries)]), total=total_entries))
+
+    for result in results:
+        if result is not None:
+            materials_list.append(result)
 
     with open(output_file, 'w') as json_file:
         json.dump(materials_list, json_file)
 
-
 if __name__ == "__main__":
-
-   fire.Fire(prep_data)
-   print("Finished")
+    fire.Fire(prep_data)
+    print("Finished")
