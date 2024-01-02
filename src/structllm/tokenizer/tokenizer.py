@@ -6,8 +6,8 @@ from tokenizers.pre_tokenizers import Whitespace
 tokenizer = Tokenizer(BPE(unk_token="[UNK]"))
 tokenizer.pre_tokenizer = Whitespace()
 
-train_files : [str] = ["/home/so87pot/n0w0f/structllm/data/396k/slice/train.csv"]
-tokenizer_save_path : str = "tokenizer-slice_396k_train.json"
+train_files : [str] = ["/work/so87pot/material_db/scaleup/clean_2m.csv"]
+tokenizer_save_path : str = "tokenizer-slice_2m.json"
 
 
 trainer = BpeTrainer(special_tokens=["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]"])
