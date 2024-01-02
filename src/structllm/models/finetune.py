@@ -79,7 +79,8 @@ class FinetuneModel:
             compute_metrics=self._compute_metrics,
             tokenizer=self._wrapped_tokenizer,
             train_dataset=self.tokenized_train_datasets['train'],
-            callbacks=callbacks
+            callbacks=callbacks,
+            # shuffle=True
         )
 
         wandb.log({"Training Arguments": str(config_train_args)})

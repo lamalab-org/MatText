@@ -24,20 +24,9 @@ def read_json(json_file: str) -> List[Dict]:
         data = json.load(file)
     return data
 
-def give_slice(cif: str) -> str:
-    """Calculate a slice from a CIF string.
 
-    Args:
-        cif (str): The CIF string.
 
-    Returns:
-        str: The calculated slice.
-    """
-    backend = InvCryRep()
-    pymatgen_struct = Structure.from_str(cif, "cif")
-    return backend.structure2SLICES(pymatgen_struct)
-
-def get_agmented_slice(struct_str: str) -> str:
+def get_augmented_slice(struct_str: str) -> str:
     """
     Get the canonical slice for a given CIF structure string.
 
@@ -50,7 +39,7 @@ def get_agmented_slice(struct_str: str) -> str:
     try:
         original_structure = Structure.from_str(struct_str, "cif")
         backend = InvCryRep(graph_method='econnn')
-        slices_list = backend.structure2SLICESAug(structure=original_structure, num=2000)
+        slices_list = backend.structure2SLICESAug(structure=original_structure, num=50)
         return slices_list
     
     except ValueError as e:
@@ -99,29 +88,10 @@ def get_canonical_slice(struct_str: str) -> str:
     except IndexError:
         return None
 
-def process_entry(entry: dict, timeout: int) -> dict:
-    
-    # Ensure the give_slice function and necessary data are picklable
-    try:
-        print(f"strating{entry['chemical_formula']}")
-        slice_result = get_canonical_slice(entry['cif'])
-        return {
-                'slice': slice_result,
-                'chemical_formula': entry['chemical_formula'],
-                'crystal_system': entry['structural_info']['crystal_system']
-            }
-    except TimeoutError:
-        print(f"Timeout error processing a row")
-        return None
-    except Exception as e:
-        print(f"Error processing a row: {e}")
-        return None
-
-from typing import List
 
 def process_entry_train_matbench(entry: dict, timeout: int) -> List[dict]:
     try:
-        slices_result = get_agmented_slice(entry["structure"])
+        slices_result = get_augmented_slice(entry["structure"])
         processed_entries = []
         for slice_result in slices_result:
             processed_entry = {
@@ -137,37 +107,20 @@ def process_entry_train_matbench(entry: dict, timeout: int) -> List[dict]:
         print(f"Error processing a row: {e}")
         return []
     
-def process_entry_test_matbench(entry: List, timeout: int) -> dict:
-    # Ensure the give_slice function and necessary data are picklable
-    try:
 
-        slice_result = get_canonical_slice(entry)
-        return {
-                'slice': slice_result,
-            }
-    except TimeoutError:
-        print(f"Timeout error processing a row")
-        return None
-    except Exception as e:
-        print(f"Error processing a row: {e}")
-        return None
-
-
-def process_batch(num_workers,batch, timeout):
-
+def process_batch(num_workers, batch, timeout):
     process_entry_with_timeout = partial(process_entry_train_matbench, timeout=timeout)
 
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         results = list(executor.map(process_entry_with_timeout, batch))
 
-    return [result for result in results if result is not None]
+    flattened_results = [item for sublist in results for item in sublist]  # Flatten the list
+    return [result for result in flattened_results if result]
 
 
 def process_json_to_csv(json_file: str, csv_file: str, log_file_path: str,  num_workers: int = 4, timeout: int = 600, save_interval: int = 100,  last_processed_entry: int = 0):
-    
 
     num_cpus = multiprocessing.cpu_count()
-    #num_workers = num_cpus
 
     print(f"json file: {json_file}")
     print(f"number of cpus: {num_cpus}")
@@ -175,18 +128,16 @@ def process_json_to_csv(json_file: str, csv_file: str, log_file_path: str,  num_
     print(f"last processed entry: {last_processed_entry}")
     print(f"save_interval: {save_interval}")
 
-
     data = read_json(json_file)
     batch_size = num_workers * 4
 
     if last_processed_entry > 0:
         data = data[last_processed_entry:]
 
-    
     batch_iterator = (data[i:i+batch_size] for i in range(0, len(data), batch_size))
 
     for i, batch_data in enumerate(batch_iterator, start=1):
-        batch_results = process_batch(num_workers,batch_data, timeout)
+        batch_results = process_batch(num_workers, batch_data, timeout)
         intermediate_df = pd.DataFrame(batch_results)
         intermediate_df.to_csv(csv_file, index=False, mode='a', header=False)
 
