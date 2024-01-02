@@ -19,13 +19,6 @@ git clone https://github.com/lamalab-org/structllm.git
 cd structllm
 ```
 
-### Conda Installation
-
-```bash
-conda env create -f environment.yml -n structllm
-conda activate structllm
-```
-
 ### Pip Installation
 
 
