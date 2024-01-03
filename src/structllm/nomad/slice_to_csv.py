@@ -35,7 +35,8 @@ def give_slice(cif: str) -> str:
     """
     backend = InvCryRep()
     pymatgen_struct = Structure.from_str(cif, "cif")
-    return backend.structure2SLICES(pymatgen_struct)
+    primitive_structure = pymatgen_struct.get_primitive_structure() # convert to primitive structure
+    return backend.structure2SLICES(primitive_structure)
 
 def get_agmented_slice(struct_str: str) -> str:
     """
@@ -119,23 +120,40 @@ def process_entry(entry: dict, timeout: int) -> dict:
 
 from typing import List
 
-def process_entry_train_matbench(entry: dict, timeout: int) -> List[dict]:
+def process_entry_train_matbench(entry: dict, timeout: int) -> dict:
+    
+    # Ensure the give_slice function and necessary data are picklable
     try:
-        slices_result = get_agmented_slice(entry["structure"])
-        processed_entries = []
-        for slice_result in slices_result:
-            processed_entry = {
-                'slice': slice_result,
+        slices_result = give_slice(entry["structure"])
+        return {
+                'slice': slices_result,
                 'labels': entry["labels"]
             }
-            processed_entries.append(processed_entry)
-        return processed_entries
     except TimeoutError:
         print(f"Timeout error processing a row")
-        return []
+        return None
     except Exception as e:
         print(f"Error processing a row: {e}")
-        return []
+        return None
+
+
+# def process_entry_train_matbench(entry: dict, timeout: int) -> List[dict]:
+#     try:
+#         slices_result = give_slice(entry["structure"])
+#         processed_entries = []
+#         for slice_result in slices_result:
+#             processed_entry = {
+#                 'slice': slice_result,
+#                 'labels': entry["labels"]
+#             }
+#             processed_entries.append(processed_entry)
+#         return processed_entries
+#     except TimeoutError:
+#         print(f"Timeout error processing a row")
+#         return []
+#     except Exception as e:
+#         print(f"Error processing a row: {e}")
+#         return []
     
 def process_entry_test_matbench(entry: List, timeout: int) -> dict:
     # Ensure the give_slice function and necessary data are picklable
