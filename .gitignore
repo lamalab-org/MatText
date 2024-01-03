@@ -200,6 +200,7 @@ predictions/
 checkpoints/
 embeddings/
 wandb/
+results/
 *.png 
 
 
