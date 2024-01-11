@@ -1,2 +1,2 @@
-wandb_project : "scaleup_2m_ft"
+wandb_project : "finetune_128_context_2m_388000"
 wandb_log_model : "checkpoint"

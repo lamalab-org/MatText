@@ -1,5 +1,48 @@
+
+pretrain:
+  exp_name: 2mils_512_2
+  model_name_or_path: "bert-base-uncased"
+
+  model_config:
+    hidden_size: 512
+    num_hidden_layers: 4
+    num_attention_heads: 8
+    is_decoder: False
+    add_cross_attention: False
+
+  path:
+    pretrained_checkpoint: 
+    traindata: ["/work/so87pot/material_db/scaleup/slice_2m.csv"]
+    evaldata: "/home/so87pot/n0w0f/structllm/data/130k/val.csv"
+    root_path: "/work/so87pot/structllm/model_outs/checkpoints"
+    output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
+    logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
+    finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
+
+  context_length: 512
+  training_arguments:
+    output_dir: "${model.pretrain.path.output_dir}"   # Directory where model checkpoints and logs will be saved
+    logging_dir: "${model.pretrain.path.logging_dir}"
+    overwrite_output_dir: True     
+    label_names: ["labels"]
+    save_total_limit: 5      # Maximum number of checkpoints to save
+    per_device_train_batch_size: 400 # Batch size per device during training
+    num_train_epochs: 50       # Number of training epochs
+    learning_rate: 2e-4
+    save_steps: 1000
+    report_to: "wandb"
+    evaluation_strategy:  'steps'          # check evaluation metrics at each epoch
+    logging_steps: 100                    # we will log every 100 steps
+    eval_steps: 500                     # we will perform evaluation every 500 steps
+    load_best_model_at_end: True
+
+  mlm:
+    is_mlm: True 
+    mlm_probability: 0.15
+
+
 finetune:
-  model_name: scaleup_2m_ft
+  model_name: finetune_128_context_2m_388000
   exp_name: [
     "train_matbench_dielectric_0",
     "train_matbench_dielectric_1",
@@ -8,13 +51,13 @@ finetune:
     "train_matbench_dielectric_4",
     ]
   path:
-    pretrained_checkpoint: "/work/so87pot/structllm/model_outs/checkpoints/scaleup_2m/checkpoint-194000"
+    pretrained_checkpoint: "/work/so87pot/structllm/model_outs/checkpoints/scaleup_2m_256_3/checkpoint-388000"
     finetune_traindata: [
-      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_dielectric_0.csv",
-      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_dielectric_1.csv",
-      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_dielectric_2.csv",
-      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_dielectric_3.csv",
-      "/home/so87pot/n0w0f/structllm/data/mb_1/csv/train_matbench_dielectric_4.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_0.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_1.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_2.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_3.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_4.csv",
   
           ]
 
@@ -29,7 +72,7 @@ finetune:
     output_dir: "${model.finetune.path.output_dir}"
     overwrite_output_dir: True
     num_train_epochs: 400
-    per_device_train_batch_size: 512
+    per_device_train_batch_size: 1024
     save_strategy: "epoch"
     save_steps: 5
     report_to: "wandb"
@@ -42,46 +85,6 @@ finetune:
 
 
 
-pretrain:
-  exp_name: 27k_256
-  model_name_or_path: "bert-base-uncased"
-
-  model_config:
-    hidden_size: 512
-    num_hidden_layers: 4
-    num_attention_heads: 8
-    is_decoder: False
-    add_cross_attention: False
-
-  path:
-    pretrained_checkpoint: 
-    traindata: ["/home/so87pot/n0w0f/structllm/data/27k/train.csv"]
-    evaldata: "/home/so87pot/n0w0f/structllm/data/130k/val.csv"
-    root_path: "/work/so87pot/structllm/model_outs/checkpoints"
-    output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
-    logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
-    finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
-
-  context_length: 256
-  training_arguments:
-    output_dir: "${model.pretrain.path.output_dir}"   # Directory where model checkpoints and logs will be saved
-    logging_dir: "${model.pretrain.path.logging_dir}"
-    overwrite_output_dir: True     
-    label_names: ["labels"]
-    save_total_limit: 5      # Maximum number of checkpoints to save
-    per_device_train_batch_size: 128 # Batch size per device during training
-    num_train_epochs: 50       # Number of training epochs
-    learning_rate: 2e-4
-    save_steps: 1000
-    report_to: "wandb"
-    evaluation_strategy:  'steps'          # check evaluation metrics at each epoch
-    logging_steps: 100                    # we will log every 100 steps
-    eval_steps: 500                     # we will perform evaluation every 500 steps
-    load_best_model_at_end: True
-
-  mlm:
-    is_mlm: True 
-    mlm_probability: 0.15
 
 
 
