@@ -18,6 +18,8 @@ class AtomVocabTokenizer(PreTrainedTokenizer):
     def tokenize(self, text):
         # List of tokens
         tokens = list(self.vocab.keys())
+            # Sort tokens by length, in descending order
+        tokens.sort(key=len, reverse=True)
 
         # Escape special characters in the vocab to ensure they are treated as literals in the regex
         escaped_tokens = [re.escape(token) for token in tokens]
