@@ -6,7 +6,7 @@ from tokenizers.pre_tokenizers import Whitespace
 tokenizer = Tokenizer(BPE(unk_token="[UNK]"))
 tokenizer.pre_tokenizer = Whitespace()
 
-train_files : [str] = ["/work/so87pot/material_db/scaleup/clean_2m.csv"]
+train_files : [str] = ["/work/so87pot/material_db/scaleup/slice_2m.csv"]
 tokenizer_save_path : str = "tokenizer-slice_2m.json"
 
 

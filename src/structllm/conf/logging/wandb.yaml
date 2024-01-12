@@ -1,2 +1,2 @@
-wandb_project : "finetune_128_context_2m_388000"
+wandb_project : "finetune_128_context_2m_pretrain"
 wandb_log_model : "checkpoint"

@@ -1,6 +1,6 @@
 
 pretrain:
-  exp_name: 2mils_512_2
+  exp_name: 2m_128_context
   model_name_or_path: "bert-base-uncased"
 
   model_config:
@@ -19,14 +19,14 @@ pretrain:
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
     finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
 
-  context_length: 512
+  context_length: 128
   training_arguments:
     output_dir: "${model.pretrain.path.output_dir}"   # Directory where model checkpoints and logs will be saved
     logging_dir: "${model.pretrain.path.logging_dir}"
     overwrite_output_dir: True     
     label_names: ["labels"]
     save_total_limit: 5      # Maximum number of checkpoints to save
-    per_device_train_batch_size: 400 # Batch size per device during training
+    per_device_train_batch_size: 512 # Batch size per device during training
     num_train_epochs: 50       # Number of training epochs
     learning_rate: 2e-4
     save_steps: 1000
