@@ -37,6 +37,7 @@ def test_encode_decode(tokenizer):
     ("Se Se Mo 0 2 o o + 0 2 + o o 0 2 o + o 1 2 o o + 1 2 o + o 1 2 + o o", ['Se', 'Se', 'Mo', '0', '2', 'o o +', '0', '2', '+ o o', '0', '2', 'o + o', '1', '2', 'o o +', '1', '2', 'o + o', '1', '2', '+ o o']),
     ("H H O", ['H', 'H', 'O']),
     ("Sc Sc 0 1 - - - ", ['Sc', 'Sc', '0', '1', '- - -']),
+    ("Cu Cu Cu Cu 0 3 - - o 0 2 - o - 0 1 o - - 1 2 - + o 1 3 - o + 2 3 o - + ", ['Cu', 'Cu', 'Cu', 'Cu', '0', '3', '- - o', '0', '2', '- o -', '0', '1', 'o - -', '1', '2', '- + o', '1', '3', '- o +', '2', '3', 'o - +']),
     
 ])
 def test_tokenize(tokenizer, input_string, expected):
