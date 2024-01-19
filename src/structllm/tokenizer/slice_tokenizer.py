@@ -25,6 +25,9 @@ class AtomVocabTokenizer(PreTrainedTokenizer):
                 return json.load(file)
         else:
             raise ValueError(f"Unsupported file type: {file_extension}")
+        
+    def get_vocab(self):
+        return self.vocab
 
     def tokenize(self, text):
         tokens = list(self.vocab.keys())
