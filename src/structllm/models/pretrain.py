@@ -12,6 +12,10 @@ from transformers import AutoModelForMaskedLM, AutoConfig
 from transformers import Trainer, TrainingArguments
 from datasets import load_dataset
 from transformers import TrainerCallback, TrainerControl
+from structllm.tokenizer.slice_tokenizer import AtomVocabTokenizer
+from datasets import load_dataset
+
+
 
 
 class CustomWandbCallback(TrainerCallback):
@@ -30,18 +34,27 @@ class PretrainModel:
         self.tokenizer_cfg = cfg.tokenizer
         self.context_length: int = self.cfg.context_length
         self.model_name_or_path: str = self.cfg.model_name_or_path
-        
-        # Load the custom tokenizer using tokenizers library
-        self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-        self._wrapped_tokenizer: PreTrainedTokenizerFast = PreTrainedTokenizerFast(
-            tokenizer_object=self._tokenizer,
-            unk_token="[UNK]",
-            pad_token="[PAD]",
-            cls_token="[CLS]",
-            sep_token="[SEP]",
-            mask_token="[MASK]",
-        )
 
+        print("tokenizer")
+        print(self.tokenizer_cfg.name)
+        
+        if self.tokenizer_cfg.name == "atom":
+            tokenizer = AtomVocabTokenizer(self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False)
+        else:
+            self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
+            tokenizer = PreTrainedTokenizerFast(
+                tokenizer_object=self._tokenizer,
+            )
+
+        special_tokens = {
+            "unk_token": "[UNK]",
+            "pad_token": "[PAD]",
+            "cls_token": "[CLS]",
+            "sep_token": "[SEP]",
+            "mask_token": "[MASK]",
+        }
+        tokenizer.add_special_tokens(special_tokens)
+        self._wrapped_tokenizer = tokenizer
         train_dataset = load_dataset("csv", data_files=self.cfg.path.traindata)
         eval_dataset = load_dataset("csv", data_files=self.cfg.path.evaldata)
 
