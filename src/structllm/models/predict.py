@@ -12,6 +12,7 @@ from transformers import PreTrainedTokenizerFast, AutoModelForSequenceClassifica
 from datasets import load_dataset
 from omegaconf import DictConfig
 from typing import Any, Dict, List, Union
+from structllm.tokenizer.slice_tokenizer import AtomVocabTokenizer
 
 
 class CustomWandbCallback_Inference(TrainerCallback):
@@ -31,15 +32,23 @@ class Inference:
         self.context_length: int = self.cfg.context_length
 
         # Load the custom tokenizer using tokenizers library
-        self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-        self._wrapped_tokenizer: PreTrainedTokenizerFast = PreTrainedTokenizerFast(
-            tokenizer_object=self._tokenizer,
-            unk_token="[UNK]",
-            pad_token="[PAD]",
-            cls_token="[CLS]",
-            sep_token="[SEP]",
-            mask_token="[MASK]",
-        )
+        if self.tokenizer_cfg.name == "atom":
+            tokenizer = AtomVocabTokenizer(self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False)
+        else:
+            self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
+            tokenizer = PreTrainedTokenizerFast(
+                tokenizer_object=self._tokenizer,
+            )
+
+        special_tokens = {
+            "unk_token": "[UNK]",
+            "pad_token": "[PAD]",
+            "cls_token": "[CLS]",
+            "sep_token": "[SEP]",
+            "mask_token": "[MASK]",
+        }
+        tokenizer.add_special_tokens(special_tokens)
+        self._wrapped_tokenizer = tokenizer
 
         test_data = load_dataset("csv", data_files=self.cfg.path.test_data)
         self.tokenized_test_datasets = test_data.map(self._tokenize_pad_and_truncate, batched=True)
