@@ -9,6 +9,10 @@ import hydra
 from omegaconf import DictConfig
 from typing import Any, Dict, List, Union
 import wandb
+from structllm.tokenizer.slice_tokenizer import AtomVocabTokenizer
+
+from torch import nn
+from torch.nn.parallel import DistributedDataParallel
 
 
 class CustomWandbCallback_FineTune(TrainerCallback):
@@ -20,22 +24,30 @@ class CustomWandbCallback_FineTune(TrainerCallback):
 
 class FinetuneModel:
     """Class to perform finetuning of a language model."""
-    def __init__(self, cfg: DictConfig) -> None:
+    def __init__(self, cfg: DictConfig,local_rank=None) -> None:
 
         self.cfg = cfg.model.finetune
+        self.local_rank = local_rank
         self.tokenizer_cfg = cfg.tokenizer
         self.context_length: int = self.cfg.context_length
 
-        # Load the custom tokenizer using tokenizers library
-        self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-        self._wrapped_tokenizer: PreTrainedTokenizerFast = PreTrainedTokenizerFast(
-            tokenizer_object=self._tokenizer,
-            unk_token="[UNK]",
-            pad_token="[PAD]",
-            cls_token="[CLS]",
-            sep_token="[SEP]",
-            mask_token="[MASK]",
-        )
+        if self.tokenizer_cfg.name == "atom":
+            tokenizer = AtomVocabTokenizer(self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False)
+        else:
+            self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
+            tokenizer = PreTrainedTokenizerFast(
+                tokenizer_object=self._tokenizer,
+            )
+
+        special_tokens = {
+            "unk_token": "[UNK]",
+            "pad_token": "[PAD]",
+            "cls_token": "[CLS]",
+            "sep_token": "[SEP]",
+            "mask_token": "[MASK]",
+        }
+        tokenizer.add_special_tokens(special_tokens)
+        self._wrapped_tokenizer = tokenizer
 
         train_dataset = load_dataset("csv", data_files=self.cfg.path.finetune_traindata)
         self.tokenized_train_datasets = train_dataset.map(self._tokenize_pad_and_truncate, batched=True)
@@ -71,9 +83,15 @@ class FinetuneModel:
         # for param in model.base_model.parameters():
         #     param.requires_grad = False
 
+        if self.local_rank is not None:
+            model = model.to(self.local_rank)
+            model = nn.parallel.DistributedDataParallel(model, device_ids=[self.local_rank])
+        else:
+            model = model.to("cuda")
+
 
         trainer = Trainer(
-            model=model.to("cuda"),
+            model=model,
             args=training_args,
             data_collator=None,
             compute_metrics=self._compute_metrics,
