@@ -1,6 +1,5 @@
-
 pretrain:
-  exp_name: 2m_128_context
+  exp_name: mp_512cont_atomtok
   model_name_or_path: "bert-base-uncased"
 
   model_config:
@@ -12,21 +11,21 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    traindata: ["/work/so87pot/material_db/scaleup/slice_2m.csv"]
-    evaldata: "/home/so87pot/n0w0f/structllm/data/130k/val.csv"
+    traindata: ["/work/so87pot/structllm/materials_project/train_slice.csv"]
+    evaldata: "/home/so87pot/n0w0f/structllm/data/27k/val.csv"
     root_path: "/work/so87pot/structllm/model_outs/checkpoints"
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
     finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
 
-  context_length: 128
+  context_length: 512
   training_arguments:
     output_dir: "${model.pretrain.path.output_dir}"   # Directory where model checkpoints and logs will be saved
     logging_dir: "${model.pretrain.path.logging_dir}"
     overwrite_output_dir: True     
     label_names: ["labels"]
     save_total_limit: 5      # Maximum number of checkpoints to save
-    per_device_train_batch_size: 512 # Batch size per device during training
+    per_device_train_batch_size: 256 # Batch size per device during training
     num_train_epochs: 50       # Number of training epochs
     learning_rate: 2e-4
     save_steps: 1000
@@ -35,6 +34,7 @@ pretrain:
     logging_steps: 100                    # we will log every 100 steps
     eval_steps: 500                     # we will perform evaluation every 500 steps
     load_best_model_at_end: True
+    seed: 42 
 
   mlm:
     is_mlm: True 
@@ -42,7 +42,7 @@ pretrain:
 
 
 finetune:
-  model_name: finetune_128_context_2m_388000
+  model_name: 512cont_atomtok_100_ft_400epoch
   exp_name: [
     "train_matbench_dielectric_0",
     "train_matbench_dielectric_1",
@@ -51,7 +51,7 @@ finetune:
     "train_matbench_dielectric_4",
     ]
   path:
-    pretrained_checkpoint: "/work/so87pot/structllm/model_outs/checkpoints/scaleup_2m_256_3/checkpoint-388000"
+    pretrained_checkpoint: "/work/so87pot/structllm/model_outs/checkpoints/checkpoints/512cont_atomtok_100_pt/checkpoint-21000"
     finetune_traindata: [
       "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_0.csv",
       "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_1.csv",
@@ -67,18 +67,19 @@ finetune:
     logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
 
-  context_length: 128
+  context_length: 512
   training_arguments:
     output_dir: "${model.finetune.path.output_dir}"
     overwrite_output_dir: True
     num_train_epochs: 400
-    per_device_train_batch_size: 1024
+    per_device_train_batch_size: 128
     save_strategy: "epoch"
     save_steps: 5
     report_to: "wandb"
     save_total_limit: 20
     learning_rate: 2e-4
-    logging_steps: 20                    # we will log every 100 steps
+    logging_steps: 20   
+    seed: 42                 # we will log every 100 steps
     # eval_steps: 1                     # we will perform evaluation every 500 steps
     # load_best_model_at_end: True
     # evaluation_strategy:  "epoch"          # check evaluation metrics at each epoch
