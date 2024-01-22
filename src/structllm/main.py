@@ -66,14 +66,14 @@ class TaskRunner:
             finetuner.finetune()
             wandb.finish()
 
-    def run_pretraining(self, task_cfg: DictConfig) -> None:
+    def run_pretraining(self, task_cfg: DictConfig,local_rank=None) -> None:
 
         wandb.init(
                 config=dict(task_cfg.model.pretrain), 
                 project=task_cfg.logging.wandb_project, 
                 name=task_cfg.model.pretrain.exp_name
                     )
-        pretrainer = PretrainModel(task_cfg)
+        pretrainer = PretrainModel(task_cfg,local_rank)
         pretrainer.pretrain_mlm()
 
     def initialize_wandb(self):
