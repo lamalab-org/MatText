@@ -1,5 +1,5 @@
 benchmarks : 
-  name: "check"
+  name: "512cont_atomtok_300_matbench_400epoch"
   dataset: [
 
     'matbench_dielectric',
@@ -21,11 +21,11 @@ record_test:
   benchmark_dataset: "matbench_dielectric"
 
   checkpoints: [
-    "/work/so87pot/structllm/model_outs/finetune/finetune_128_context_2m_388000/checkpoints/finetuned_train_matbench_dielectric_0",
-    "/work/so87pot/structllm/model_outs/finetune/finetune_128_context_2m_388000/checkpoints/finetuned_train_matbench_dielectric_0",
-    "/work/so87pot/structllm/model_outs/finetune/finetune_128_context_2m_388000/checkpoints/finetuned_train_matbench_dielectric_0",
-    "/work/so87pot/structllm/model_outs/finetune/finetune_128_context_2m_388000/checkpoints/finetuned_train_matbench_dielectric_0",
-    "/work/so87pot/structllm/model_outs/finetune/finetune_128_context_2m_388000/checkpoints/finetuned_train_matbench_dielectric_0",
+    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch/checkpoints/finetuned_train_matbench_dielectric_0",
+    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch/checkpoints/finetuned_train_matbench_dielectric_1",
+    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch/checkpoints/finetuned_train_matbench_dielectric_2",
+    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch/checkpoints/finetuned_train_matbench_dielectric_3",
+    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch/checkpoints/finetuned_train_matbench_dielectric_4",
    ] 
 
   list_test_data: [
@@ -35,4 +35,4 @@ record_test:
     "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_3.csv",
     "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_4.csv",
   ]
-  benchmark_save_file: "${matbench.path.save_path}/${matbench.record_test.benchmark_dataset}_380k.json.gz"
+  benchmark_save_file: "${matbench.path.save_path}/${matbench.record_test.benchmark_dataset}.json.gz"

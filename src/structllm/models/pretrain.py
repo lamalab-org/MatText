@@ -15,6 +15,8 @@ from transformers import TrainerCallback, TrainerControl
 from structllm.tokenizer.slice_tokenizer import AtomVocabTokenizer
 from datasets import load_dataset
 
+from torch import nn
+from torch.nn.parallel import DistributedDataParallel
 
 
 
@@ -28,10 +30,11 @@ class CustomWandbCallback(TrainerCallback):
 
 class PretrainModel:
     """Class to perform pretraining of a language model."""
-    def __init__(self, cfg: DictConfig):
+    def __init__(self, cfg: DictConfig, local_rank=None):
 
         self.cfg = cfg.model.pretrain
         self.tokenizer_cfg = cfg.tokenizer
+        self.local_rank = local_rank
         self.context_length: int = self.cfg.context_length
         self.model_name_or_path: str = self.cfg.model_name_or_path
 
@@ -89,6 +92,12 @@ class PretrainModel:
         )
          
         model = AutoModelForMaskedLM.from_config(config).to("cuda")
+
+        if self.local_rank is not None:
+            model = model.to(self.local_rank)
+            model = nn.parallel.DistributedDataParallel(model, device_ids=[self.local_rank])
+        else:
+            model = model.to("cuda")
         
         training_args = TrainingArguments(
             **config_train_args
