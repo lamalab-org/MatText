@@ -1,8 +1,8 @@
 benchmarks : 
-  name: "512cont_atomtok_300_matbench_400epoch"
+  name: "05_02_300k_ft_perov_512_atom"
   dataset: [
 
-    'matbench_dielectric',
+    'matbench_perovskites',
 
 ]
 
@@ -12,27 +12,27 @@ path:
 
 record_test:
   exp_name: [
-    "test_matbench_dielectric_0",
-    "test_matbench_dielectric_1",
-    "test_matbench_dielectric_2",
-    "test_matbench_dielectric_3",
-    "test_matbench_dielectric_4",
+    "test_matbench_perovskites_0",
+    "test_matbench_perovskites_1",
+    "test_matbench_perovskites_2",
+    "test_matbench_perovskites_3",
+    "test_matbench_perovskites_4",
     ]
-  benchmark_dataset: "matbench_dielectric"
+  benchmark_dataset: "matbench_perovskites"
 
   checkpoints: [
-    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch/checkpoints/finetuned_train_matbench_dielectric_0",
-    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch/checkpoints/finetuned_train_matbench_dielectric_1",
-    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch/checkpoints/finetuned_train_matbench_dielectric_2",
-    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch/checkpoints/finetuned_train_matbench_dielectric_3",
-    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch/checkpoints/finetuned_train_matbench_dielectric_4",
+    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch_new/checkpoints/finetuned_train_matbench_perovskites_0",
+    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch_new/checkpoints/finetuned_train_matbench_perovskites_1",
+    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch_new/checkpoints/finetuned_train_matbench_perovskites_2",
+    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch_new/checkpoints/finetuned_train_matbench_perovskites_3",
+    "/work/so87pot/structllm/model_outs/finetune/512cont_atomtok_300_ft_400epoch_new/checkpoints/finetuned_train_matbench_perovskites_4",
    ] 
 
   list_test_data: [
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_0.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_1.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_2.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_3.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_4.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_perovskites_0.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_perovskites_1.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_perovskites_2.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_perovskites_3.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_perovskites_4.csv",
   ]
-  benchmark_save_file: "${matbench.path.save_path}/${matbench.record_test.benchmark_dataset}.json.gz"
+  benchmark_save_file: "${matbench.path.save_path}/${matbench.record_test.benchmark_dataset}_05_02.json.gz"

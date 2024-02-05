@@ -1,5 +1,5 @@
 pretrain:
-  exp_name: 03_02_2m_pt_bpe_128
+  exp_name: 31_01_2m_pt_512_atom_materials_project
   model_name_or_path: "bert-base-uncased"
 
   model_config:
@@ -11,21 +11,21 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    traindata: ["/work/so87pot/material_db/scaleup/slice_2m.csv"]
+    traindata: ["/work/so87pot/structllm/materials_project/train_slice.csv"]
     evaldata: "/home/so87pot/n0w0f/structllm/data/27k/val.csv"
-    root_path: "/work/so87pot/structllm/model_outs2"
+    root_path: "/work/so87pot/structllm/model_outs/checkpoints"
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
     finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
 
-  context_length: 128
+  context_length: 512
   training_arguments:
     output_dir: "${model.pretrain.path.output_dir}"   # Directory where model checkpoints and logs will be saved
     logging_dir: "${model.pretrain.path.logging_dir}"
     overwrite_output_dir: True     
     label_names: ["labels"]
     save_total_limit: 5      # Maximum number of checkpoints to save
-    per_device_train_batch_size: 512 # Batch size per device during training
+    per_device_train_batch_size: 64 # Batch size per device during training
     num_train_epochs: 50       # Number of training epochs
     learning_rate: 2e-4
     save_steps: 500
@@ -42,7 +42,7 @@ pretrain:
 
 
 finetune:
-  model_name: 04_02_20k_ft_128bpe_100epoch
+  model_name: 31_01_300k_ft_perov_128_atom
   exp_name: [
     "train_matbench_perovskites_0",
     "train_matbench_perovskites_1",
@@ -51,18 +51,18 @@ finetune:
     "train_matbench_perovskites_4",
     ]
   path:
-    pretrained_checkpoint: "/work/so87pot/structllm/model_outs2/checkpoints/03_02_20k_pt_bpe_128/checkpoint-4000"
+    pretrained_checkpoint: "/work/so87pot/structllm/model_outs/checkpoints/checkpoints/512cont_atomtok_300_pt/checkpoint-123000"
     finetune_traindata: [
-      "/work/so87pot/structllm/finetune_data_non_primitive/csv/train_matbench_perovskites_0.csv",
-      "/work/so87pot/structllm/finetune_data_non_primitive/csv/train_matbench_perovskites_1.csv",
-      "/work/so87pot/structllm/finetune_data_non_primitive/csv/train_matbench_perovskites_2.csv",
-      "/work/so87pot/structllm/finetune_data_non_primitive/csv/train_matbench_perovskites_3.csv",
-      "/work/so87pot/structllm/finetune_data_non_primitive/csv/train_matbench_perovskites_4.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_perovskites_0.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_perovskites_1.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_perovskites_2.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_perovskites_3.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_perovskites_4.csv",
   
           ]
 
     finetune_testdata:
-    root_path: "/work/so87pot/structllm/model_outs2/finetune/${model.finetune.model_name}"
+    root_path: "/work/so87pot/structllm/model_outs/finetune/${model.finetune.model_name}"
     output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
     logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
@@ -71,8 +71,8 @@ finetune:
   training_arguments:
     output_dir: "${model.finetune.path.output_dir}"
     overwrite_output_dir: True
-    num_train_epochs: 100
-    per_device_train_batch_size: 1024
+    num_train_epochs: 400
+    per_device_train_batch_size: 1028
     save_strategy: "epoch"
     save_steps: 25
     report_to: "wandb"
@@ -91,45 +91,32 @@ finetune:
 
 inference:
   exp_name: [
-    "test_matbench_perovskites_0",
-    "test_matbench_perovskites_1",
-    "test_matbench_perovskites_2",
-    "test_matbench_perovskites_3",
-    "test_matbench_perovskites_4",
-    ]
+    "matbench_mp_e_form_0",
+    "matbench_mp_e_form_1",
+    "matbench_mp_e_form_2", 
+    "matbench_mp_e_form_3",
+    "matbench_mp_e_form_4"]
   path:
-    pretrained_checkpoint:  [
-    # "/work/so87pot/structllm/model_outs2/finetune//01_02_100k_ft_perov_512_atom/checkpoints/finetuned_train_matbench_perovskites_0",
-    # "/work/so87pot/structllm/model_outs2/finetune//01_02_100k_ft_perov_512_atom/checkpoints/finetuned_train_matbench_perovskites_1",
-    # "/work/so87pot/structllm/model_outs2/finetune//01_02_100k_ft_perov_512_atom/checkpoints/finetuned_train_matbench_perovskites_2",
-    # "/work/so87pot/structllm/model_outs2/finetune//01_02_100k_ft_perov_512_atom/checkpoints/finetuned_train_matbench_perovskites_3",
-    # "/work/so87pot/structllm/model_outs2/finetune//01_02_100k_ft_perov_512_atom/checkpoints/finetuned_train_matbench_perovskites_4",
-   ] 
+    pretrained_checkpoint: [
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_0/checkpoint-10000",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_1/checkpoint-10000",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_2/checkpoint-10000",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_3/checkpoint-10000",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_4/checkpoint-10000"
+  ] 
 
     test_data: [
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_perovskites_0.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_perovskites_1.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_perovskites_2.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_perovskites_3.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_perovskites_4.csv",
+    "/work/so87pot/structllm/finetune_data/csv/test_matbench_mp_e_form_0.csv",
+    "/work/so87pot/structllm/finetune_data/csv/test_matbench_mp_e_form_1.csv",
+    "/work/so87pot/structllm/finetune_data/csv/test_matbench_mp_e_form_2.csv",
+    "/work/so87pot/structllm/finetune_data/csv/test_matbench_mp_e_form_3.csv",
+    "/work/so87pot/structllm/finetune_data/csv/test_matbench_mp_e_form_4.csv",
+
   ]
-
-
     root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/predictions"
     output_dir: "${model.inference.path.root_path}/checkpoints/${model.inference.exp_name}"
     logging_dir: "${model.inference.path.root_path}/logs/${model.inference.exp_name}"
     predictions: "${model.inference.path.root_path}/checkpoints/inference${model.inference.exp_name}"
 
-  context_length: 512
+  context_length: 128
  
-
-
-
-
- #/work/so87pot/structllm/model_outs2/checkpoints/03_02_100k_pt_bpe_128/checkpoint-21500
- #/work/so87pot/structllm/model_outs2/checkpoints/02_02_300k_pt_bpe_128/checkpoint-62000
- #/work/so87pot/structllm/model_outs2/checkpoints/03_02_20k_pt_bpe_128/checkpoint-4000
-
-
- #512
- #/work/so87pot/structllm/model_outs2/checkpoints/02_02_100k_pt_bpe_512/checkpoint-86000
