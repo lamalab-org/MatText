@@ -1,6 +1,6 @@
 defaults:
   - model: bert
-  - tokenizer: bpe
+  - tokenizer: atom
   - matbench: matbench
   - logging: wandb
 
