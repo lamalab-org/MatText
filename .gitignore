@@ -202,6 +202,7 @@ embeddings/
 wandb/
 results/
 *.png 
+data/2m/slice_2m.csv 
 
 
 #slurm files
