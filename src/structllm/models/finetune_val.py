@@ -15,6 +15,10 @@ from datasets import Dataset, DatasetDict
 from sklearn.model_selection import train_test_split
 from transformers import EarlyStoppingCallback
 
+from torch import nn
+from torch.nn.parallel import DistributedDataParallel
+from structllm.tokenizer.slice_tokenizer import AtomVocabTokenizer
+
 
 
 class CustomWandbCallback_FineTune(TrainerCallback):
@@ -23,35 +27,45 @@ class CustomWandbCallback_FineTune(TrainerCallback):
         if state.is_world_process_zero:
             step = state.global_step  # Retrieve the current step
             epoch = state.epoch  # Retrieve the current epoch
+            print(f"Step: {step}, Epoch: {epoch}")
 
             if "loss" in logs and "eval_loss" in logs:  # Both training and evaluation losses are present
                 wandb.log({"train_loss": logs.get("loss"), "eval_loss": logs.get("eval_loss")}, step=step)
             
-            if "eval_loss" not in logs:
-                # Log eval_loss as NaN if it's missing to avoid issues with logging
-                wandb.log({"eval_loss": float('nan')}, step=step)
+            # if "eval_loss" not in logs:
+            #     # Log eval_loss as NaN if it's missing to avoid issues with logging
+            #     wandb.log({"eval_loss": float('nan')}, step=step)
 
 
 
 class FinetuneModelwithEval:
     """Class to perform finetuning of a language model."""
-    def __init__(self, cfg: DictConfig) -> None:
+    def __init__(self, cfg: DictConfig,local_rank=None) -> None:
 
         self.cfg = cfg.model.finetune
+        self.local_rank = local_rank
         self.tokenizer_cfg = cfg.tokenizer
         self.context_length: int = self.cfg.context_length
 
+        if self.tokenizer_cfg.name == "atom":
+            tokenizer = AtomVocabTokenizer(self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False)
+        else:
+            self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
+            tokenizer = PreTrainedTokenizerFast(
+                tokenizer_object=self._tokenizer,
+            )
 
-        # Load the custom tokenizer using tokenizers library
-        self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-        self._wrapped_tokenizer: PreTrainedTokenizerFast = PreTrainedTokenizerFast(
-            tokenizer_object=self._tokenizer,
-            unk_token="[UNK]",
-            pad_token="[PAD]",
-            cls_token="[CLS]",
-            sep_token="[SEP]",
-            mask_token="[MASK]",
-        )
+        special_tokens = {
+            "unk_token": "[UNK]",
+            "pad_token": "[PAD]",
+            "cls_token": "[CLS]",
+            "sep_token": "[SEP]",
+            "mask_token": "[MASK]",
+        }
+        tokenizer.add_special_tokens(special_tokens)
+        self._wrapped_tokenizer = tokenizer
+
+    
 
         train_df = pd.read_csv(self.cfg.path.finetune_traindata)
         train_df, val_df = train_test_split(train_df, test_size=0.1)
@@ -120,16 +134,22 @@ class FinetuneModelwithEval:
         # for param in model.base_model.parameters():
         #     param.requires_grad = False
 
+        if self.local_rank is not None:
+            model = model.to(self.local_rank)
+            model = nn.parallel.DistributedDataParallel(model, device_ids=[self.local_rank])
+        else:
+            model = model.to("cuda")
+
 
         trainer = Trainer(
-            model=model.to("cuda"),
+            model=model,
             args=training_args,
             data_collator=None,
             compute_metrics=self._compute_metrics,
             tokenizer=self._wrapped_tokenizer,
             train_dataset=train_dataset,
             eval_dataset=eval_dataset,
-            callbacks=[early_stopping] + callbacks,
+            callbacks=[early_stopping] #+ callbacks,
         )
 
         wandb.log({"Training Arguments": str(config_train_args)})

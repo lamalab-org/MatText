@@ -1,2 +1,2 @@
-wandb_project : "512cont_atomtok_100_ft_400epoch"
+wandb_project : "early_stop_implementation"
 wandb_log_model : "checkpoint"
