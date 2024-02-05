@@ -35,8 +35,23 @@ def give_slice(cif: str) -> str:
     """
     backend = InvCryRep()
     pymatgen_struct = Structure.from_str(cif, "cif")
-    primitive_structure = pymatgen_struct.get_primitive_structure() # convert to primitive structure
-    return backend.structure2SLICES(primitive_structure)
+    #primitive_structure = pymatgen_struct.get_primitive_structure() # convert to primitive structure
+    return backend.structure2SLICES(pymatgen_struct)
+
+
+def give_composition(cif: str) -> str:
+    """give composition from structure using pymatgen.
+
+    Args:
+        cif (str): The CIF string.
+
+    Returns:
+        str: composition.
+    """
+    pymatgen_struct = Structure.from_str(cif, "cif")
+    original_str = str(pymatgen_struct.composition)
+    composition = ''.join(original_str.split())
+    return composition
 
 def get_agmented_slice(struct_str: str) -> str:
     """
@@ -159,7 +174,7 @@ def process_entry_test_matbench(entry: List, timeout: int) -> dict:
     # Ensure the give_slice function and necessary data are picklable
     try:
 
-        slice_result = get_canonical_slice(entry)
+        slice_result = give_slice(entry)
         return {
                 'slice': slice_result,
             }

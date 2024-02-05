@@ -1,0 +1,36 @@
+benchmarks : 
+  name: "comp_100"
+  dataset: [
+    'matbench_log_gvrh',
+]
+
+path: 
+  root: "/home/so87pot/n0w0f/structllm/data"
+  save_path: "${matbench.path.root}/${matbench.benchmarks.name}"
+
+record_test:
+  exp_name: [
+    "test_matbench_log_gvrh_0",
+    "test_matbench_log_gvrh_1",
+    "test_matbench_log_gvrh_2",
+    "test_matbench_log_gvrh_3",
+    "test_matbench_log_gvrh_4",
+    ]
+  benchmark_dataset: "matbench_log_gvrh"
+
+  checkpoints: [
+    "/work/so87pot/structllm/model_outs/finetune/comp_32cont_100k/checkpoints/finetuned_train_matbench_log_gvrh_0",
+    "/work/so87pot/structllm/model_outs/finetune/comp_32cont_100k/checkpoints/finetuned_train_matbench_log_gvrh_1",
+    "/work/so87pot/structllm/model_outs/finetune/comp_32cont_100k/checkpoints/finetuned_train_matbench_log_gvrh_2",
+    "/work/so87pot/structllm/model_outs/finetune/comp_32cont_100k/checkpoints/finetuned_train_matbench_log_gvrh_3",
+    "/work/so87pot/structllm/model_outs/finetune/comp_32cont_100k/checkpoints/finetuned_train_matbench_log_gvrh_4",
+   ] 
+
+  list_test_data: [
+    "/work/so87pot/material_db/composition/matbench/csv/test_matbench_log_gvrh_0.csv",
+    "/work/so87pot/material_db/composition/matbench/csv/test_matbench_log_gvrh_1.csv",
+    "/work/so87pot/material_db/composition/matbench/csv/test_matbench_log_gvrh_2.csv",
+    "/work/so87pot/material_db/composition/matbench/csv/test_matbench_log_gvrh_3.csv",
+    "/work/so87pot/material_db/composition/matbench/csv/test_matbench_log_gvrh_4.csv",
+  ]
+  benchmark_save_file: "${matbench.path.save_path}/${matbench.record_test.benchmark_dataset}.json.gz"

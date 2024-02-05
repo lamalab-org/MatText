@@ -1,0 +1,122 @@
+pretrain:
+  exp_name: comp_32cont_20K
+  model_name_or_path: "bert-base-uncased"
+
+  model_config:
+    hidden_size: 512
+    num_hidden_layers: 4
+    num_attention_heads: 8
+    is_decoder: False
+    add_cross_attention: False
+
+  path:
+    pretrained_checkpoint: 
+    traindata: ["/work/so87pot/material_db/composition/20/train.csv"]
+    evaldata: "/work/so87pot/material_db/composition/20/val.csv"
+    root_path: "/work/so87pot/structllm/model_outs/checkpoints"
+    output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
+    logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
+    finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
+
+  context_length: 32
+  training_arguments:
+    output_dir: "${model.pretrain.path.output_dir}"   # Directory where model checkpoints and logs will be saved
+    logging_dir: "${model.pretrain.path.logging_dir}"
+    overwrite_output_dir: True     
+    label_names: ["labels"]
+    save_total_limit: 5      # Maximum number of checkpoints to save
+    per_device_train_batch_size: 1028 # Batch size per device during training
+    num_train_epochs: 50       # Number of training epochs
+    learning_rate: 2e-4
+    save_steps: 500
+    report_to: "wandb"
+    evaluation_strategy:  'steps'          # check evaluation metrics at each epoch
+    logging_steps: 100                    # we will log every 100 steps
+    eval_steps: 500                     # we will perform evaluation every 500 steps
+    load_best_model_at_end: True
+    seed: 42 
+
+  mlm:
+    is_mlm: True 
+    mlm_probability: 0.15
+
+
+finetune:
+  model_name: comp_32cont_20k_gvrh
+  exp_name: [
+    "train_matbench_log_gvrh_0",
+    "train_matbench_log_gvrh_1",
+    "train_matbench_log_gvrh_2",
+    "train_matbench_log_gvrh_3",
+    "train_matbench_log_gvrh_4",
+    ]
+  path:
+    pretrained_checkpoint: "/work/so87pot/structllm/model_outs/checkpoints/checkpoints/comp_32cont_20K/checkpoint-1000"
+    finetune_traindata: [
+      "/work/so87pot/material_db/composition/matbench/csv/train_matbench_log_gvrh_0.csv",
+      "/work/so87pot/material_db/composition/matbench/csv/train_matbench_log_gvrh_1.csv",
+      "/work/so87pot/material_db/composition/matbench/csv/train_matbench_log_gvrh_2.csv",
+      "/work/so87pot/material_db/composition/matbench/csv/train_matbench_log_gvrh_3.csv",
+      "/work/so87pot/material_db/composition/matbench/csv/train_matbench_log_gvrh_4.csv",
+  
+          ]
+
+    finetune_testdata:
+    root_path: "/work/so87pot/structllm/model_outs/finetune/${model.finetune.model_name}"
+    output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
+    logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
+    finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
+
+  context_length: 32
+  training_arguments:
+    output_dir: "${model.finetune.path.output_dir}"
+    overwrite_output_dir: True
+    num_train_epochs: 400
+    per_device_train_batch_size: 2058
+    save_strategy: "epoch"
+    save_steps: 5
+    report_to: "wandb"
+    save_total_limit: 20
+    learning_rate: 2e-4
+    logging_steps: 20   
+    seed: 42                 # we will log every 100 steps
+    # eval_steps: 1                     # we will perform evaluation every 500 steps
+    # load_best_model_at_end: True
+    # evaluation_strategy:  "epoch"          # check evaluation metrics at each epoch
+
+
+
+
+
+
+inference:
+  exp_name: [
+    "matbench_mp_e_form_0",
+    "matbench_mp_e_form_1",
+    "matbench_mp_e_form_2", 
+    "matbench_mp_e_form_3",
+    "matbench_mp_e_form_4"]
+  path:
+    pretrained_checkpoint: [
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_0/checkpoint-10000",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_1/checkpoint-10000",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_2/checkpoint-10000",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_3/checkpoint-10000",
+    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_4/checkpoint-10000"
+  ] 
+
+    test_data: [
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_0.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_1.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_2.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_3.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_4.csv",
+
+  ]
+    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/predictions"
+    output_dir: "${model.inference.path.root_path}/checkpoints/${model.inference.exp_name}"
+    logging_dir: "${model.inference.path.root_path}/logs/${model.inference.exp_name}"
+    predictions: "${model.inference.path.root_path}/checkpoints/inference${model.inference.exp_name}"
+
+  context_length: 128
+ 
