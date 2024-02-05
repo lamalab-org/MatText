@@ -12,7 +12,7 @@ class TaskRunner:
     def __init__(self):
         self.wandb_api_key = os.environ.get("WANDB_API_KEY")
 
-    def run_task(self, run: list , task_cfg: DictConfig) -> None:
+    def run_task(self, run: list , task_cfg: DictConfig, local_rank=None) -> None:
 
         if "matbench_predict" in run: 
             self.run_matbench_prediction(task_cfg)
@@ -51,7 +51,7 @@ class TaskRunner:
             wandb.finish()
 
 
-    def run_finetuning(self, task_cfg: DictConfig) -> None:
+    def run_finetuning(self, task_cfg: DictConfig,local_rank=None) -> None:
         for exp_name, train_data_path in zip(task_cfg.model.finetune.exp_name, task_cfg.model.finetune.path.finetune_traindata):
             wandb.init(
                 config=dict(task_cfg.model.finetune), 
@@ -62,18 +62,18 @@ class TaskRunner:
             exp_cfg.model.finetune.path.finetune_traindata = train_data_path
 
             
-            finetuner = FinetuneModel(exp_cfg)
+            finetuner = FinetuneModel(exp_cfg,local_rank)
             finetuner.finetune()
             wandb.finish()
 
-    def run_pretraining(self, task_cfg: DictConfig) -> None:
+    def run_pretraining(self, task_cfg: DictConfig,local_rank=None) -> None:
 
         wandb.init(
                 config=dict(task_cfg.model.pretrain), 
                 project=task_cfg.logging.wandb_project, 
                 name=task_cfg.model.pretrain.exp_name
                     )
-        pretrainer = PretrainModel(task_cfg)
+        pretrainer = PretrainModel(task_cfg,local_rank)
         pretrainer.pretrain_mlm()
 
     def initialize_wandb(self):
@@ -83,8 +83,17 @@ class TaskRunner:
         else:
             print("W&B API key not found. Please set the WANDB_API_KEY environment variable.")
 
+
+# import argparse
+# parser = argparse.ArgumentParser()
+# parser.add_argument('--local_rank', type=int, default=0)
+# args = parser.parse_args()
+
+
 @hydra_main(config_path="conf", config_name="config")
 def main(cfg: DictConfig) -> None:
+    
+    local_rank = int(os.getenv('LOCAL_RANK', '0'))
     task_runner = TaskRunner()
     task_runner.initialize_wandb()
 
@@ -94,8 +103,7 @@ def main(cfg: DictConfig) -> None:
         print(runs)
         for run in runs:
             print(run)
-            task_runner.run_task(run['tasks'],task_cfg=cfg)
-
+            task_runner.run_task(run['tasks'],task_cfg=cfg,local_rank=local_rank)
 
 if __name__ == "__main__":
     main()
