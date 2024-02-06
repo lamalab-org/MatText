@@ -1,60 +1,22 @@
-import json
 import os
 import torch
 from torch.nn import DataParallel
 import wandb
 import pandas as pd
 import numpy as np
-from tokenizers import Tokenizer
-from tokenizers.models import BPE
-from transformers import pipeline
-from transformers import PreTrainedTokenizerFast, AutoModelForSequenceClassification, TrainerCallback, Trainer
+from transformers import  AutoModelForSequenceClassification, TrainerCallback, Trainer
 from datasets import load_dataset
 from omegaconf import DictConfig
 from typing import Any, Dict, List, Union
-from structllm.tokenizer.slice_tokenizer import AtomVocabTokenizer
 
-
-class CustomWandbCallback_Inference(TrainerCallback):
-    """Custom W&B callback for logging during inference."""
-
-    def __init__(self):
-        self.predictions = []
-
-    def on_predict_end(self, args: Any, state: Any, control: Any, model: Any, predictions: Any, **kwargs: Any) -> None:
-        wandb.log({"predictions": predictions.predictions, })
-
-class TokenizerMixin:
-    """Mixin class to handle tokenizer functionality."""
-
-    def __init__(self, tokenizer_cfg):
-        self.tokenizer_cfg = tokenizer_cfg
-        self._wrapped_tokenizer = None
-
-        if self.tokenizer_cfg.name == "atom":
-            self._wrapped_tokenizer = AtomVocabTokenizer(
-                self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False
-            )
-        else:
-            self._tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-            self._wrapped_tokenizer = PreTrainedTokenizerFast(tokenizer_object=self._tokenizer)
-
-        special_tokens = {
-            "unk_token": "[UNK]",
-            "pad_token": "[PAD]",
-            "cls_token": "[CLS]",
-            "sep_token": "[SEP]",
-            "mask_token": "[MASK]",
-        }
-        self._wrapped_tokenizer.add_special_tokens(special_tokens)
-
-    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any], context_length: int) -> Dict[str, Any]:
-        """Tokenizes, pads, and truncates input texts."""
-        return self._wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=context_length)
+from structllm.models.utils import CustomWandbCallback_Inference, TokenizerMixin
 
 
 
-class Inference:
+
+
+
+class Inference(TokenizerMixin):
     def __init__(self, cfg: DictConfig):
 
         super().__init__(cfg.tokenizer)

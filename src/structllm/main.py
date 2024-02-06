@@ -84,10 +84,6 @@ class TaskRunner:
             print("W&B API key not found. Please set the WANDB_API_KEY environment variable.")
 
 
-# import argparse
-# parser = argparse.ArgumentParser()
-# parser.add_argument('--local_rank', type=int, default=0)
-# args = parser.parse_args()
 
 
 @hydra_main(config_path="conf", config_name="config")
