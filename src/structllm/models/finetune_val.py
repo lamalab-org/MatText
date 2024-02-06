@@ -37,23 +37,20 @@ class CustomWandbCallback_FineTune(TrainerCallback):
             #     wandb.log({"eval_loss": float('nan')}, step=step)
 
 
+class TokenizerMixin:
+    """Mixin class to handle tokenizer functionality."""
 
-class FinetuneModelwithEval:
-    """Class to perform finetuning of a language model."""
-    def __init__(self, cfg: DictConfig,local_rank=None) -> None:
-
-        self.cfg = cfg.model.finetune
-        self.local_rank = local_rank
-        self.tokenizer_cfg = cfg.tokenizer
-        self.context_length: int = self.cfg.context_length
+    def __init__(self, tokenizer_cfg):
+        self.tokenizer_cfg = tokenizer_cfg
+        self._wrapped_tokenizer = None
 
         if self.tokenizer_cfg.name == "atom":
-            tokenizer = AtomVocabTokenizer(self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False)
-        else:
-            self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-            tokenizer = PreTrainedTokenizerFast(
-                tokenizer_object=self._tokenizer,
+            self._wrapped_tokenizer = AtomVocabTokenizer(
+                self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False
             )
+        else:
+            self._tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
+            self._wrapped_tokenizer = PreTrainedTokenizerFast(tokenizer_object=self._tokenizer)
 
         special_tokens = {
             "unk_token": "[UNK]",
@@ -62,11 +59,26 @@ class FinetuneModelwithEval:
             "sep_token": "[SEP]",
             "mask_token": "[MASK]",
         }
-        tokenizer.add_special_tokens(special_tokens)
-        self._wrapped_tokenizer = tokenizer
+        self._wrapped_tokenizer.add_special_tokens(special_tokens)
 
+    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any], context_length: int) -> Dict[str, Any]:
+        """Tokenizes, pads, and truncates input texts."""
+        return self._wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=context_length)
+
+
+
+
+class FinetuneModelwithEval(TokenizerMixin):
+    """Class to perform finetuning of a language model."""
+    def __init__(self, cfg: DictConfig,local_rank=None) -> None:
+
+        super().__init__(cfg.tokenizer)
+        self.cfg = cfg.model.finetune
+        self.local_rank = local_rank
+        self.context_length: int = self.cfg.context_length
+
+        
     
-
         train_df = pd.read_csv(self.cfg.path.finetune_traindata)
         train_df, val_df = train_test_split(train_df, test_size=0.1)
 
@@ -74,7 +86,7 @@ class FinetuneModelwithEval:
         train_dataset = Dataset.from_pandas(train_df)
         val_dataset = Dataset.from_pandas(val_df)
 
-        # Create a DatasetDict for training and validation
+        
         self.tokenized_train_datasets = DatasetDict({
             'train': train_dataset,
             'test': val_dataset
