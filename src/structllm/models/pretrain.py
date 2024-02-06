@@ -1,62 +1,20 @@
 from typing import Any, List, Dict, Union
 
-import os
+
 import wandb
-import hydra
 from omegaconf import DictConfig
 
-from tokenizers import Tokenizer
-from transformers import PreTrainedTokenizerFast
 from transformers import DataCollatorForLanguageModeling
 from transformers import AutoModelForMaskedLM, AutoConfig
 from transformers import Trainer, TrainingArguments
 from datasets import load_dataset
-from transformers import TrainerCallback, TrainerControl
-from structllm.tokenizer.slice_tokenizer import AtomVocabTokenizer
+from transformers import TrainerCallback
 from datasets import load_dataset
 
 from torch import nn
 from torch.nn.parallel import DistributedDataParallel
 from transformers import EarlyStoppingCallback
-
-
-
-class CustomWandbCallback(TrainerCallback):
-    """Custom W&B callback for logging during training."""
-    def on_log(self, args: Any, state: Any, control: Any, model: Any, logs: Dict[str, Union[float, Any]], **kwargs: Any) -> None:
-        if state.is_world_process_zero:
-            wandb.log({"train_loss": logs.get("loss")})  # Log training loss
-            wandb.log({"eval_loss": logs.get("eval_loss")})  # Log evaluation loss
-
-
-
-class TokenizerMixin:
-    """Mixin class to handle tokenizer functionality."""
-
-    def __init__(self, tokenizer_cfg):
-        self.tokenizer_cfg = tokenizer_cfg
-        self._wrapped_tokenizer = None
-
-        if self.tokenizer_cfg.name == "atom":
-            self._wrapped_tokenizer = AtomVocabTokenizer(
-                self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False
-            )
-        else:
-            self._tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-            self._wrapped_tokenizer = PreTrainedTokenizerFast(tokenizer_object=self._tokenizer)
-
-        special_tokens = {
-            "unk_token": "[UNK]",
-            "pad_token": "[PAD]",
-            "cls_token": "[CLS]",
-            "sep_token": "[SEP]",
-            "mask_token": "[MASK]",
-        }
-        self._wrapped_tokenizer.add_special_tokens(special_tokens)
-
-    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any], context_length: int) -> Dict[str, Any]:
-        """Tokenizes, pads, and truncates input texts."""
-        return self._wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=context_length)
+from structllm.models.utils import CustomWandbCallback_Pretrain, TokenizerMixin
 
 
 
@@ -77,7 +35,7 @@ class PretrainModel(TokenizerMixin):
 
     def _wandb_callbacks(self) -> List[TrainerCallback]:
         """Returns a list of callbacks for logging."""
-        return [CustomWandbCallback()]
+        return [CustomWandbCallback_Pretrain()]
 
     def _tokenize_pad_and_truncate(self, texts: Dict[str, Any]) -> Dict[str, Any]:
         """Tokenizes, pads, and truncates input texts."""
