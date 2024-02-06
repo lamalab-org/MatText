@@ -144,7 +144,7 @@ class FinetuneModel(TokenizerMixin):
         wandb.log(eval_result)
 
         model.save_pretrained(self.cfg.path.finetuned_modelname)
-        wandb.finish()
+        # wandb.finish()
         return self.cfg.path.finetuned_modelname
     
     def evaluate(self):
