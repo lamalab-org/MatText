@@ -24,21 +24,20 @@ class CustomWandbCallback_Inference(TrainerCallback):
     def on_predict_end(self, args: Any, state: Any, control: Any, model: Any, predictions: Any, **kwargs: Any) -> None:
         wandb.log({"predictions": predictions.predictions, })
 
+class TokenizerMixin:
+    """Mixin class to handle tokenizer functionality."""
 
-class Inference:
-    def __init__(self, cfg: DictConfig):
-        self.cfg = cfg.model.inference
-        self.tokenizer_cfg = cfg.tokenizer
-        self.context_length: int = self.cfg.context_length
+    def __init__(self, tokenizer_cfg):
+        self.tokenizer_cfg = tokenizer_cfg
+        self._wrapped_tokenizer = None
 
-        # Load the custom tokenizer using tokenizers library
         if self.tokenizer_cfg.name == "atom":
-            tokenizer = AtomVocabTokenizer(self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False)
-        else:
-            self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-            tokenizer = PreTrainedTokenizerFast(
-                tokenizer_object=self._tokenizer,
+            self._wrapped_tokenizer = AtomVocabTokenizer(
+                self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False
             )
+        else:
+            self._tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
+            self._wrapped_tokenizer = PreTrainedTokenizerFast(tokenizer_object=self._tokenizer)
 
         special_tokens = {
             "unk_token": "[UNK]",
@@ -47,9 +46,23 @@ class Inference:
             "sep_token": "[SEP]",
             "mask_token": "[MASK]",
         }
-        tokenizer.add_special_tokens(special_tokens)
-        self._wrapped_tokenizer = tokenizer
+        self._wrapped_tokenizer.add_special_tokens(special_tokens)
 
+    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any], context_length: int) -> Dict[str, Any]:
+        """Tokenizes, pads, and truncates input texts."""
+        return self._wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=context_length)
+
+
+
+class Inference:
+    def __init__(self, cfg: DictConfig):
+
+        super().__init__(cfg.tokenizer)
+        self.cfg = cfg.model.inference
+        self.tokenizer_cfg = cfg.tokenizer
+        self.context_length: int = self.cfg.context_length
+
+        
         test_data = load_dataset("csv", data_files=self.cfg.path.test_data)
         self.tokenized_test_datasets = test_data.map(self._tokenize_pad_and_truncate, batched=True)
 
@@ -91,28 +104,6 @@ class Inference:
 
         return pd.Series(predictions.predictions.flatten())
 
-        
-        # Load the text classification pipeline with specified parameters
-        # classifier = pipeline(
-        #     "text-classification",
-        #     model=model,
-        #     tokenizer=self._wrapped_tokenizer,
-        #     device=0 if torch.cuda.is_available() else -1,  # Set device to GPU if available
-        #     framework="pt",  # Ensure PyTorch is used
-        #     batch_size=512,  # Set your desired batch size
-
-        # )
-
-        # def custom_processor(data_batch):
-        #     return [{"input_ids": batch["input_ids"], "attention_mask": batch["attention_mask"]} for batch in data_batch]
-        
-        # results = classifier(tokenized_test_datasets['train'])  # Pass your dataset
-        # print(results)
-
-        
-
-
-        
         
 
             
