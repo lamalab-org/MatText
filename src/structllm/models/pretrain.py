@@ -91,7 +91,7 @@ class PretrainModel:
             **config_model_args
         )
          
-        model = AutoModelForMaskedLM.from_config(config).to("cuda")
+        model = AutoModelForMaskedLM.from_config(config)
 
         if self.local_rank is not None:
             model = model.to(self.local_rank)
