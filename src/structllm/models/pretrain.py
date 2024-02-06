@@ -17,6 +17,7 @@ from datasets import load_dataset
 
 from torch import nn
 from torch.nn.parallel import DistributedDataParallel
+from transformers import EarlyStoppingCallback
 
 
 
@@ -95,6 +96,7 @@ class PretrainModel(TokenizerMixin):
         )
 
         callbacks = self._wandb_callbacks()
+        early_stopping = EarlyStoppingCallback(early_stopping_patience=6)
 
         config = AutoConfig.from_pretrained(
             self.model_name_or_path,
@@ -119,7 +121,7 @@ class PretrainModel(TokenizerMixin):
             train_dataset=self.tokenized_train_datasets['train'],
             eval_dataset=self.tokenized_eval_datasets['train'],
             args=training_args,
-            callbacks=callbacks
+            callbacks= [early_stopping] #+ callbacks
         )
 
         wandb.log({"config_details": str(config)}) 
