@@ -1,11 +1,11 @@
 finetune:
   model_name: 100k_bpe_128
   exp_name: [
-    "train_matbench_band_gap_0",
-    "train_matbench_band_gap_1",
-    "train_matbench_band_gap_2",
-    "train_matbench_band_gap_3",
-    "train_matbench_band_gap_4",
+    "train_matbench_dielectric_0",
+    "train_matbench_dielectric_1",
+    "train_matbench_dielectric_2",
+    "train_matbench_dielectric_3",
+    "train_matbench_dielectric_4",
     ]
 
 
@@ -18,11 +18,11 @@ finetune:
 
     finetune_data_rootpath: "/work/so87pot/structllm/finetune_data/csv"                     # <--- Change this to the path of the finetune data
     finetune_traindata: [
-      "${model.finetune.path.finetune_data_rootpath}/train_matbench_band_gap_0.csv",
-      "${model.finetune.path.finetune_data_rootpath}/train_matbench_band_gap_1.csv",
-      "${model.finetune.path.finetune_data_rootpath}/train_matbench_band_gap_2.csv",
-      "${model.finetune.path.finetune_data_rootpath}/train_matbench_band_gap_3.csv",
-      "${model.finetune.path.finetune_data_rootpath}/train_matbench_band_gap_4.csv",
+      "${model.finetune.path.finetune_data_rootpath}/train_matbench_dielectric_0.csv",
+      "${model.finetune.path.finetune_data_rootpath}/train_matbench_dielectric_1.csv",
+      "${model.finetune.path.finetune_data_rootpath}/train_matbench_dielectric_2.csv",
+      "${model.finetune.path.finetune_data_rootpath}/train_matbench_dielectric_3.csv",
+      "${model.finetune.path.finetune_data_rootpath}/train_matbench_dielectric_4.csv",
           ]
 
     finetune_testdata:
@@ -57,14 +57,14 @@ finetune:
 
 
 inference:
-  benchmark_dataset: "matbench_band_gap"
+  benchmark_dataset: "matbench_dielectric"
   context_length: "${model.finetune.context_length}"
   exp_name: [
-    "test_matbench_band_gap_0",
-    "test_matbench_band_gap_1",
-    "test_matbench_band_gap_2",
-    "test_matbench_band_gap_3",
-    "test_matbench_band_gap_4",
+    "test_matbench_dielectric_0",
+    "test_matbench_dielectric_1",
+    "test_matbench_dielectric_2",
+    "test_matbench_dielectric_3",
+    "test_matbench_dielectric_4",
     ]
   path:
     pretrained_checkpoint: [
@@ -72,11 +72,11 @@ inference:
   ] 
     test_data_rootpath: "/home/so87pot/n0w0f/structllm/data/mb_1/csv"                     # <--- Change this to the path of the finetune data
     test_data: [
-    "${model.inference.path.test_data_rootpath}/test_matbench_band_gap_0.csv",
-    "${model.inference.path.test_data_rootpath}/test_matbench_band_gap_1.csv",
-    "${model.inference.path.test_data_rootpath}/test_matbench_band_gap_2.csv",
-    "${model.inference.path.test_data_rootpath}/test_matbench_band_gap_3.csv",
-    "${model.inference.path.test_data_rootpath}/test_matbench_band_gap_4.csv",
+    "${model.inference.path.test_data_rootpath}/test_matbench_dielectric_0.csv",
+    "${model.inference.path.test_data_rootpath}/test_matbench_dielectric_1.csv",
+    "${model.inference.path.test_data_rootpath}/test_matbench_dielectric_2.csv",
+    "${model.inference.path.test_data_rootpath}/test_matbench_dielectric_3.csv",
+    "${model.inference.path.test_data_rootpath}/test_matbench_dielectric_4.csv",
   ]
     root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/predictions"        # <--- Change this to the path where predictions will be saved
     output_dir: "${model.inference.path.root_path}/checkpoints/${model.inference.exp_name}"

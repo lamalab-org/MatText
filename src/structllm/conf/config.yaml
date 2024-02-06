@@ -1,6 +1,6 @@
 defaults:
   - model: perovskites
-  - tokenizer: atom
+  - tokenizer: bpe
   - matbench: matbench
   - logging: wandb
 
@@ -8,6 +8,7 @@ runs:
 
   - name: benchmark_run
     tasks: [benchmark]
+    
   # - name: matbench_predict
   #   tasks: [matbench_predict]
 
