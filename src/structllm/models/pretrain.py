@@ -28,26 +28,21 @@ class CustomWandbCallback(TrainerCallback):
             wandb.log({"eval_loss": logs.get("eval_loss")})  # Log evaluation loss
 
 
-class PretrainModel:
-    """Class to perform pretraining of a language model."""
-    def __init__(self, cfg: DictConfig, local_rank=None):
 
-        self.cfg = cfg.model.pretrain
-        self.tokenizer_cfg = cfg.tokenizer
-        self.local_rank = local_rank
-        self.context_length: int = self.cfg.context_length
-        self.model_name_or_path: str = self.cfg.model_name_or_path
+class TokenizerMixin:
+    """Mixin class to handle tokenizer functionality."""
 
-        print("tokenizer")
-        print(self.tokenizer_cfg.name)
-        
+    def __init__(self, tokenizer_cfg):
+        self.tokenizer_cfg = tokenizer_cfg
+        self._wrapped_tokenizer = None
+
         if self.tokenizer_cfg.name == "atom":
-            tokenizer = AtomVocabTokenizer(self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False)
-        else:
-            self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-            tokenizer = PreTrainedTokenizerFast(
-                tokenizer_object=self._tokenizer,
+            self._wrapped_tokenizer = AtomVocabTokenizer(
+                self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False
             )
+        else:
+            self._tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
+            self._wrapped_tokenizer = PreTrainedTokenizerFast(tokenizer_object=self._tokenizer)
 
         special_tokens = {
             "unk_token": "[UNK]",
@@ -56,8 +51,23 @@ class PretrainModel:
             "sep_token": "[SEP]",
             "mask_token": "[MASK]",
         }
-        tokenizer.add_special_tokens(special_tokens)
-        self._wrapped_tokenizer = tokenizer
+        self._wrapped_tokenizer.add_special_tokens(special_tokens)
+
+    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any], context_length: int) -> Dict[str, Any]:
+        """Tokenizes, pads, and truncates input texts."""
+        return self._wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=context_length)
+
+
+
+class PretrainModel(TokenizerMixin):
+    """Class to perform pretraining of a language model."""
+    def __init__(self, cfg: DictConfig, local_rank=None):
+        super().__init__(cfg.tokenizer)
+        self.cfg = cfg.model.pretrain
+        self.local_rank = local_rank
+        self.context_length: int = self.cfg.context_length
+        self.model_name_or_path: str = self.cfg.model_name_or_path
+
         train_dataset = load_dataset("csv", data_files=self.cfg.path.traindata)
         eval_dataset = load_dataset("csv", data_files=self.cfg.path.evaldata)
 
