@@ -1,15 +1,18 @@
 defaults:
-  - model: bert
+  - model: perovskites
   - tokenizer: atom
   - matbench: matbench
   - logging: wandb
 
 runs:
+
+  - name: benchmark_run
+    tasks: [benchmark]
   # - name: matbench_predict
   #   tasks: [matbench_predict]
 
-  - name: pretrain_run
-    tasks: [pretrain]
+  # - name: pretrain_run
+  #   tasks: [pretrain]
 
   # - name: finetune_run
   #   tasks: [finetune]

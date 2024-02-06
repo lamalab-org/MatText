@@ -13,9 +13,6 @@ from structllm.models.utils import CustomWandbCallback_Inference, TokenizerMixin
 
 
 
-
-
-
 class Inference(TokenizerMixin):
     def __init__(self, cfg: DictConfig):
 
@@ -28,7 +25,7 @@ class Inference(TokenizerMixin):
         test_data = load_dataset("csv", data_files=self.cfg.path.test_data)
         self.tokenized_test_datasets = test_data.map(self._tokenize_pad_and_truncate, batched=True)
 
-    def _wandb_callbacks(self) -> List[TrainerCallback]:
+    def _callbacks(self) -> List[TrainerCallback]:
         """Returns a list of callbacks for logging."""
         return [CustomWandbCallback_Inference()]
 
@@ -38,7 +35,7 @@ class Inference(TokenizerMixin):
 
     def predict(self):
         pretrained_ckpt = self.cfg.path.pretrained_checkpoint
-        callbacks = self._wandb_callbacks()
+        callbacks = self._callbacks()
 
 
         model = AutoModelForSequenceClassification.from_pretrained(
