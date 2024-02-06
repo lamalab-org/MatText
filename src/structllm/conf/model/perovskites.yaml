@@ -1,0 +1,103 @@
+finetune:
+  model_name: automate_implemetation
+  exp_name: [
+    "train_matbench_dielectric_0",
+    "train_matbench_dielectric_1",
+    "train_matbench_dielectric_2",
+    "train_matbench_dielectric_3",
+    "train_matbench_dielectric_4",
+    ]
+  path:
+    checkpoint_rootpath: "/work/so87pot/structllm/model_outs/checkpoints/checkpoints/512cont_atomtok_100_pt"
+    checkpoint_name: "checkpoint-21000"
+    pretrained_checkpoint: "${model.finetune.path.checkpoint_rootpath}/${model.finetune.path.checkpoint_name}"
+    finetune_traindata: [
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_0.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_1.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_2.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_3.csv",
+      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_4.csv",
+          ]
+
+    finetune_testdata:
+    root_path: "/work/so87pot/structllm/model_outs/finetune/${model.finetune.model_name}"
+    output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
+    logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
+    finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.model_name}"
+
+  context_length: 64
+  callbacks:
+    early_stopping: True
+    custom_logger: True
+    early_stopping_patience: 3
+    early_stopping_threshold: 0.001
+
+  training_arguments:
+    output_dir: "${model.finetune.path.output_dir}"
+    overwrite_output_dir: True
+    num_train_epochs: 5
+    per_device_train_batch_size: 1028
+    save_strategy: "epoch"
+    evaluation_strategy: "epoch"   
+    save_steps: 2  # Number of epochs before saving
+    report_to: "wandb"
+    save_total_limit: 20
+    learning_rate: 2e-4
+    logging_steps: 6  
+    seed: 42
+    eval_steps: 2  # Adjusted evaluation frequency, e.g., evaluate after 10 epochs
+    load_best_model_at_end: True
+           # check evaluation metrics at each epoch
+
+
+inference:
+  benchmark_dataset: "matbench_dielectric"
+  exp_name: [
+    "test_matbench_dielectric_0",
+    "test_matbench_dielectric_1",
+    "test_matbench_dielectric_2",
+    "test_matbench_dielectric_3",
+    "test_matbench_dielectric_4",
+    ]
+  path:
+    pretrained_checkpoint: [
+   
+  ] 
+
+    test_data: [
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_0.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_1.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_2.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_3.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_4.csv",
+  ]
+    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/predictions"
+    output_dir: "${model.inference.path.root_path}/checkpoints/${model.inference.exp_name}"
+    logging_dir: "${model.inference.path.root_path}/logs/${model.inference.exp_name}"
+    predictions: "${model.inference.path.root_path}/checkpoints/inference${model.inference.exp_name}"
+
+  benchmark_save_file: "${model.finetune.path.finetuned_modelname}/${model.inference.benchmark_dataset}.json.gz"
+
+  context_length: 128
+ 
+
+ 
+benchmarks : 
+  name: "512cont_atomtok_300_matbench_400epoch"
+  dataset: [
+
+    'matbench_dielectric',
+
+]
+
+# path: 
+#   root: "/home/so87pot/n0w0f/structllm/data"
+#   save_path: "${matbench.path.root}/${matbench.benchmarks.name}"
+
+# record_test:
+#   benchmark_dataset: "matbench_dielectric"
+
+#   list_test_data: [
+#     "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_0.csv",
+#   ]
+  benchmark_save_file: "${model.finetune.path.finetuned_modelname}"

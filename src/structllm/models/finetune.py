@@ -113,6 +113,7 @@ class FinetuneModel(TokenizerMixin):
                                                                    num_labels=1,
                                                                    ignore_mismatched_sizes=False)
         
+        #TODO: optional freezing of base model
         # for param in model.base_model.parameters():
         #     param.requires_grad = False
 
@@ -143,6 +144,17 @@ class FinetuneModel(TokenizerMixin):
         wandb.log(eval_result)
 
         model.save_pretrained(self.cfg.path.finetuned_modelname)
+        wandb.finish()
+        return self.cfg.path.finetuned_modelname
+    
+    def evaluate(self):
+        """
+        Evaluate the fine-tuned model on the test dataset.
+        """
+        ckpt = self.finetune()
+        
+
+
 
     
 

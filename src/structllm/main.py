@@ -7,6 +7,7 @@ from structllm.models.finetune import FinetuneModel
 from structllm.models.pretrain import PretrainModel
 from structllm.models.predict import Inference
 from structllm.matbenchmark.matbench_test import MatbenchPredict
+from structllm.matbenchmark.benchmark import Matbenchmark
 
 
 
@@ -19,6 +20,9 @@ class TaskRunner:
         if "matbench_predict" in run: 
             self.run_matbench_prediction(task_cfg)
 
+        if "benchmark" in run:
+            self.run_benchmarking(task_cfg)
+            
         if "predict" in run:
             print(task_cfg)
             self.run_predictions(task_cfg)
@@ -33,6 +37,13 @@ class TaskRunner:
         print("performing benchmaking")
         matbench_predictor = MatbenchPredict(task_cfg)
         matbench_predictor.run_benchmark()
+
+
+    def run_benchmarking(self, task_cfg: DictConfig) -> None:
+        print("Finetuning and testing on matbench dataset")
+        matbench_predictor = Matbenchmark(task_cfg)
+        matbench_predictor.run_benchmarking()
+
 
     def run_predictions(self,task_cfg: DictConfig) -> None:
         for exp_name, test_data_path, ckpt in zip(task_cfg.model.inference.exp_name, task_cfg.model.inference.path.test_data, task_cfg.model.inference.path.pretrained_checkpoint):

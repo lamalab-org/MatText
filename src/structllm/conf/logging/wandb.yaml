@@ -1,2 +1,2 @@
-wandb_project : "early_stop_implementation_pretrain"
+wandb_project : "automate_implemetation"
 wandb_log_model : "checkpoint"
