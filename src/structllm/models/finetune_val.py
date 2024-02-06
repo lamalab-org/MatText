@@ -129,7 +129,7 @@ class FinetuneModelwithEval:
 
         model = AutoModelForSequenceClassification.from_pretrained(pretrained_ckpt,
                                                                    num_labels=1,
-                                                                   ignore_mismatched_sizes=True)
+                                                                   ignore_mismatched_sizes=False)
         
         # for param in model.base_model.parameters():
         #     param.requires_grad = False
