@@ -1,2 +1,2 @@
-wandb_project : "automate_implemetation"
+wandb_project : "perov_128_bpe_revamp"
 wandb_log_model : "checkpoint"

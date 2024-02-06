@@ -1,103 +1,88 @@
 finetune:
-  model_name: automate_implemetation
+  model_name: 100k_bpe_128
   exp_name: [
-    "train_matbench_dielectric_0",
-    "train_matbench_dielectric_1",
-    "train_matbench_dielectric_2",
-    "train_matbench_dielectric_3",
-    "train_matbench_dielectric_4",
+    "train_matbench_perovskites_0",
+    "train_matbench_perovskites_1",
+    "train_matbench_perovskites_2",
+    "train_matbench_perovskites_3",
+    "train_matbench_perovskites_4",
     ]
+
+
   path:
-    checkpoint_rootpath: "/work/so87pot/structllm/model_outs/checkpoints/checkpoints/512cont_atomtok_100_pt"
-    checkpoint_name: "checkpoint-21000"
+    checkpoint_rootpath: "/work/so87pot/structllm/model_outs2/checkpoints/03_02_100k_pt_bpe_128"  # <--- Change this to the path of the pretrained checkpoint
+    checkpoint_name: "checkpoint-21500"                           # <--- Change this to the name of the pretrained checkpoint
+
     pretrained_checkpoint: "${model.finetune.path.checkpoint_rootpath}/${model.finetune.path.checkpoint_name}"
+
+
+    finetune_data_rootpath: "/work/so87pot/structllm/finetune_data/csv"                     # <--- Change this to the path of the finetune data
     finetune_traindata: [
-      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_0.csv",
-      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_1.csv",
-      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_2.csv",
-      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_3.csv",
-      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_4.csv",
+      "${model.finetune.path.finetune_data_rootpath}/train_matbench_perovskites_0.csv",
+      "${model.finetune.path.finetune_data_rootpath}/train_matbench_perovskites_1.csv",
+      "${model.finetune.path.finetune_data_rootpath}/train_matbench_perovskites_2.csv",
+      "${model.finetune.path.finetune_data_rootpath}/train_matbench_perovskites_3.csv",
+      "${model.finetune.path.finetune_data_rootpath}/train_matbench_perovskites_4.csv",
           ]
 
     finetune_testdata:
-    root_path: "/work/so87pot/structllm/model_outs/finetune/${model.finetune.model_name}"
+    root_path: "/work/so87pot/structllm/results/finetune/${model.finetune.model_name}"  # <--- Change this to the path where chkpoints and logs will be saved
     output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
     logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
-    finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.model_name}"
+    finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
 
-  context_length: 64
+  context_length: 128
   callbacks:
     early_stopping: True
     custom_logger: True
-    early_stopping_patience: 3
-    early_stopping_threshold: 0.001
+    early_stopping_patience: 10
+    early_stopping_threshold: 0.01
 
   training_arguments:
     output_dir: "${model.finetune.path.output_dir}"
     overwrite_output_dir: True
-    num_train_epochs: 5
+    num_train_epochs: 400
     per_device_train_batch_size: 1028
-    save_strategy: "epoch"
-    evaluation_strategy: "epoch"   
-    save_steps: 2  # Number of epochs before saving
+#    save_strategy: "epoch"
+    evaluation_strategy: 'steps'   
+    save_steps: 1000  # Number of epochs before saving
     report_to: "wandb"
-    save_total_limit: 20
+    save_total_limit: 5
     learning_rate: 2e-4
-    logging_steps: 6  
+    logging_steps: 100 
+    eval_steps: 500
     seed: 42
-    eval_steps: 2  # Adjusted evaluation frequency, e.g., evaluate after 10 epochs
     load_best_model_at_end: True
-           # check evaluation metrics at each epoch
+
 
 
 inference:
-  benchmark_dataset: "matbench_dielectric"
+  benchmark_dataset: "matbench_perovskites"
+  context_length: "${model.finetune.context_length}"
   exp_name: [
-    "test_matbench_dielectric_0",
-    "test_matbench_dielectric_1",
-    "test_matbench_dielectric_2",
-    "test_matbench_dielectric_3",
-    "test_matbench_dielectric_4",
+    "test_matbench_perovskites_0",
+    "test_matbench_perovskites_1",
+    "test_matbench_perovskites_2",
+    "test_matbench_perovskites_3",
+    "test_matbench_perovskites_4",
     ]
   path:
     pretrained_checkpoint: [
    
   ] 
-
+    test_data_rootpath: "/home/so87pot/n0w0f/structllm/data/mb_1/csv"                     # <--- Change this to the path of the finetune data
     test_data: [
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_0.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_1.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_2.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_3.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_4.csv",
+    "${model.inference.path.test_data_rootpath}/test_matbench_perovskites_0.csv",
+    "${model.inference.path.test_data_rootpath}/test_matbench_perovskites_1.csv",
+    "${model.inference.path.test_data_rootpath}/test_matbench_perovskites_2.csv",
+    "${model.inference.path.test_data_rootpath}/test_matbench_perovskites_3.csv",
+    "${model.inference.path.test_data_rootpath}/test_matbench_perovskites_4.csv",
   ]
-    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/predictions"
+    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/predictions"        # <--- Change this to the path where predictions will be saved
     output_dir: "${model.inference.path.root_path}/checkpoints/${model.inference.exp_name}"
     logging_dir: "${model.inference.path.root_path}/logs/${model.inference.exp_name}"
     predictions: "${model.inference.path.root_path}/checkpoints/inference${model.inference.exp_name}"
 
-  benchmark_save_file: "${model.finetune.path.finetuned_modelname}/${model.inference.benchmark_dataset}.json.gz"
+  benchmark_save_file: "${model.finetune.path.root_path}"
 
-  context_length: 128
- 
-
- 
-benchmarks : 
-  name: "512cont_atomtok_300_matbench_400epoch"
-  dataset: [
-
-    'matbench_dielectric',
-
-]
-
-# path: 
-#   root: "/home/so87pot/n0w0f/structllm/data"
-#   save_path: "${matbench.path.root}/${matbench.benchmarks.name}"
-
-# record_test:
-#   benchmark_dataset: "matbench_dielectric"
-
-#   list_test_data: [
-#     "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_dielectric_0.csv",
-#   ]
-  benchmark_save_file: "${model.finetune.path.finetuned_modelname}"
+  

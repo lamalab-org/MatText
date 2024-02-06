@@ -159,7 +159,7 @@ def process_entry_test_matbench(entry: List, timeout: int) -> dict:
     # Ensure the give_slice function and necessary data are picklable
     try:
 
-        slice_result = get_canonical_slice(entry)
+        slice_result = give_slice(entry)
         return {
                 'slice': slice_result,
             }
@@ -173,7 +173,7 @@ def process_entry_test_matbench(entry: List, timeout: int) -> dict:
 
 def process_batch(num_workers,batch, timeout):
 
-    process_entry_with_timeout = partial(process_entry_train_matbench, timeout=timeout)
+    process_entry_with_timeout = partial(process_entry_test_matbench, timeout=timeout)
 
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         results = list(executor.map(process_entry_with_timeout, batch))
