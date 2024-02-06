@@ -1,11 +1,13 @@
 import os
+import wandb
 from hydra import main as hydra_main, utils
 from omegaconf import DictConfig
-from structllm.models.finetune_val import FinetuneModelwithEval
+
+from structllm.models.finetune import FinetuneModel
 from structllm.models.pretrain import PretrainModel
 from structllm.models.predict import Inference
 from structllm.matbenchmark.matbench_test import MatbenchPredict
-import wandb
+
 
 
 class TaskRunner:
@@ -62,7 +64,7 @@ class TaskRunner:
             exp_cfg.model.finetune.path.finetune_traindata = train_data_path
 
             
-            finetuner = FinetuneModelwithEval(exp_cfg,local_rank)
+            finetuner = FinetuneModel(exp_cfg,local_rank)
             finetuner.finetune()
             wandb.finish()
 

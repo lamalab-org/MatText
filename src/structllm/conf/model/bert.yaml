@@ -11,7 +11,7 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    traindata: ["/home/so87pot/n0w0f/structllm/data/27k/train.csv"]
+    traindata: "/home/so87pot/n0w0f/structllm/data/27k/train.csv"
     evaldata: "/home/so87pot/n0w0f/structllm/data/27k/val.csv"
     root_path: "/work/so87pot/structllm/model_outs/checkpoints"
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
@@ -19,6 +19,15 @@ pretrain:
     finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
 
   context_length: 128
+
+
+  callbacks:
+    early_stopping: True
+    custom_logger: True
+    early_stopping_patience: 3
+    early_stopping_threshold: 0.001
+
+
   training_arguments:
     output_dir: "${model.pretrain.path.output_dir}"   # Directory where model checkpoints and logs will be saved
     logging_dir: "${model.pretrain.path.logging_dir}"
@@ -60,9 +69,11 @@ finetune:
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
 
   context_length: 64
-  early_stopping: True
-  early_stopping_patience: 3
-  early_stopping_threshold: 0.001
+  callbacks:
+    early_stopping: True
+    custom_logger: True
+    early_stopping_patience: 3
+    early_stopping_threshold: 0.001
 
   training_arguments:
     output_dir: "${model.finetune.path.output_dir}"
