@@ -127,7 +127,9 @@ def prepare_dict(mat_dict:dict):
 
     # crystal structure properties
     material_id = mat_dict['material']['material_id']
-    chemical_formula = mat_dict['material']['chemical_formula_descriptive']
+    chemical_formula_descriptive = mat_dict['material']['chemical_formula_descriptive']
+    chemical_formula_reduced = mat_dict['material']['chemical_formula_reduced']
+    chemical_formula_hill = mat_dict['material']['chemical_formula_hill']
 
     # Crystal structure properties
     try:
@@ -139,6 +141,7 @@ def prepare_dict(mat_dict:dict):
             "crystal_system": structure.get('crystal_system', None),
             "point_group": structure.get('point_group', None)
         }
+        symmetry = mat_dict['material']['symmetry']
     except KeyError:
         structural = {
             "space_group_symbol": None,
@@ -178,9 +181,12 @@ def prepare_dict(mat_dict:dict):
     method = mat_dict.get('method', None)
 
     return {
-        "cif": cif_content,
-        "chemical_formula":chemical_formula,
         "material_id": material_id,
+        "cif": cif_content,
+        "chemical_formula_descriptive": chemical_formula_descriptive,
+        "chemical_formula_reduced": chemical_formula_reduced,
+        "chemical_formula_hill": chemical_formula_hill,
+        "symmetry": symmetry,
         "method":method,
         "mass_density":mass_density,
         "total_energy":total_energy,
@@ -244,12 +250,16 @@ def prep_data(lmdb_path: str, output_file: str, num_processes: int = 4) -> None:
     with Pool(processes=num_processes) as pool:
         results = list(tqdm(pool.imap(process_data, [(lmdb_path, i) for i in range(total_entries)]), total=total_entries))
 
+    skipped_count = 0 
     for result in results:
         if result is not None:
             materials_list.append(result)
+        else:
+            skipped_count += 1 
 
     with open(output_file, 'w') as json_file:
         json.dump(materials_list, json_file)
+    print(f"Total number of skipped datapoints: {skipped_count}")  # Print the total number of skipped datapoints
 
 if __name__ == "__main__":
     fire.Fire(prep_data)
