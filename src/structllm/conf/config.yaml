@@ -1,6 +1,6 @@
 defaults:
-  - model: perovskites
-  - tokenizer: bpe
+  - model: none
+  - tokenizer: atom
   - matbench: matbench
   - logging: wandb
 

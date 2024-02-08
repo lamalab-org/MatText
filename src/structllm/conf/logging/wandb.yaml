@@ -1,2 +1,4 @@
-wandb_project : "perov_128_bpe_revamp"
+wandb_project : "08_02_100k_ft_512bpe"
 wandb_log_model : "checkpoint"
+
+# wandb_project : "perov_128_bpe_revamp"

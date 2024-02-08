@@ -99,32 +99,32 @@ finetune:
 
 inference:
   exp_name: [
-    "matbench_mp_e_form_0",
-    "matbench_mp_e_form_1",
-    "matbench_mp_e_form_2", 
-    "matbench_mp_e_form_3",
-    "matbench_mp_e_form_4"]
+    "test_matbench_log_kvrh_0",
+    "test_matbench_log_kvrh_1",
+    "test_matbench_log_kvrh_2",
+    "test_matbench_log_kvrh_3",
+    "test_matbench_log_kvrh_4",
+    ]
   path:
     pretrained_checkpoint: [
-    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_0/checkpoint-10000",
-    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_1/checkpoint-10000",
-    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_2/checkpoint-10000",
-    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_3/checkpoint-10000",
-    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_4/checkpoint-10000"
-  ] 
+    "/work/so87pot/structllm/model_outs2/finetune/04_02_100k_ft_512bpe/checkpoints/finetuned_train_matbench_log_kvrh_0",
+    "/work/so87pot/structllm/model_outs2/finetune/04_02_100k_ft_512bpe/checkpoints/finetuned_train_matbench_log_kvrh_1",
+    "/work/so87pot/structllm/model_outs2/finetune/04_02_100k_ft_512bpe/checkpoints/finetuned_train_matbench_log_kvrh_2",
+    "/work/so87pot/structllm/model_outs2/finetune/04_02_100k_ft_512bpe/checkpoints/finetuned_train_matbench_log_kvrh_3",
+    "/work/so87pot/structllm/model_outs2/finetune/04_02_100k_ft_512bpe/checkpoints/finetuned_train_matbench_log_kvrh_4",
+   ] 
 
     test_data: [
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_0.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_1.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_2.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_3.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_4.csv",
-
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_log_kvrh_0.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_log_kvrh_1.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_log_kvrh_2.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_log_kvrh_3.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_log_kvrh_4.csv",
   ]
     root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/predictions"
     output_dir: "${model.inference.path.root_path}/checkpoints/${model.inference.exp_name}"
     logging_dir: "${model.inference.path.root_path}/logs/${model.inference.exp_name}"
     predictions: "${model.inference.path.root_path}/checkpoints/inference${model.inference.exp_name}"
 
-  context_length: 128
+  context_length: 512
  
