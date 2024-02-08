@@ -1,5 +1,5 @@
 finetune:
-  model_name: 100k_bpe_128
+  model_name: 100k_bpe_512_gvrh
   exp_name: [
     "train_matbench_log_gvrh_0",
     "train_matbench_log_gvrh_1",
@@ -10,8 +10,8 @@ finetune:
 
 
   path:
-    checkpoint_rootpath: "/work/so87pot/structllm/model_outs2/checkpoints/03_02_100k_pt_bpe_128"  # <--- Change this to the path of the pretrained checkpoint
-    checkpoint_name: "checkpoint-21500"                           # <--- Change this to the name of the pretrained checkpoint
+    checkpoint_rootpath: "/work/so87pot/structllm/model_outs2/checkpoints/02_02_100k_pt_bpe_512"  # <--- Change this to the path of the pretrained checkpoint
+    checkpoint_name: "checkpoint-86000"                            # <--- Change this to the name of the pretrained checkpoint
 
     pretrained_checkpoint: "${model.finetune.path.checkpoint_rootpath}/${model.finetune.path.checkpoint_name}"
 
@@ -31,7 +31,7 @@ finetune:
     logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
 
-  context_length: 128
+  context_length: 512
   callbacks:
     early_stopping: True
     custom_logger: True
@@ -42,15 +42,15 @@ finetune:
     output_dir: "${model.finetune.path.output_dir}"
     overwrite_output_dir: True
     num_train_epochs: 400
-    per_device_train_batch_size: 1028
+    per_device_train_batch_size: 128
 #    save_strategy: "epoch"
     evaluation_strategy: 'steps'   
     save_steps: 1000  # Number of epochs before saving
     report_to: "wandb"
     save_total_limit: 5
     learning_rate: 2e-4
-    logging_steps: 100 
-    eval_steps: 500
+    logging_steps: 50 
+    eval_steps: 50
     seed: 42
     load_best_model_at_end: True
 
