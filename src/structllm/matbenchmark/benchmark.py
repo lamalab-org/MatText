@@ -17,22 +17,27 @@ class Matbenchmark:
 
     def __init__(self, task_cfg: DictConfig):
         self.task_cfg = task_cfg
-        self.benchmark = self.task_cfg.matbench.record_test.benchmark_dataset
+        self.benchmark = self.task_cfg.model.inference.benchmark_dataset
         self.exp_names = self.task_cfg.model.finetune.exp_name
         self.test_exp_names = self.task_cfg.model.inference.exp_name
         self.train_data = task_cfg.model.finetune.path.finetune_traindata
         self.test_data = task_cfg.model.inference.path.test_data
         self.benchmark_save_path = self.task_cfg.model.inference.benchmark_save_file
-        self.wandb_project = self.task_cfg.logging.wandb_project
+
+        #override wandb project name & tokenizer
+        self.wandb_project = self.task_cfg.model.logging.wandb_project
+        self.task_cfg.tokenizer = self.task_cfg.model.tokenizer
+
+        print("-------------------------")
+        print(self.task_cfg.tokenizer)
+        print("-------------------------")
 
     def run_benchmarking(self, local_rank=None) -> None:
         mb = MatbenchBenchmark(autoload=False)
         benchmark = getattr(mb, self.benchmark)
         benchmark.load()
 
-        # wandb.init(
-        #         config=dict(self.task_cfg), 
-        #         project=self.task_cfg.logging.wandb_project,)
+        
 
         for i, (exp_name, test_name, train_data_path, test_data_path) in enumerate(
             zip(self.exp_names, self.test_exp_names, self.train_data, self.test_data)
@@ -59,25 +64,6 @@ class Matbenchmark:
             
             exp_cfg.model.inference.path.test_data = test_data_path
             exp_cfg.model.inference.path.pretrained_checkpoint = ckpt
-
-
-            # finetune_config = self.task_cfg.model.finetune
-            # finetune_config.exp_name = exp_name
-            # finetune_config.path.finetune_traindata = train_data_path
-
-            # finetuner = FinetuneModel(self.task_cfg, local_rank)
-            # ckpt = finetuner.finetune()
-            # print("-------------------------")
-            # print(ckpt)
-            # print("-------------------------")
-
-            # wandb.init(
-            #     config=dict(self.task_cfg.model.inference), 
-            #     project=self.task_cfg.logging.wandb_project, name=test_name)
-            
-            # inference_config = self.task_cfg.model.inference
-            # inference_config.path.test_data = test_data_path
-            # inference_config.path.pretrained_checkpoint = ckpt
 
             predict = Inference(exp_cfg)
             predictions = predict.predict()
