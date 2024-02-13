@@ -2,6 +2,7 @@ import os
 import wandb
 from hydra import main as hydra_main, utils
 from omegaconf import DictConfig
+import hydra
 
 from structllm.models.finetune import FinetuneModel
 from structllm.models.pretrain import PretrainModel
@@ -101,6 +102,10 @@ class TaskRunner:
 
 @hydra_main(config_path="conf", config_name="config")
 def main(cfg: DictConfig) -> None:
+    print(f"Working directory : {os.getcwd()}")
+    print(
+        f"Output directory  : {hydra.core.hydra_config.HydraConfig.get().runtime.output_dir}"
+    )
     
     local_rank = int(os.getenv('LOCAL_RANK', '0'))
     task_runner = TaskRunner()

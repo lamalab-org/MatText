@@ -1,22 +1,26 @@
 defaults:
   - model: none
-  - tokenizer: atom
+  - tokenizer: none
   - matbench: matbench
   - logging: wandb
 
 runs:
 
-  - name: benchmark_run
-    tasks: [benchmark]
+  # - name: benchmark_run
+  #   tasks: [benchmark]
     
   # - name: matbench_predict
   #   tasks: [matbench_predict]
 
-  # - name: pretrain_run
-  #   tasks: [pretrain]
+  - name: pretrain_run
+    tasks: [pretrain]
 
   # - name: finetune_run
   #   tasks: [finetune]
 
   # - name: predict
   #   tasks: [predict]
+
+hydra:
+  run:
+    dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}

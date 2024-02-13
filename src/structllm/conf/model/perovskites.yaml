@@ -10,7 +10,7 @@ logging:
 
 
 finetune:
-  model_name: 08_02_100k_bpe_512
+  model_name: 08_02_100k_bpe_512_wes
   exp_name: [
     "train_matbench_perovskites_0",
     "train_matbench_perovskites_1",
@@ -44,7 +44,7 @@ finetune:
 
   context_length: 512
   callbacks:
-    early_stopping: True
+    early_stopping: False
     custom_logger: True
     early_stopping_patience: 10
     early_stopping_threshold: 0.01

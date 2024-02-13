@@ -43,21 +43,28 @@ class PretrainModel(TokenizerMixin):
             DatasetDict: Dictionary containing training and validation datasets.
         """
 
-        train_df = pd.read_csv(self.cfg.path.traindata)
-        val_df = pd.read_csv(self.cfg.path.evaldata)
+        # train_df = pd.read_csv(self.cfg.path.traindata,low_memory=False)
+        # val_df = pd.read_csv(self.cfg.path.evaldata,low_memory=False)
 
-        datasets = DatasetDict({
-            'train': Dataset.from_pandas(train_df),
-            'test': Dataset.from_pandas(val_df)
-        })
+        # datasets = DatasetDict({
+        #     'train': Dataset.from_pandas(train_df),
+        #     'test': Dataset.from_pandas(val_df)
+        # })
 
-        # Tokenize, pad, and truncate the datasets
-        tokenized_datasets = {
-            k: v.map(partial(self._tokenize_pad_and_truncate, context_length=self.context_length), batched=True)
-            for k, v in datasets.items()
-        }
+        # # Tokenize, pad, and truncate the datasets
+        # tokenized_datasets = {
+        #     k: v.map(partial(self._tokenize_pad_and_truncate, context_length=self.context_length), batched=True)
+        #     for k, v in datasets.items()
+        # }
 
-        return tokenized_datasets
+        # Load train and test datasets
+        train_dataset = load_dataset("csv", data_files=self.cfg.path.traindata)
+        eval_dataset = load_dataset("csv", data_files=self.cfg.path.evaldata)
+
+        self.tokenized_train_datasets = train_dataset.map(partial(self._tokenize_pad_and_truncate, context_length=self.context_length), batched=True)
+        self.tokenized_eval_datasets = eval_dataset.map(partial(self._tokenize_pad_and_truncate, context_length=self.context_length), batched=True)
+
+
     
     def _callbacks(self) -> List[TrainerCallback]:
         """Returns a list of callbacks for early stopping, and custom logging."""
@@ -93,7 +100,7 @@ class PretrainModel(TokenizerMixin):
             self.model_name_or_path,
             **config_model_args
         )
-         
+        
         model = AutoModelForMaskedLM.from_config(config)
 
         if self.local_rank is not None:
@@ -109,8 +116,8 @@ class PretrainModel(TokenizerMixin):
         trainer = Trainer(
             model=model,
             data_collator=data_collator,
-            train_dataset=self.tokenized_dataset['train'],
-            eval_dataset=self.tokenized_dataset['test'],
+            train_dataset=self.tokenized_train_datasets['train'],
+            eval_dataset=self.tokenized_eval_datasets['train'],
             args=training_args,
             callbacks= callbacks
         )
