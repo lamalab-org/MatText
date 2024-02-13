@@ -1,2 +1,4 @@
-wandb_project : "512cont_atomtok_100_ft_400epoch"
+wandb_project : "08_02_composition_pt"
 wandb_log_model : "checkpoint"
+
+# wandb_project : "perov_128_bpe_revamp"

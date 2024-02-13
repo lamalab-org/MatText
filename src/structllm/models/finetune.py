@@ -1,85 +1,119 @@
 import torch
-import os
-from datasets import load_dataset
-from tokenizers import Tokenizer
-from tokenizers.models import BPE
-from transformers import PreTrainedTokenizerFast, AutoModelForSequenceClassification, TrainingArguments, Trainer
-from transformers import TrainerCallback, TrainerControl
-import hydra
-from omegaconf import DictConfig
-from typing import Any, Dict, List, Union
-import wandb
-from structllm.tokenizer.slice_tokenizer import AtomVocabTokenizer
-
 from torch import nn
 from torch.nn.parallel import DistributedDataParallel
 
+from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer
+from transformers import TrainerCallback
+from omegaconf import DictConfig
+from typing import Any, Dict, List
+import wandb
 
-class CustomWandbCallback_FineTune(TrainerCallback):
-    """Custom W&B callback for logging during training."""
-    def on_log(self, args: Any, state: Any, control: Any, model: Any, logs: Dict[str, Union[float, Any]], **kwargs: Any) -> None:
-        if state.is_world_process_zero:
-            wandb.log({"train_loss": logs.get("loss")})  # Log training loss
+import pandas as pd
+from datasets import Dataset, DatasetDict
+from sklearn.model_selection import train_test_split
+from transformers import EarlyStoppingCallback
 
 
-class FinetuneModel:
-    """Class to perform finetuning of a language model."""
+from structllm.models.utils import CustomWandbCallback_FineTune, TokenizerMixin
+from functools import partial
+
+
+
+class FinetuneModel(TokenizerMixin):
+    """Class to perform finetuning of a language model.
+        Initialize the FinetuneModel.
+
+    Args:
+        cfg (DictConfig): Configuration for the fine-tuning.
+        local_rank (int, optional): Local rank for distributed training. Defaults to None.
+    """
     def __init__(self, cfg: DictConfig,local_rank=None) -> None:
 
+        super().__init__(cfg.tokenizer)
         self.cfg = cfg.model.finetune
         self.local_rank = local_rank
-        self.tokenizer_cfg = cfg.tokenizer
         self.context_length: int = self.cfg.context_length
+        self.callbacks = self.cfg.callbacks
+       
+        train_df = pd.read_csv(self.cfg.path.finetune_traindata)
+        self.tokenized_dataset = self._prepare_datasets(train_df)
 
-        if self.tokenizer_cfg.name == "atom":
-            tokenizer = AtomVocabTokenizer(self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False)
-        else:
-            self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-            tokenizer = PreTrainedTokenizerFast(
-                tokenizer_object=self._tokenizer,
-            )
+        
+    def _prepare_datasets(self, train_df: pd.DataFrame) -> DatasetDict:
+        """
+        Prepare training and validation datasets.
 
-        special_tokens = {
-            "unk_token": "[UNK]",
-            "pad_token": "[PAD]",
-            "cls_token": "[CLS]",
-            "sep_token": "[SEP]",
-            "mask_token": "[MASK]",
+        Args:
+            train_df (pd.DataFrame): DataFrame containing training data.
+
+        Returns:
+            DatasetDict: Dictionary containing training and validation datasets.
+        """
+
+        train_df, val_df = train_test_split(train_df, test_size=0.1)
+
+        datasets = DatasetDict({
+            'train': Dataset.from_pandas(train_df),
+            'test': Dataset.from_pandas(val_df)
+        })
+
+        # Tokenize, pad, and truncate the datasets
+        tokenized_datasets = {
+            k: v.map(partial(self._tokenize_pad_and_truncate, context_length=self.context_length), batched=True)
+            for k, v in datasets.items()
         }
-        tokenizer.add_special_tokens(special_tokens)
-        self._wrapped_tokenizer = tokenizer
 
-        train_dataset = load_dataset("csv", data_files=self.cfg.path.finetune_traindata)
-        self.tokenized_train_datasets = train_dataset.map(self._tokenize_pad_and_truncate, batched=True)
+        return tokenized_datasets
 
-    def _wandb_callbacks(self) -> List[TrainerCallback]:
-        """Returns a list of callbacks for logging."""
-        return [CustomWandbCallback_FineTune()]
+    def _callbacks(self) -> List[TrainerCallback]:
+        """Returns a list of callbacks for early stopping, and custom logging."""
+        callbacks = []
 
-    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any]) -> Dict[str, Any]:
-        """Tokenizes, pads, and truncates input texts."""
-        return self._wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=self.context_length)
-    
+        if self.callbacks.early_stopping:
+            callbacks.append(EarlyStoppingCallback(
+                early_stopping_patience=self.callbacks.early_stopping_patience,
+                early_stopping_threshold=self.callbacks.early_stopping_threshold
+            ))
+
+        if self.callbacks.custom_logger:
+            callbacks.append(CustomWandbCallback_FineTune())
+
+        return callbacks
+
+    def _compute_metrics(self, p: Any, eval=True) -> Dict[str, float]:
+        preds = torch.tensor(p.predictions.squeeze())  # Convert predictions to PyTorch tensor
+        label_ids = torch.tensor(p.label_ids)  # Convert label_ids to PyTorch tensor
+
+        if eval:
+            return {"eval_rmse": torch.sqrt(((preds - label_ids) ** 2).mean()).item()}
+        else:
+            return {"train_rmse": torch.sqrt(((preds - label_ids) ** 2).mean()).item()}
 
 
-    def _compute_metrics(self, p: Any) -> Dict[str, float]:
-        preds = p.predictions.squeeze()
-        return {"rmse": torch.sqrt(((preds - p.label_ids) ** 2).mean()).item()}
+
 
     def finetune(self) -> None:
+        """
+        Perform fine-tuning of the language model.
+        """
+        
         pretrained_ckpt = self.cfg.path.pretrained_checkpoint
 
         config_train_args = self.cfg.training_arguments
-        callbacks = self._wandb_callbacks()
+        callbacks = self._callbacks()
+
 
         training_args = TrainingArguments(
-            **config_train_args
+            **config_train_args,
+            metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
+            greater_is_better=False,  # Lower eval_rmse is better
         )
 
         model = AutoModelForSequenceClassification.from_pretrained(pretrained_ckpt,
                                                                    num_labels=1,
-                                                                   ignore_mismatched_sizes=True)
+                                                                   ignore_mismatched_sizes=False)
         
+        #TODO: optional freezing of base model
         # for param in model.base_model.parameters():
         #     param.requires_grad = False
 
@@ -96,9 +130,9 @@ class FinetuneModel:
             data_collator=None,
             compute_metrics=self._compute_metrics,
             tokenizer=self._wrapped_tokenizer,
-            train_dataset=self.tokenized_train_datasets['train'],
+            train_dataset=self.tokenized_dataset['train'],
+            eval_dataset=self.tokenized_dataset['test'],
             callbacks=callbacks,
-            # shuffle=True
         )
 
         wandb.log({"Training Arguments": str(config_train_args)})
@@ -106,7 +140,21 @@ class FinetuneModel:
 
         trainer.train()
 
+        eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset['test'])
+        wandb.log(eval_result)
+
         model.save_pretrained(self.cfg.path.finetuned_modelname)
+        wandb.finish()
+        return self.cfg.path.finetuned_modelname
+    
+    def evaluate(self):
+        """
+        Evaluate the fine-tuned model on the test dataset.
+        """
+        ckpt = self.finetune()
+        
+
+
 
     
 

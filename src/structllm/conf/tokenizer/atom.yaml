@@ -1,4 +1,5 @@
 name: atom  
+
 path: 
   root_path: "/home/so87pot/n0w0f/structllm/src/structllm/tokenizer"
   #tokenizer_path: "${tokenizer.path.root_path}/atom_vocab.json"

@@ -1,59 +1,31 @@
-import json
 import os
 import torch
 from torch.nn import DataParallel
 import wandb
 import pandas as pd
 import numpy as np
-from tokenizers import Tokenizer
-from tokenizers.models import BPE
-from transformers import pipeline
-from transformers import PreTrainedTokenizerFast, AutoModelForSequenceClassification, TrainerCallback, Trainer
+from transformers import  AutoModelForSequenceClassification, TrainerCallback, Trainer
 from datasets import load_dataset
 from omegaconf import DictConfig
 from typing import Any, Dict, List, Union
-from structllm.tokenizer.slice_tokenizer import AtomVocabTokenizer
+
+from structllm.models.utils import CustomWandbCallback_Inference, TokenizerMixin
 
 
-class CustomWandbCallback_Inference(TrainerCallback):
-    """Custom W&B callback for logging during inference."""
 
-    def __init__(self):
-        self.predictions = []
-
-    def on_predict_end(self, args: Any, state: Any, control: Any, model: Any, predictions: Any, **kwargs: Any) -> None:
-        wandb.log({"predictions": predictions.predictions, })
-
-
-class Inference:
+class Inference(TokenizerMixin):
     def __init__(self, cfg: DictConfig):
+
+        super().__init__(cfg.tokenizer)
         self.cfg = cfg.model.inference
         self.tokenizer_cfg = cfg.tokenizer
         self.context_length: int = self.cfg.context_length
 
-        # Load the custom tokenizer using tokenizers library
-        if self.tokenizer_cfg.name == "atom":
-            tokenizer = AtomVocabTokenizer(self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False)
-        else:
-            self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-            tokenizer = PreTrainedTokenizerFast(
-                tokenizer_object=self._tokenizer,
-            )
-
-        special_tokens = {
-            "unk_token": "[UNK]",
-            "pad_token": "[PAD]",
-            "cls_token": "[CLS]",
-            "sep_token": "[SEP]",
-            "mask_token": "[MASK]",
-        }
-        tokenizer.add_special_tokens(special_tokens)
-        self._wrapped_tokenizer = tokenizer
-
+        
         test_data = load_dataset("csv", data_files=self.cfg.path.test_data)
         self.tokenized_test_datasets = test_data.map(self._tokenize_pad_and_truncate, batched=True)
 
-    def _wandb_callbacks(self) -> List[TrainerCallback]:
+    def _callbacks(self) -> List[TrainerCallback]:
         """Returns a list of callbacks for logging."""
         return [CustomWandbCallback_Inference()]
 
@@ -63,13 +35,13 @@ class Inference:
 
     def predict(self):
         pretrained_ckpt = self.cfg.path.pretrained_checkpoint
-        callbacks = self._wandb_callbacks()
+        callbacks = self._callbacks()
 
 
         model = AutoModelForSequenceClassification.from_pretrained(
             pretrained_ckpt, 
             num_labels=1, 
-            ignore_mismatched_sizes=True
+            ignore_mismatched_sizes=False
         )
 
         trainer = Trainer(
@@ -91,28 +63,6 @@ class Inference:
 
         return pd.Series(predictions.predictions.flatten())
 
-        
-        # Load the text classification pipeline with specified parameters
-        # classifier = pipeline(
-        #     "text-classification",
-        #     model=model,
-        #     tokenizer=self._wrapped_tokenizer,
-        #     device=0 if torch.cuda.is_available() else -1,  # Set device to GPU if available
-        #     framework="pt",  # Ensure PyTorch is used
-        #     batch_size=512,  # Set your desired batch size
-
-        # )
-
-        # def custom_processor(data_batch):
-        #     return [{"input_ids": batch["input_ids"], "attention_mask": batch["attention_mask"]} for batch in data_batch]
-        
-        # results = classifier(tokenized_test_datasets['train'])  # Pass your dataset
-        # print(results)
-
-        
-
-
-        
         
 
             
