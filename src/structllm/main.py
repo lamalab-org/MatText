@@ -1,11 +1,15 @@
 import os
+import wandb
 from hydra import main as hydra_main, utils
 from omegaconf import DictConfig
+import hydra
+
 from structllm.models.finetune import FinetuneModel
 from structllm.models.pretrain import PretrainModel
 from structllm.models.predict import Inference
 from structllm.matbenchmark.matbench_test import MatbenchPredict
-import wandb
+from structllm.matbenchmark.benchmark import Matbenchmark
+
 
 
 class TaskRunner:
@@ -17,6 +21,9 @@ class TaskRunner:
         if "matbench_predict" in run: 
             self.run_matbench_prediction(task_cfg)
 
+        if "benchmark" in run:
+            self.run_benchmarking(task_cfg)
+            
         if "predict" in run:
             print(task_cfg)
             self.run_predictions(task_cfg)
@@ -31,6 +38,13 @@ class TaskRunner:
         print("performing benchmaking")
         matbench_predictor = MatbenchPredict(task_cfg)
         matbench_predictor.run_benchmark()
+
+
+    def run_benchmarking(self, task_cfg: DictConfig) -> None:
+        print("Finetuning and testing on matbench dataset")
+        matbench_predictor = Matbenchmark(task_cfg)
+        matbench_predictor.run_benchmarking()
+
 
     def run_predictions(self,task_cfg: DictConfig) -> None:
         for exp_name, test_data_path, ckpt in zip(task_cfg.model.inference.exp_name, task_cfg.model.inference.path.test_data, task_cfg.model.inference.path.pretrained_checkpoint):
@@ -84,14 +98,14 @@ class TaskRunner:
             print("W&B API key not found. Please set the WANDB_API_KEY environment variable.")
 
 
-# import argparse
-# parser = argparse.ArgumentParser()
-# parser.add_argument('--local_rank', type=int, default=0)
-# args = parser.parse_args()
 
 
 @hydra_main(config_path="conf", config_name="config")
 def main(cfg: DictConfig) -> None:
+    print(f"Working directory : {os.getcwd()}")
+    print(
+        f"Output directory  : {hydra.core.hydra_config.HydraConfig.get().runtime.output_dir}"
+    )
     
     local_rank = int(os.getenv('LOCAL_RANK', '0'))
     task_runner = TaskRunner()

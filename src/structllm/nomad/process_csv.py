@@ -77,7 +77,8 @@ def combine_csv_files(input_directory: str, output_filename: str) -> None:
                 if file.endswith(".csv"):
                     file_path = os.path.join(root, file)
                     # Specify column names when reading the CSV file
-                    df = pd.read_csv(file_path, names=["slices", "formula", "crystal"], on_bad_lines='warn')
+                    #df = pd.read_csv(file_path, names=["slices", "formula", "crystal"], on_bad_lines='warn')
+                    df = pd.read_csv(file_path, names=["material_id", "massdensity", "composition"], on_bad_lines='warn')
                     combined_data = pd.concat([combined_data, df], ignore_index=True)
 
         # Save the combined data to the output CSV file

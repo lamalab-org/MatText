@@ -1,10 +1,14 @@
 defaults:
-  - model: bert
-  - tokenizer: atom
+  - model: none
+  - tokenizer: none
   - matbench: matbench
   - logging: wandb
 
 runs:
+
+  # - name: benchmark_run
+  #   tasks: [benchmark]
+    
   # - name: matbench_predict
   #   tasks: [matbench_predict]
 
@@ -16,3 +20,7 @@ runs:
 
   # - name: predict
   #   tasks: [predict]
+
+hydra:
+  run:
+    dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}

@@ -1,76 +1,86 @@
 from typing import Any, List, Dict, Union
-
-import os
 import wandb
-import hydra
 from omegaconf import DictConfig
 
-from tokenizers import Tokenizer
-from transformers import PreTrainedTokenizerFast
 from transformers import DataCollatorForLanguageModeling
 from transformers import AutoModelForMaskedLM, AutoConfig
 from transformers import Trainer, TrainingArguments
 from datasets import load_dataset
-from transformers import TrainerCallback, TrainerControl
-from structllm.tokenizer.slice_tokenizer import AtomVocabTokenizer
-from datasets import load_dataset
+import pandas as pd
+from datasets import Dataset, DatasetDict
+from transformers import TrainerCallback
+
 
 from torch import nn
 from torch.nn.parallel import DistributedDataParallel
+from transformers import EarlyStoppingCallback
+from structllm.models.utils import CustomWandbCallback_Pretrain, TokenizerMixin
+from functools import partial
 
 
-
-class CustomWandbCallback(TrainerCallback):
-    """Custom W&B callback for logging during training."""
-    def on_log(self, args: Any, state: Any, control: Any, model: Any, logs: Dict[str, Union[float, Any]], **kwargs: Any) -> None:
-        if state.is_world_process_zero:
-            wandb.log({"train_loss": logs.get("loss")})  # Log training loss
-            wandb.log({"eval_loss": logs.get("eval_loss")})  # Log evaluation loss
-
-
-class PretrainModel:
+class PretrainModel(TokenizerMixin):
     """Class to perform pretraining of a language model."""
     def __init__(self, cfg: DictConfig, local_rank=None):
 
+        super().__init__(cfg.tokenizer)
         self.cfg = cfg.model.pretrain
-        self.tokenizer_cfg = cfg.tokenizer
         self.local_rank = local_rank
         self.context_length: int = self.cfg.context_length
+        self.callbacks = self.cfg.callbacks
         self.model_name_or_path: str = self.cfg.model_name_or_path
 
-        print("tokenizer")
-        print(self.tokenizer_cfg.name)
-        
-        if self.tokenizer_cfg.name == "atom":
-            tokenizer = AtomVocabTokenizer(self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False)
-        else:
-            self._tokenizer: Tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-            tokenizer = PreTrainedTokenizerFast(
-                tokenizer_object=self._tokenizer,
-            )
+        self.tokenized_dataset = self._prepare_datasets
 
-        special_tokens = {
-            "unk_token": "[UNK]",
-            "pad_token": "[PAD]",
-            "cls_token": "[CLS]",
-            "sep_token": "[SEP]",
-            "mask_token": "[MASK]",
-        }
-        tokenizer.add_special_tokens(special_tokens)
-        self._wrapped_tokenizer = tokenizer
+    @property
+    def _prepare_datasets(self) -> DatasetDict:
+        """
+        Prepare training and validation datasets.
+
+        Args:
+            train_df (pd.DataFrame): DataFrame containing training data.
+
+        Returns:
+            DatasetDict: Dictionary containing training and validation datasets.
+        """
+
+        # train_df = pd.read_csv(self.cfg.path.traindata,low_memory=False)
+        # val_df = pd.read_csv(self.cfg.path.evaldata,low_memory=False)
+
+        # datasets = DatasetDict({
+        #     'train': Dataset.from_pandas(train_df),
+        #     'test': Dataset.from_pandas(val_df)
+        # })
+
+        # # Tokenize, pad, and truncate the datasets
+        # tokenized_datasets = {
+        #     k: v.map(partial(self._tokenize_pad_and_truncate, context_length=self.context_length), batched=True)
+        #     for k, v in datasets.items()
+        # }
+
+        # Load train and test datasets
         train_dataset = load_dataset("csv", data_files=self.cfg.path.traindata)
         eval_dataset = load_dataset("csv", data_files=self.cfg.path.evaldata)
 
-        self.tokenized_train_datasets = train_dataset.map(self._tokenize_pad_and_truncate, batched=True)
-        self.tokenized_eval_datasets = eval_dataset.map(self._tokenize_pad_and_truncate, batched=True)
+        self.tokenized_train_datasets = train_dataset.map(partial(self._tokenize_pad_and_truncate, context_length=self.context_length), batched=True)
+        self.tokenized_eval_datasets = eval_dataset.map(partial(self._tokenize_pad_and_truncate, context_length=self.context_length), batched=True)
 
-    def _wandb_callbacks(self) -> List[TrainerCallback]:
-        """Returns a list of callbacks for logging."""
-        return [CustomWandbCallback()]
 
-    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any]) -> Dict[str, Any]:
-        """Tokenizes, pads, and truncates input texts."""
-        return self._wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=self.context_length)
+    
+    def _callbacks(self) -> List[TrainerCallback]:
+        """Returns a list of callbacks for early stopping, and custom logging."""
+        callbacks = []
+
+        if self.callbacks.early_stopping:
+            callbacks.append(EarlyStoppingCallback(
+                early_stopping_patience=self.callbacks.early_stopping_patience,
+                early_stopping_threshold=self.callbacks.early_stopping_threshold
+            ))
+
+        if self.callbacks.custom_logger:
+            callbacks.append(CustomWandbCallback_Pretrain())
+
+        return callbacks
+
 
     def pretrain_mlm(self) -> None:
         """Performs MLM pretraining of the language model."""
@@ -84,14 +94,14 @@ class PretrainModel:
             mlm_probability=config_mlm.mlm_probability
         )
 
-        callbacks = self._wandb_callbacks()
+        callbacks = self._callbacks()
 
         config = AutoConfig.from_pretrained(
             self.model_name_or_path,
             **config_model_args
         )
-         
-        model = AutoModelForMaskedLM.from_config(config).to("cuda")
+        
+        model = AutoModelForMaskedLM.from_config(config)
 
         if self.local_rank is not None:
             model = model.to(self.local_rank)
@@ -109,7 +119,7 @@ class PretrainModel:
             train_dataset=self.tokenized_train_datasets['train'],
             eval_dataset=self.tokenized_eval_datasets['train'],
             args=training_args,
-            callbacks=callbacks
+            callbacks= callbacks
         )
 
         wandb.log({"config_details": str(config)}) 

@@ -1,5 +1,5 @@
 pretrain:
-  exp_name: mp_512cont_atomtok
+  exp_name: early_stop_implementation
   model_name_or_path: "bert-base-uncased"
 
   model_config:
@@ -11,14 +11,23 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    traindata: ["/work/so87pot/structllm/materials_project/train_slice.csv"]
+    traindata: "/home/so87pot/n0w0f/structllm/data/27k/train.csv"
     evaldata: "/home/so87pot/n0w0f/structllm/data/27k/val.csv"
     root_path: "/work/so87pot/structllm/model_outs/checkpoints"
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
     finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
 
-  context_length: 512
+  context_length: 128
+
+
+  callbacks:
+    early_stopping: True
+    custom_logger: True
+    early_stopping_patience: 3
+    early_stopping_threshold: 0.001
+
+
   training_arguments:
     output_dir: "${model.pretrain.path.output_dir}"   # Directory where model checkpoints and logs will be saved
     logging_dir: "${model.pretrain.path.logging_dir}"
@@ -42,22 +51,14 @@ pretrain:
 
 
 finetune:
-  model_name: 512cont_atomtok_100_ft_400epoch
+  model_name: early_stop_implementation
   exp_name: [
     "train_matbench_dielectric_0",
-    "train_matbench_dielectric_1",
-    "train_matbench_dielectric_2",
-    "train_matbench_dielectric_3",
-    "train_matbench_dielectric_4",
     ]
   path:
     pretrained_checkpoint: "/work/so87pot/structllm/model_outs/checkpoints/checkpoints/512cont_atomtok_100_pt/checkpoint-21000"
     finetune_traindata: [
       "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_0.csv",
-      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_1.csv",
-      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_2.csv",
-      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_3.csv",
-      "/work/so87pot/structllm/finetune_data/csv/train_matbench_dielectric_4.csv",
   
           ]
 
@@ -67,22 +68,29 @@ finetune:
     logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
 
-  context_length: 512
+  context_length: 64
+  callbacks:
+    early_stopping: True
+    custom_logger: True
+    early_stopping_patience: 3
+    early_stopping_threshold: 0.001
+
   training_arguments:
     output_dir: "${model.finetune.path.output_dir}"
     overwrite_output_dir: True
-    num_train_epochs: 400
-    per_device_train_batch_size: 128
+    num_train_epochs: 50
+    per_device_train_batch_size: 1028
     save_strategy: "epoch"
-    save_steps: 5
+    evaluation_strategy: "epoch"   
+    save_steps: 2  # Number of epochs before saving
     report_to: "wandb"
     save_total_limit: 20
     learning_rate: 2e-4
-    logging_steps: 20   
-    seed: 42                 # we will log every 100 steps
-    # eval_steps: 1                     # we will perform evaluation every 500 steps
-    # load_best_model_at_end: True
-    # evaluation_strategy:  "epoch"          # check evaluation metrics at each epoch
+    logging_steps: 6  
+    seed: 42
+    eval_steps: 2  # Adjusted evaluation frequency, e.g., evaluate after 10 epochs
+    load_best_model_at_end: True
+           # check evaluation metrics at each epoch
 
 
 
@@ -91,32 +99,32 @@ finetune:
 
 inference:
   exp_name: [
-    "matbench_mp_e_form_0",
-    "matbench_mp_e_form_1",
-    "matbench_mp_e_form_2", 
-    "matbench_mp_e_form_3",
-    "matbench_mp_e_form_4"]
+    "test_matbench_log_kvrh_0",
+    "test_matbench_log_kvrh_1",
+    "test_matbench_log_kvrh_2",
+    "test_matbench_log_kvrh_3",
+    "test_matbench_log_kvrh_4",
+    ]
   path:
     pretrained_checkpoint: [
-    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_0/checkpoint-10000",
-    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_1/checkpoint-10000",
-    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_2/checkpoint-10000",
-    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_3/checkpoint-10000",
-    "/home/so87pot/n0w0f/structllm/src/structllm/models/finetune/checkpoints/train_matbench_mp_e_form_4/checkpoint-10000"
-  ] 
+    "/work/so87pot/structllm/results/finetune/08_02_100k_bpe_512_wes/checkpoints/finetuned_train_matbench_log_kvrh_0",
+    "/work/so87pot/structllm/results/finetune/08_02_100k_bpe_512_wes/checkpoints/finetuned_train_matbench_log_kvrh_1",
+    "/work/so87pot/structllm/results/finetune/08_02_100k_bpe_512_wes/checkpoints/finetuned_train_matbench_log_kvrh_2",
+    "/work/so87pot/structllm/results/finetune/08_02_100k_bpe_512_wes/checkpoints/finetuned_train_matbench_log_kvrh_3",
+    "/work/so87pot/structllm/results/finetune/08_02_100k_bpe_512_wes/checkpoints/finetuned_train_matbench_log_kvrh_4",
+   ] 
 
     test_data: [
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_0.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_1.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_2.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_3.csv",
-    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_mp_e_form_4.csv",
-
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_log_kvrh_0.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_log_kvrh_1.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_log_kvrh_2.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_log_kvrh_3.csv",
+    "/home/so87pot/n0w0f/structllm/data/mb_1/csv/test_matbench_log_kvrh_4.csv",
   ]
     root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/predictions"
     output_dir: "${model.inference.path.root_path}/checkpoints/${model.inference.exp_name}"
     logging_dir: "${model.inference.path.root_path}/logs/${model.inference.exp_name}"
     predictions: "${model.inference.path.root_path}/checkpoints/inference${model.inference.exp_name}"
 
-  context_length: 128
+  context_length: 512
  
