@@ -1,5 +1,5 @@
 pretrain:
-  exp_name: pretrain_composition_27k
+  exp_name: pretrain_composition_100k
   model_name_or_path: "bert-base-uncased"
 
   model_config:
@@ -11,8 +11,9 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    traindata: "/work/so87pot/material_db/nomad/07_02_data/composition/27k/train.csv"
-    evaldata: "/work/so87pot/material_db/nomad/07_02_data/composition/27k/val.csv"
+    data_root_path: "/work/so87pot/material_db/nomad/07_02_data/composition/130k"
+    traindata: "${model.pretrain.path.data_root_path}/train.csv"
+    evaldata: "${model.pretrain.path.data_root_path}/val.csv"
     root_path: "/work/so87pot/structllm/results/checkpoints"
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
@@ -40,8 +41,8 @@ pretrain:
     save_steps: 1000
     report_to: "wandb"
     evaluation_strategy:  'steps'          # check evaluation metrics at each epoch
-    logging_steps: 100                    # we will log every 100 steps
-    eval_steps: 500                     # we will perform evaluation every 500 steps
+    logging_steps: 50                    # we will log every 100 steps
+    eval_steps: 50                     # we will perform evaluation every 500 steps
     load_best_model_at_end: True
     seed: 42 
 

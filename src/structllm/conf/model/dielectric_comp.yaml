@@ -1,15 +1,15 @@
 tokenizer:
-  name: bpe
+  name: atom  
   path: 
     root_path: "/home/so87pot/n0w0f/structllm/src/structllm/tokenizer"
-    tokenizer_path: "${tokenizer.path.root_path}/tokenizer-slice_130k.json"
+    tokenizer_path: "/home/so87pot/n0w0f/structllm/src/structllm/tokenizer/composition.txt"
 
 logging:
-  wandb_project : "08_02_100k_ft_512bpe"
+  wandb_project : "08_02_composition_ft"
   wandb_log_model : "checkpoint"
 
 finetune:
-  model_name: 08_02_100k_bpe_512_wes
+  model_name: 08_02_27k_comp
   exp_name: [
     "train_matbench_dielectric_0",
     "train_matbench_dielectric_1",
@@ -20,13 +20,10 @@ finetune:
 
 
   path:
-    checkpoint_rootpath: "/work/so87pot/structllm/model_outs2/checkpoints/02_02_100k_pt_bpe_512"  # <--- Change this to the path of the pretrained checkpoint
-    checkpoint_name: "checkpoint-86000"                           # <--- Change this to the name of the pretrained checkpoint
-
-    pretrained_checkpoint: "${model.finetune.path.checkpoint_rootpath}/${model.finetune.path.checkpoint_name}"
+    pretrained_checkpoint: "/work/so87pot/structllm/results/checkpoints/checkpoints/pretrain_composition_27k/checkpoint-1000"  # <--- Change this to the path of the pretrained checkpoint
 
 
-    finetune_data_rootpath: "/work/so87pot/structllm/finetune_data/csv"                     # <--- Change this to the path of the finetune data
+    finetune_data_rootpath: "/work/so87pot/material_db/nomad/07_02_data/matbench"                     # <--- Change this to the path of the finetune data
     finetune_traindata: [
       "${model.finetune.path.finetune_data_rootpath}/train_matbench_dielectric_0.csv",
       "${model.finetune.path.finetune_data_rootpath}/train_matbench_dielectric_1.csv",
@@ -41,9 +38,9 @@ finetune:
     logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
 
-  context_length: 512
+  context_length: 32
   callbacks:
-    early_stopping: False
+    early_stopping: True
     custom_logger: True
     early_stopping_patience: 10
     early_stopping_threshold: 0.01
@@ -52,7 +49,7 @@ finetune:
     output_dir: "${model.finetune.path.output_dir}"
     overwrite_output_dir: True
     num_train_epochs: 100
-    per_device_train_batch_size: 128
+    per_device_train_batch_size: 1024
 #    save_strategy: "epoch"
     evaluation_strategy: 'steps'   
     save_steps: 1000  # Number of epochs before saving
@@ -80,7 +77,7 @@ inference:
     pretrained_checkpoint: [
    
   ] 
-    test_data_rootpath: "/work/so87pot/structllm/finetune_data_non_primitive/csv"                     # <--- Change this to the path of the finetune data
+    test_data_rootpath: "/work/so87pot/material_db/nomad/07_02_data/matbench"                     # <--- Change this to the path of the finetune data
     test_data: [
     "${model.inference.path.test_data_rootpath}/test_matbench_dielectric_0.csv",
     "${model.inference.path.test_data_rootpath}/test_matbench_dielectric_1.csv",

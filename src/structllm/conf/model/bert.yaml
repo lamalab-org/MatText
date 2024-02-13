@@ -107,11 +107,11 @@ inference:
     ]
   path:
     pretrained_checkpoint: [
-    "/work/so87pot/structllm/model_outs2/finetune/04_02_100k_ft_512bpe/checkpoints/finetuned_train_matbench_log_kvrh_0",
-    "/work/so87pot/structllm/model_outs2/finetune/04_02_100k_ft_512bpe/checkpoints/finetuned_train_matbench_log_kvrh_1",
-    "/work/so87pot/structllm/model_outs2/finetune/04_02_100k_ft_512bpe/checkpoints/finetuned_train_matbench_log_kvrh_2",
-    "/work/so87pot/structllm/model_outs2/finetune/04_02_100k_ft_512bpe/checkpoints/finetuned_train_matbench_log_kvrh_3",
-    "/work/so87pot/structllm/model_outs2/finetune/04_02_100k_ft_512bpe/checkpoints/finetuned_train_matbench_log_kvrh_4",
+    "/work/so87pot/structllm/results/finetune/08_02_100k_bpe_512_wes/checkpoints/finetuned_train_matbench_log_kvrh_0",
+    "/work/so87pot/structllm/results/finetune/08_02_100k_bpe_512_wes/checkpoints/finetuned_train_matbench_log_kvrh_1",
+    "/work/so87pot/structllm/results/finetune/08_02_100k_bpe_512_wes/checkpoints/finetuned_train_matbench_log_kvrh_2",
+    "/work/so87pot/structllm/results/finetune/08_02_100k_bpe_512_wes/checkpoints/finetuned_train_matbench_log_kvrh_3",
+    "/work/so87pot/structllm/results/finetune/08_02_100k_bpe_512_wes/checkpoints/finetuned_train_matbench_log_kvrh_4",
    ] 
 
     test_data: [
