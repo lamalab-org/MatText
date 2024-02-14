@@ -5,11 +5,15 @@ import wandb
 
 from structllm.tokenizer.slice_tokenizer import AtomVocabTokenizer
 
+#tokenizermap dictionary here
+
 class TokenizerMixin:
     """Mixin class to handle tokenizer functionality."""
 
-    def __init__(self, tokenizer_cfg):
-        self.tokenizer_cfg = tokenizer_cfg
+    def __init__(self, cfg):
+
+        self.cfg = cfg
+        self.tokenizer_cfg = cfg.tokenizer
         self._wrapped_tokenizer = None
 
         if self.tokenizer_cfg.name == "atom":
@@ -29,9 +33,9 @@ class TokenizerMixin:
         }
         self._wrapped_tokenizer.add_special_tokens(special_tokens)
 
-    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any], context_length: int) -> Dict[str, Any]:
+    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any],label:str, context_length: int) -> Dict[str, Any]:
         """Tokenizes, pads, and truncates input texts."""
-        return self._wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=context_length)
+        return self._wrapped_tokenizer(texts[label], truncation=True, padding="max_length", max_length=context_length)
 
 
 

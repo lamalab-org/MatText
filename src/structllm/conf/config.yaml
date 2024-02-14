@@ -1,3 +1,7 @@
+hydra:
+  run:
+    dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
 defaults:
   - model: none
   - tokenizer: none
@@ -21,6 +25,3 @@ runs:
   # - name: predict
   #   tasks: [predict]
 
-hydra:
-  run:
-    dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
