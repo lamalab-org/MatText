@@ -13,7 +13,7 @@ class TokenizerMixin:
     def __init__(self, cfg):
 
         self.cfg = cfg
-        self.tokenizer_cfg = cfg.tokenizer
+        self.tokenizer_cfg = cfg.model.tokenizer
         self._wrapped_tokenizer = None
 
         if self.tokenizer_cfg.name == "atom":
@@ -47,6 +47,7 @@ class CustomWandbCallback_Inference(TrainerCallback):
 
     def on_predict_end(self, args: Any, state: Any, control: Any, model: Any, predictions: Any, **kwargs: Any) -> None:
         wandb.log({"predictions": predictions.predictions, })
+        
 
 class CustomWandbCallback_Pretrain(TrainerCallback):
     """Custom W&B callback for logging during training."""

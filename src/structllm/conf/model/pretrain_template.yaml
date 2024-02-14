@@ -3,7 +3,7 @@ tokenizer:
   representation: slice
   path: 
     root_path: "/home/so87pot/n0w0f/structllm/src/structllm/tokenizer"
-    tokenizer_path: "${tokenizer.path.root_path}/tokenizer-slice_130k.json"
+    tokenizer_path: "${model.tokenizer.path.root_path}/tokenizer-slice_130k.json"
 
 logging:
   wandb_project : "newdataset_test"
@@ -22,16 +22,15 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    data_root_path: "/work/so87pot/material_db/structllm_dataset"
+    data_root_path: "/work/so87pot/material_db/structllm_dataset" #--> Change this to your dataset path
+    root_path: "/work/so87pot/structllm/results/checkpoints" #--> Change this to your wd path TODO overwrite this config in main config
     traindata: "${model.pretrain.path.data_root_path}/lmdb_0.json"
-    evaldata: "${model.pretrain.path.data_root_path}/lmdb_0.json"
-    root_path: "/work/so87pot/structllm/results/checkpoints"
+    evaldata: "${model.pretrain.path.data_root_path}/lmdb_0.json" 
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
     finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
 
   context_length: 32
-
 
   callbacks:
     early_stopping: True

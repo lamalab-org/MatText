@@ -84,7 +84,7 @@ class TaskRunner:
 
         wandb.init(
                 config=dict(task_cfg.model.pretrain), 
-                project=task_cfg.logging.wandb_project, 
+                project=task_cfg.model.logging.wandb_project, 
                 name=task_cfg.model.pretrain.exp_name
                     )
         pretrainer = PretrainModel(task_cfg,local_rank)
