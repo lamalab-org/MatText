@@ -2,27 +2,34 @@ from transformers import PreTrainedTokenizerFast, TrainerCallback
 from tokenizers import Tokenizer
 from typing import Any, List, Dict, Union
 import wandb
+from xtal2txt.tokenizer import SliceTokenizer, CompositionTokenizer, CifTokenizer, CrysllmTokenizer, RobocrysTokenizer
 
-from structllm.tokenizer.slice_tokenizer import AtomVocabTokenizer
-
-#tokenizermap dictionary here
+_TOKENIZER_MAP = {
+    "slice": SliceTokenizer,
+    "composition": CompositionTokenizer,
+    "cif_symmetrized": CifTokenizer,
+    "cif_p1": CifTokenizer,
+    "cif_bonding": CifTokenizer,
+    "crystal_llm_rep": CrysllmTokenizer,
+    "robocrys_rep": RobocrysTokenizer,
+    "wycoff_rep": None,
+}
 
 class TokenizerMixin:
     """Mixin class to handle tokenizer functionality."""
 
     def __init__(self, cfg):
 
-        self.cfg = cfg
-        self.tokenizer_cfg = cfg.model.tokenizer
+        self.representation = cfg
         self._wrapped_tokenizer = None
 
-        if self.tokenizer_cfg.name == "atom":
-            self._wrapped_tokenizer = AtomVocabTokenizer(
-                self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False
-            )
-        else:
-            self._tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-            self._wrapped_tokenizer = PreTrainedTokenizerFast(tokenizer_object=self._tokenizer)
+        self._tokenizer = _TOKENIZER_MAP.get(self.representation)
+        if self._tokenizer is None:
+            raise ValueError(f"Tokenizer not defined for {self.representation}")
+        
+        self._wrapped_tokenizer = self._tokenizer(
+                    model_max_length=512, truncation=False, padding=False
+                )
 
         special_tokens = {
             "unk_token": "[UNK]",
@@ -33,9 +40,9 @@ class TokenizerMixin:
         }
         self._wrapped_tokenizer.add_special_tokens(special_tokens)
 
-    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any],label:str, context_length: int) -> Dict[str, Any]:
+    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any], context_length: int) -> Dict[str, Any]:
         """Tokenizes, pads, and truncates input texts."""
-        return self._wrapped_tokenizer(texts[label], truncation=True, padding="max_length", max_length=context_length)
+        return self._wrapped_tokenizer(texts[str(self.representation)], truncation=True, padding="max_length", max_length=context_length)
 
 
 

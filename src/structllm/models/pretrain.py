@@ -22,7 +22,7 @@ class PretrainModel(TokenizerMixin):
     """Class to perform pretraining of a language model."""
     def __init__(self, cfg: DictConfig, local_rank=None):
 
-        super().__init__(cfg)
+        super().__init__(cfg.model.tokenizer.representation)
         self.local_rank = local_rank
         self.representation = cfg.model.tokenizer.representation
         self.cfg = cfg.model.pretrain       
@@ -45,7 +45,7 @@ class PretrainModel(TokenizerMixin):
         dataset = load_dataset("json", data_files=path)
         filtered_dataset= dataset.filter(lambda example: example[self.representation] is not None)
         return filtered_dataset.map(
-            partial(self._tokenize_pad_and_truncate, label = self.representation, context_length=self.context_length), 
+            partial(self._tokenize_pad_and_truncate, context_length=self.context_length), 
             batched=True)
     
     def _callbacks(self) -> List[TrainerCallback]:
