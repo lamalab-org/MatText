@@ -22,8 +22,9 @@ class PretrainModel(TokenizerMixin):
     """Class to perform pretraining of a language model."""
     def __init__(self, cfg: DictConfig, local_rank=None):
 
-        super().__init__(cfg.tokenizer)
+        super().__init__(cfg)
         self.cfg = cfg.model.pretrain
+        self.representation = cfg.model.tokenizer.representation
         self.local_rank = local_rank
         self.context_length: int = self.cfg.context_length
         self.callbacks = self.cfg.callbacks
@@ -43,26 +44,13 @@ class PretrainModel(TokenizerMixin):
             DatasetDict: Dictionary containing training and validation datasets.
         """
 
-        # train_df = pd.read_csv(self.cfg.path.traindata,low_memory=False)
-        # val_df = pd.read_csv(self.cfg.path.evaldata,low_memory=False)
+        train_dataset = load_dataset("json", data_files=self.cfg.path.traindata)
+        eval_dataset = load_dataset("json", data_files=self.cfg.path.evaldata)
+        filtered_train_dataset= train_dataset.filter(lambda example: example[self.representation] is not None)
+        filtered_eval_dataset= eval_dataset.filter(lambda example: example[self.representation] is not None)
 
-        # datasets = DatasetDict({
-        #     'train': Dataset.from_pandas(train_df),
-        #     'test': Dataset.from_pandas(val_df)
-        # })
-
-        # # Tokenize, pad, and truncate the datasets
-        # tokenized_datasets = {
-        #     k: v.map(partial(self._tokenize_pad_and_truncate, context_length=self.context_length), batched=True)
-        #     for k, v in datasets.items()
-        # }
-
-        # Load train and test datasets
-        train_dataset = load_dataset("csv", data_files=self.cfg.path.traindata)
-        eval_dataset = load_dataset("csv", data_files=self.cfg.path.evaldata)
-
-        self.tokenized_train_datasets = train_dataset.map(partial(self._tokenize_pad_and_truncate, context_length=self.context_length), batched=True)
-        self.tokenized_eval_datasets = eval_dataset.map(partial(self._tokenize_pad_and_truncate, context_length=self.context_length), batched=True)
+        self.tokenized_train_datasets = filtered_train_dataset.map(partial(self._tokenize_pad_and_truncate, label = self.representation, context_length=self.context_length), batched=True)
+        self.tokenized_eval_datasets = filtered_eval_dataset.map(partial(self._tokenize_pad_and_truncate, label = self.representation, context_length=self.context_length), batched=True)
 
 
     
