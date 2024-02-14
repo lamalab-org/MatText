@@ -4,9 +4,9 @@ hydra:
 
 defaults:
   - model: none
-  - tokenizer: none
+  # - tokenizer: none
   - matbench: matbench
-  - logging: wandb
+  # - logging: wandb
 
 runs:
 
