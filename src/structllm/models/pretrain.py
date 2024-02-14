@@ -23,17 +23,16 @@ class PretrainModel(TokenizerMixin):
     def __init__(self, cfg: DictConfig, local_rank=None):
 
         super().__init__(cfg)
-        self.cfg = cfg.model.pretrain
-        self.representation = cfg.model.tokenizer.representation
         self.local_rank = local_rank
+        self.representation = cfg.model.tokenizer.representation
+        self.cfg = cfg.model.pretrain       
         self.context_length: int = self.cfg.context_length
         self.callbacks = self.cfg.callbacks
         self.model_name_or_path: str = self.cfg.model_name_or_path
+        self.tokenized_train_datasets = self._prepare_datasets(path=self.cfg.path.traindata)
+        self.tokenized_eval_datasets = self._prepare_datasets(path=self.cfg.path.evaldata)
 
-        self.tokenized_dataset = self._prepare_datasets
-
-    @property
-    def _prepare_datasets(self) -> DatasetDict:
+    def _prepare_datasets(self,path:str) -> DatasetDict:
         """
         Prepare training and validation datasets.
 
@@ -43,16 +42,11 @@ class PretrainModel(TokenizerMixin):
         Returns:
             DatasetDict: Dictionary containing training and validation datasets.
         """
-
-        train_dataset = load_dataset("json", data_files=self.cfg.path.traindata)
-        eval_dataset = load_dataset("json", data_files=self.cfg.path.evaldata)
-        filtered_train_dataset= train_dataset.filter(lambda example: example[self.representation] is not None)
-        filtered_eval_dataset= eval_dataset.filter(lambda example: example[self.representation] is not None)
-
-        self.tokenized_train_datasets = filtered_train_dataset.map(partial(self._tokenize_pad_and_truncate, label = self.representation, context_length=self.context_length), batched=True)
-        self.tokenized_eval_datasets = filtered_eval_dataset.map(partial(self._tokenize_pad_and_truncate, label = self.representation, context_length=self.context_length), batched=True)
-
-
+        dataset = load_dataset("json", data_files=path)
+        filtered_dataset= dataset.filter(lambda example: example[self.representation] is not None)
+        return filtered_dataset.map(
+            partial(self._tokenize_pad_and_truncate, label = self.representation, context_length=self.context_length), 
+            batched=True)
     
     def _callbacks(self) -> List[TrainerCallback]:
         """Returns a list of callbacks for early stopping, and custom logging."""
