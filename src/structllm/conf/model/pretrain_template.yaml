@@ -1,9 +1,4 @@
-tokenizer:
-  name: bpe
-  representation: slice
-  path: 
-    root_path: "/home/so87pot/n0w0f/structllm/src/structllm/tokenizer"
-    tokenizer_path: "${model.tokenizer.path.root_path}/tokenizer-slice_130k.json"
+representation: slice
 
 logging:
   wandb_project : "newdataset_test"

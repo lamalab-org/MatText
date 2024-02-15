@@ -5,7 +5,7 @@ hydra:
 defaults:
   - model: none
   # - tokenizer: none
-  - matbench: matbench
+  # - matbench: matbench
   # - logging: wandb
 
 runs:
