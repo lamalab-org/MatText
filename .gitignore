@@ -202,7 +202,8 @@ embeddings/
 wandb/
 results/
 *.png 
-
+multirun/
+multirun/*
 
 #slurm files
 *.sh
