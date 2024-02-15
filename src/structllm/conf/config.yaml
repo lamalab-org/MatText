@@ -1,27 +1,24 @@
 hydra:
   run:
     dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  launcher:
+    _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.SlurmLauncher
+    submitit_folder: ${hydra.sweep.dir}/.submitit/%j
+    timeout_min: 60
+    cpus_per_task: 2
+    gpus_per_node: 1
+    tasks_per_node: 1
+    mem_gb: 32
+    nodes: 1
+    name: ${hydra.job.name}
+    partition: 'gpu'
 
 defaults:
   - model: pretrain_template
-  # - tokenizer: none
-  # - matbench: matbench
-  # - logging: wandb
+  - override hydra/launcher: submitit_slurm
 
 runs:
 
-  # - name: benchmark_run
-  #   tasks: [benchmark]
-    
-  # - name: matbench_predict
-  #   tasks: [matbench_predict]
-
   - name: pretrain_run
     tasks: [pretrain]
-
-  # - name: finetune_run
-  #   tasks: [finetune]
-
-  # - name: predict
-  #   tasks: [predict]
 
