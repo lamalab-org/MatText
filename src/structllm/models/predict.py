@@ -1,37 +1,45 @@
 import os
-import torch
-from torch.nn import DataParallel
-import wandb
-import pandas as pd
+from functools import partial
+from typing import Any, Dict, List
+
 import numpy as np
-from transformers import  AutoModelForSequenceClassification, TrainerCallback, Trainer
-from datasets import load_dataset
+import pandas as pd
+import torch
+from datasets import DatasetDict, load_dataset
 from omegaconf import DictConfig
-from typing import Any, Dict, List, Union
+from transformers import AutoModelForSequenceClassification, Trainer, TrainerCallback
 
 from structllm.models.utils import CustomWandbCallback_Inference, TokenizerMixin
-
 
 
 class Inference(TokenizerMixin):
     def __init__(self, cfg: DictConfig):
 
-        super().__init__(cfg.tokenizer)
+        super().__init__(cfg.model.representation)
+        self.representation = cfg.model.representation
         self.cfg = cfg.model.inference
-        self.tokenizer_cfg = cfg.tokenizer
         self.context_length: int = self.cfg.context_length
+        self.tokenized_test_datasets = self._prepare_datasets(self.cfg.path.test_data)
 
-        
-        test_data = load_dataset("csv", data_files=self.cfg.path.test_data)
-        self.tokenized_test_datasets = test_data.map(self._tokenize_pad_and_truncate, batched=True)
+    def _prepare_datasets(self,path:str) -> DatasetDict:
+        """
+        Prepare training and validation datasets.
+
+        Args:
+            train_df (pd.DataFrame): DataFrame containing training data.
+
+        Returns:
+            DatasetDict: Dictionary containing training and validation datasets.
+        """
+        dataset = load_dataset("json", data_files=path)
+        filtered_dataset= dataset.filter(lambda example: example[self.representation] is not None)
+        return filtered_dataset.map(
+            partial(self._tokenize_pad_and_truncate, context_length=self.context_length),
+            batched=True)
 
     def _callbacks(self) -> List[TrainerCallback]:
         """Returns a list of callbacks for logging."""
         return [CustomWandbCallback_Inference()]
-
-    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any]) -> Dict[str, Any]:
-        """Tokenizes, pads, and truncates input texts."""
-        return self._wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=self.context_length)
 
     def predict(self):
         pretrained_ckpt = self.cfg.path.pretrained_checkpoint
@@ -39,8 +47,8 @@ class Inference(TokenizerMixin):
 
 
         model = AutoModelForSequenceClassification.from_pretrained(
-            pretrained_ckpt, 
-            num_labels=1, 
+            pretrained_ckpt,
+            num_labels=1,
             ignore_mismatched_sizes=False
         )
 
@@ -63,7 +71,7 @@ class Inference(TokenizerMixin):
 
         return pd.Series(predictions.predictions.flatten())
 
-        
 
-            
+
+
 

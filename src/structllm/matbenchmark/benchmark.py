@@ -1,11 +1,12 @@
 import os
-import pandas as pd
-import hydra
+
 import wandb
-from omegaconf import DictConfig
 from matbench.bench import MatbenchBenchmark
-from structllm.models.predict import Inference
+from omegaconf import DictConfig
+
 from structllm.models.finetune import FinetuneModel
+from structllm.models.predict import Inference
+
 
 class Matbenchmark:
     """
@@ -26,31 +27,26 @@ class Matbenchmark:
 
         #override wandb project name & tokenizer
         self.wandb_project = self.task_cfg.model.logging.wandb_project
-        self.task_cfg.tokenizer = self.task_cfg.model.tokenizer
-
-        print("-------------------------")
-        print(self.task_cfg.tokenizer)
-        print("-------------------------")
 
     def run_benchmarking(self, local_rank=None) -> None:
         mb = MatbenchBenchmark(autoload=False)
         benchmark = getattr(mb, self.benchmark)
         benchmark.load()
 
-        
+
 
         for i, (exp_name, test_name, train_data_path, test_data_path) in enumerate(
             zip(self.exp_names, self.test_exp_names, self.train_data, self.test_data)
         ):
-            print("Running training on {}, and testing on {}".format(train_data_path, test_data_path))
+            print(f"Running training on {train_data_path}, and testing on {test_data_path}")
             wandb.init(
-                config=dict(self.task_cfg.model.finetune), 
+                config=dict(self.task_cfg.model.finetune),
                 project=self.task_cfg.logging.wandb_project, name=exp_name)
-            
+
             exp_cfg = self.task_cfg.copy()
             exp_cfg.model.finetune.exp_name = exp_name
             exp_cfg.model.finetune.path.finetune_traindata = train_data_path
-            
+
 
             finetuner = FinetuneModel(exp_cfg,local_rank)
             ckpt = finetuner.finetune()
@@ -59,9 +55,9 @@ class Matbenchmark:
             print("-------------------------")
 
             wandb.init(
-                config=dict(self.task_cfg.model.inference), 
+                config=dict(self.task_cfg.model.inference),
                 project=self.task_cfg.logging.wandb_project, name=test_name)
-            
+
             exp_cfg.model.inference.path.test_data = test_data_path
             exp_cfg.model.inference.path.pretrained_checkpoint = ckpt
 
