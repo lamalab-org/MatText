@@ -1,22 +1,21 @@
-import torch
-from torch import nn
-from torch.nn.parallel import DistributedDataParallel
-
-from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer
-from transformers import TrainerCallback
-from omegaconf import DictConfig
+from functools import partial
 from typing import Any, Dict, List
-import wandb
 
 import pandas as pd
-from datasets import Dataset, DatasetDict
-from sklearn.model_selection import train_test_split
-from transformers import EarlyStoppingCallback
-
+import torch
+import wandb
+from datasets import DatasetDict, load_dataset
+from omegaconf import DictConfig
+from torch import nn
+from transformers import (
+    AutoModelForSequenceClassification,
+    EarlyStoppingCallback,
+    Trainer,
+    TrainerCallback,
+    TrainingArguments,
+)
 
 from structllm.models.utils import CustomWandbCallback_FineTune, TokenizerMixin
-from functools import partial
-
 
 
 class FinetuneModel(TokenizerMixin):
@@ -29,17 +28,16 @@ class FinetuneModel(TokenizerMixin):
     """
     def __init__(self, cfg: DictConfig,local_rank=None) -> None:
 
-        super().__init__(cfg.tokenizer)
-        self.cfg = cfg.model.finetune
+        super().__init__(cfg.model.representation)
         self.local_rank = local_rank
+        self.representation = cfg.model.representation
+        self.cfg = cfg.model.finetune
         self.context_length: int = self.cfg.context_length
         self.callbacks = self.cfg.callbacks
-       
-        train_df = pd.read_csv(self.cfg.path.finetune_traindata)
-        self.tokenized_dataset = self._prepare_datasets(train_df)
+        self.tokenized_dataset = self._prepare_datasets(self.cfg.path.finetune_traindata)
 
-        
-    def _prepare_datasets(self, train_df: pd.DataFrame) -> DatasetDict:
+
+    def _prepare_datasets(self, path: str) -> DatasetDict:
         """
         Prepare training and validation datasets.
 
@@ -50,20 +48,11 @@ class FinetuneModel(TokenizerMixin):
             DatasetDict: Dictionary containing training and validation datasets.
         """
 
-        train_df, val_df = train_test_split(train_df, test_size=0.1)
-
-        datasets = DatasetDict({
-            'train': Dataset.from_pandas(train_df),
-            'test': Dataset.from_pandas(val_df)
-        })
-
-        # Tokenize, pad, and truncate the datasets
-        tokenized_datasets = {
-            k: v.map(partial(self._tokenize_pad_and_truncate, context_length=self.context_length), batched=True)
-            for k, v in datasets.items()
-        }
-
-        return tokenized_datasets
+        dataset = load_dataset("json", data_files=path)
+        filtered_dataset= dataset.filter(lambda example: example[self.representation] is not None)
+        return filtered_dataset.map(
+            partial(self._tokenize_pad_and_truncate, context_length=self.context_length),
+            batched=True)
 
     def _callbacks(self) -> List[TrainerCallback]:
         """Returns a list of callbacks for early stopping, and custom logging."""
@@ -96,7 +85,7 @@ class FinetuneModel(TokenizerMixin):
         """
         Perform fine-tuning of the language model.
         """
-        
+
         pretrained_ckpt = self.cfg.path.pretrained_checkpoint
 
         config_train_args = self.cfg.training_arguments
@@ -112,7 +101,7 @@ class FinetuneModel(TokenizerMixin):
         model = AutoModelForSequenceClassification.from_pretrained(pretrained_ckpt,
                                                                    num_labels=1,
                                                                    ignore_mismatched_sizes=False)
-        
+
         #TODO: optional freezing of base model
         # for param in model.base_model.parameters():
         #     param.requires_grad = False
@@ -146,15 +135,15 @@ class FinetuneModel(TokenizerMixin):
         model.save_pretrained(self.cfg.path.finetuned_modelname)
         wandb.finish()
         return self.cfg.path.finetuned_modelname
-    
+
     def evaluate(self):
         """
         Evaluate the fine-tuned model on the test dataset.
         """
         ckpt = self.finetune()
-        
 
 
 
-    
+
+
 

@@ -1,21 +1,21 @@
-from typing import Any, List, Dict, Union
-import wandb
-from omegaconf import DictConfig
-
-from transformers import DataCollatorForLanguageModeling
-from transformers import AutoModelForMaskedLM, AutoConfig
-from transformers import Trainer, TrainingArguments
-from datasets import load_dataset
-import pandas as pd
-from datasets import Dataset, DatasetDict
-from transformers import TrainerCallback
-
-
-from torch import nn
-from torch.nn.parallel import DistributedDataParallel
-from transformers import EarlyStoppingCallback
-from structllm.models.utils import CustomWandbCallback_Pretrain, TokenizerMixin
 from functools import partial
+from typing import List
+
+import wandb
+from datasets import DatasetDict, load_dataset
+from omegaconf import DictConfig
+from torch import nn
+from transformers import (
+    AutoConfig,
+    AutoModelForMaskedLM,
+    DataCollatorForLanguageModeling,
+    EarlyStoppingCallback,
+    Trainer,
+    TrainerCallback,
+    TrainingArguments,
+)
+
+from structllm.models.utils import CustomWandbCallback_Pretrain, TokenizerMixin
 
 
 class PretrainModel(TokenizerMixin):
@@ -25,7 +25,7 @@ class PretrainModel(TokenizerMixin):
         super().__init__(cfg.model.representation)
         self.local_rank = local_rank
         self.representation = cfg.model.representation
-        self.cfg = cfg.model.pretrain       
+        self.cfg = cfg.model.pretrain
         self.context_length: int = self.cfg.context_length
         self.callbacks = self.cfg.callbacks
         self.model_name_or_path: str = self.cfg.model_name_or_path
@@ -45,9 +45,9 @@ class PretrainModel(TokenizerMixin):
         dataset = load_dataset("json", data_files=path)
         filtered_dataset= dataset.filter(lambda example: example[self.representation] is not None)
         return filtered_dataset.map(
-            partial(self._tokenize_pad_and_truncate, context_length=self.context_length), 
+            partial(self._tokenize_pad_and_truncate, context_length=self.context_length),
             batched=True)
-    
+
     def _callbacks(self) -> List[TrainerCallback]:
         """Returns a list of callbacks for early stopping, and custom logging."""
         callbacks = []
@@ -69,7 +69,7 @@ class PretrainModel(TokenizerMixin):
         config_mlm = self.cfg.mlm
         config_train_args = self.cfg.training_arguments
         config_model_args = self.cfg.model_config
-        
+
         data_collator = DataCollatorForLanguageModeling(
             tokenizer=self._wrapped_tokenizer,
             mlm=config_mlm.is_mlm,
@@ -82,7 +82,7 @@ class PretrainModel(TokenizerMixin):
             self.model_name_or_path,
             **config_model_args
         )
-        
+
         model = AutoModelForMaskedLM.from_config(config)
 
         if self.local_rank is not None:
@@ -90,11 +90,11 @@ class PretrainModel(TokenizerMixin):
             model = nn.parallel.DistributedDataParallel(model, device_ids=[self.local_rank])
         else:
             model = model.to("cuda")
-        
+
         training_args = TrainingArguments(
             **config_train_args
         )
-    
+
         trainer = Trainer(
             model=model,
             data_collator=data_collator,
@@ -104,10 +104,10 @@ class PretrainModel(TokenizerMixin):
             callbacks= callbacks
         )
 
-        wandb.log({"config_details": str(config)}) 
-        wandb.log({"Training Arguments": str(config_train_args)}) 
-        wandb.log({"model_summary": str(model)}) 
-        
+        wandb.log({"config_details": str(config)})
+        wandb.log({"Training Arguments": str(config_train_args)})
+        wandb.log({"model_summary": str(model)})
+
         trainer.train()
 
         # Save the fine-tuned model
