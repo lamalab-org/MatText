@@ -8,7 +8,7 @@ hydra:
     cpus_per_task: 2
     gpus_per_node: 1
     tasks_per_node: 1
-    mem_gb: 32
+    mem_gb: 100
     nodes: 1
     name: ${hydra.job.name}
     partition: 'gpu'

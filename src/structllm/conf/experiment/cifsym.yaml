@@ -1,0 +1,7 @@
+# @package _global_
+
+defaults:
+  - override /model: pretrain_template
+
+model:
+  representation: cif_symmetrized

@@ -1,0 +1,9 @@
+# @package _global_
+
+defaults:
+  - override /model: finetune_template
+
+model:
+  representation: slice
+  finetune.model_name: 08_02_100k_bpe_512_wes
+  finetune.dataset_name: "matbench_dielectric"
