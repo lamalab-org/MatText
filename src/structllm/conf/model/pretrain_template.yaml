@@ -1,11 +1,12 @@
 representation: slice
 
 logging:
-  wandb_project : "newdataset_test"
+  wandb_project : "30k_pt"
   wandb_log_model : "checkpoint"
 
 pretrain:
-  exp_name: newdataset_test
+  name: 30k_pt
+  exp_name: "${model.representation}_${model.pretrain.name}"
   model_name_or_path: "bert-base-uncased"
 
   model_config:
@@ -17,15 +18,15 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    data_root_path: "/work/so87pot/material_db/structllm_dataset" #--> Change this to your dataset path
+    data_root_path: "/work/so87pot/material_db/structllm_dataset/30k" #--> Change this to your dataset path
     root_path: "/work/so87pot/structllm/results/checkpoints" #--> Change this to your wd path TODO overwrite this config in main config
-    traindata: "${model.pretrain.path.data_root_path}/lmdb_0.json"
-    evaldata: "${model.pretrain.path.data_root_path}/lmdb_0.json" 
+    traindata: "${model.pretrain.path.data_root_path}/train.json"
+    evaldata: "${model.pretrain.path.data_root_path}/test.json" 
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
     finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
 
-  context_length: 32
+  context_length: 512
 
   callbacks:
     early_stopping: True
@@ -40,8 +41,8 @@ pretrain:
     overwrite_output_dir: True     
     label_names: ["labels"]
     save_total_limit: 5      # Maximum number of checkpoints to save
-    per_device_train_batch_size: 1024 # Batch size per device during training
-    num_train_epochs: 5       # Number of training epochs
+    per_device_train_batch_size: 128 # Batch size per device during training
+    num_train_epochs: 50       # Number of training epochs
     learning_rate: 2e-4
     save_steps: 1000
     report_to: "wandb"
