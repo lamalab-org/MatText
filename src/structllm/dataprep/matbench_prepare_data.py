@@ -1,15 +1,12 @@
 import json
-import pandas as pd
-import fire
-
-from concurrent.futures import ProcessPoolExecutor, TimeoutError
 import multiprocessing
+from concurrent.futures import ProcessPoolExecutor, TimeoutError
 from functools import partial
-from pymatgen.core.structure import Structure
+from typing import Dict, List
 
-from typing import List, Dict
-from functools import partial
-from typing import List
+import fire
+from xtal2txt.core import TextRep
+
 
 def read_json(json_file: str) -> List[Dict]:
     """Read JSON data from a file.
@@ -20,53 +17,34 @@ def read_json(json_file: str) -> List[Dict]:
     Returns:
         List[Dict]: A list of dictionaries containing the JSON data.
     """
-    with open(json_file, 'r') as file:
+    with open(json_file) as file:
         data = json.load(file)
     return data
 
-def give_composition(cif:str)-> str:
-    """Return composition in hill format from a CIF string.
 
-    Args:
-        cif (str): The CIF string.
-
-    Returns:
-        str: The composition in hill format.
-    """
-    pymatgen_struct = Structure.from_str(cif, "cif")
-    composition_string = pymatgen_struct.composition.hill_formula
-    composition= composition_string.replace(" ", "")
-    return composition
 
 
 def process_entry_train_matbench(entry: dict, timeout: int) -> dict:
-    
-    # Ensure the give_slice function and necessary data are picklable
+
     try:
-        slices_result = give_composition(entry["structure"])
-        return {
-                'slice': slices_result,
-                'labels': entry["labels"]
-            }
+        text_reps = TextRep.from_input(entry["structure"]).get_all_text_reps()  # Use get_all_text_reps to get various text representations # Add chemical formula to the dictionary
+        text_reps['labels'] = entry["labels"]
+        return text_reps  # Return the entire dictionary
     except TimeoutError:
-        print(f"Timeout error processing a row")
+        print("Timeout error processing a row")
         return None
     except Exception as e:
         print(f"Error processing a row: {e}")
         return None
 
 
-    
 def process_entry_test_matbench(entry: List, timeout: int) -> dict:
     # Ensure the give_slice function and necessary data are picklable
     try:
-
-        slice_result = give_composition(entry)
-        return {
-                'slice': slice_result,
-            }
+        text_reps = TextRep.from_input(entry).get_all_text_reps()  # Use get_all_text_reps to get various text representations # Add chemical formula to the dictionary
+        return text_reps  # Return the entire dictionary
     except TimeoutError:
-        print(f"Timeout error processing a row")
+        print("Timeout error processing a row")
         return None
     except Exception as e:
         print(f"Error processing a row: {e}")
@@ -84,11 +62,10 @@ def process_batch(num_workers, batch, timeout, process_entry_func):
 
 
 
-def process_json_to_csv(json_file: str, csv_file: str, log_file_path: str,  process_entry: str = 'test', num_workers: int = 4, timeout: int = 600, save_interval: int = 100,  last_processed_entry: int = 0):
-    
+def process_json_to_json(json_file: str, output_json_file: str, log_file_path: str,process_entry: str = 'test', num_workers: int = 48, timeout: int = 600, save_interval: int = 100, last_processed_entry: int = 0):
 
     num_cpus = multiprocessing.cpu_count()
-    #num_workers = num_cpus
+    print(num_workers)
 
     process_entry_funcs = {
         'test': process_entry_test_matbench,
@@ -97,13 +74,11 @@ def process_json_to_csv(json_file: str, csv_file: str, log_file_path: str,  proc
     # Get the selected function
     process_entry_func = process_entry_funcs[process_entry]
 
-
     print(f"json file: {json_file}")
     print(f"number of cpus: {num_cpus}")
     print(f"number of workers: {num_workers}")
     print(f"last processed entry: {last_processed_entry}")
     print(f"save_interval: {save_interval}")
-
 
     data = read_json(json_file)
     batch_size = num_workers * 4
@@ -111,13 +86,16 @@ def process_json_to_csv(json_file: str, csv_file: str, log_file_path: str,  proc
     if last_processed_entry > 0:
         data = data[last_processed_entry:]
 
-    
-    batch_iterator = (data[i:i+batch_size] for i in range(0, len(data), batch_size))
+    batch_iterator = (data[i:i + batch_size] for i in range(0, len(data), batch_size))
 
     for i, batch_data in enumerate(batch_iterator, start=1):
         batch_results = process_batch(num_workers,batch_data, timeout, process_entry_func)
-        intermediate_df = pd.DataFrame(batch_results)
-        intermediate_df.to_csv(csv_file, index=False, mode='a', header=False)
+
+        # Append batch_results to the output JSON file
+        with open(output_json_file, 'a') as f:
+            for result in batch_results:
+                json.dump(result, f)
+                f.write('\n')
 
         last_processed_entry += len(batch_data)
         if i % save_interval == 0:
@@ -128,7 +106,7 @@ def process_json_to_csv(json_file: str, csv_file: str, log_file_path: str,  proc
     print(f"Finished !!! logging at {log_file_path}")
 
 
-
 if __name__ == "__main__":
-    fire.Fire(process_json_to_csv)
+    fire.Fire(process_json_to_json)
+
 

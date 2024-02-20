@@ -1,23 +1,21 @@
-import lmdb
-import pickle
 import json
-import fire
-import numpy as np
-
-from tqdm import tqdm 
+import pickle
 from math import pi
-from pymatgen.core import Structure, Lattice
+from multiprocessing import Pool
 
-
+import fire
+import lmdb
+from pymatgen.core import Element, Lattice, Structure
+from tqdm import tqdm
 
 scale_factor : int = 1e10 #length in nomad is in meters, scale to angstrom
 
 
 
-class Dataset():
+class Dataset:
   """
   Custom class for reading NOMAD dataset from MatSciML Zenodo
-  
+
   """
 
   def __init__(self, lmdb_path, max_readers=1, transform=None, pre_transform=None):
@@ -34,11 +32,11 @@ class Dataset():
         meminit=False,
         max_readers=max_readers)
     self.txn = self.env.begin()
-    
+
   def len(self):
-    
+
     return self.txn.stat()['entries']
-    
+
 
   def get(self, index):
     """
@@ -47,7 +45,7 @@ class Dataset():
     # Select graph sample
     id = f"{index}".encode("ascii")
     datapoint = pickle.loads(self.txn.get(id))
-    
+
     return datapoint
 
 
@@ -64,7 +62,7 @@ def create_lattice(lattice_params : dict):
                     lattice_params["gamma"],
                 )
     a, b, c  = lattice_abc
-    alpha, beta, gamma = lattice_angles       
+    alpha, beta, gamma = lattice_angles
     lattice = Lattice.from_parameters(
                 a, b, c, alpha * 180/pi, beta * 180/pi, gamma * 180/pi
             )
@@ -87,15 +85,15 @@ def create_cif(mat_dict:dict):
     atom_positions = [
             [v * scale_factor for v in row] for row in cartesian_pos
         ]
-    
+
 
     lattice_params =crystal[
             "lattice_parameters"
         ]
     lattice = create_lattice(lattice_params)
-    
-    
-    
+
+
+
     # Handle atom species which could be either symbols or atomic numbers
     atom_symbols = []
     for species in atom_species:
@@ -113,10 +111,10 @@ def create_cif(mat_dict:dict):
     cif_content = pymatgen_structure.to(fmt="cif")
     # Remove the comment line if present
     cif_lines = cif_content.split('\n')
-    
+
     if cif_lines[0].startswith("# generated using pymatgen"):
         cif_lines = cif_lines[1:]
-    
+
     # Join the lines back together to form the CIF content without the comment
     cif_content_without_comment = '\n'.join(cif_lines)
     return cif_content_without_comment
@@ -134,7 +132,7 @@ def prepare_dict(mat_dict:dict):
     # Crystal structure properties
     try:
         structure = mat_dict['material']['symmetry']
-    
+
         structural = {
             "space_group_symbol": structure.get('space_group_symbol', None),
             "space_group_number": structure.get('space_group_number', None),
@@ -156,7 +154,7 @@ def prepare_dict(mat_dict:dict):
     # Electronic structure properties
     try:
         elec_structure = mat_dict['properties']['electronic']['dos_electronic']
-    
+
         electronic = {
             "spin_polarized": elec_structure.get('spin_polarized', None),
             "energy_fermi": elec_structure.get('energy_fermi', None),
@@ -176,9 +174,9 @@ def prepare_dict(mat_dict:dict):
     # Extracting energy values
     total_energy = mat_dict['energies']['total'].get('value', None)
     fermi = mat_dict['energies'].get('fermi', None)
-    
+
     # Extracting the method
-    method = mat_dict.get('method', None)
+    method = mat_dict.get('method')
 
     return {
         "material_id": material_id,
@@ -190,39 +188,10 @@ def prepare_dict(mat_dict:dict):
         "method":method,
         "mass_density":mass_density,
         "total_energy":total_energy,
-        "fermi":fermi ,           
-        "structural_info" :structural, 
-        "electronic" :electronic, 
+        "fermi":fermi ,
+        "structural_info" :structural,
+        "electronic" :electronic,
     }
-
-# def prep_data(lmdb_path:str,output_file:str)->None:
-#     materials_list = []
-#     dataset = Dataset(lmdb_path, 1)
-
-#     #loop through data points in lmdb
-#     for index in tqdm(range(dataset.len())):
-#         datapoint = dataset.get(index)
-#         if datapoint is not None:
-#             try:
-#                 data_dict = prepare_dict(datapoint)
-#                 materials_list.append(data_dict)
-#             except Exception as e:
-#                 print(f"An error occurred for index {index}: {e}. Skipping this entry.")
-#                 continue
-#             materials_list.append(data_dict)
-#         else:
-#             print(datapoint)
-
-#     with open(output_file, 'w') as json_file:
-#         json.dump(materials_list, json_file)
-
-
-# if __name__ == "__main__":
-
-#    fire.Fire(prep_data)
-#    print("Finished")
-
-from multiprocessing import Pool
 
 def process_data(args):
     lmdb_path, index = args
@@ -250,12 +219,12 @@ def prep_data(lmdb_path: str, output_file: str, num_processes: int = 4) -> None:
     with Pool(processes=num_processes) as pool:
         results = list(tqdm(pool.imap(process_data, [(lmdb_path, i) for i in range(total_entries)]), total=total_entries))
 
-    skipped_count = 0 
+    skipped_count = 0
     for result in results:
         if result is not None:
             materials_list.append(result)
         else:
-            skipped_count += 1 
+            skipped_count += 1
 
     with open(output_file, 'w') as json_file:
         json.dump(materials_list, json_file)

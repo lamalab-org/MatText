@@ -27,7 +27,7 @@ class FinetuneModel(TokenizerMixin):
     """
     def __init__(self, cfg: DictConfig,local_rank=None) -> None:
 
-        super().__init__(cfg.model.representation)
+        super().__init__(cfg=cfg.model.representation,special_tokens=cfg.model.special_tokens)
         self.local_rank = local_rank
         self.representation = cfg.model.representation
         self.cfg = cfg.model.finetune
@@ -49,8 +49,8 @@ class FinetuneModel(TokenizerMixin):
 
         ds = load_dataset("json", data_files=path,split="train")
         dataset = ds.train_test_split(shuffle=True, test_size=0.2, seed=42)
-        filtered_dataset= dataset.filter(lambda example: example[self.representation] is not None)
-        return filtered_dataset.map(
+        #dataset= dataset.filter(lambda example: example[self.representation] is not None)
+        return dataset.map(
             partial(self._tokenize_pad_and_truncate, context_length=self.context_length),
             batched=True)
 

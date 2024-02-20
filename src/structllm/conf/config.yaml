@@ -18,7 +18,7 @@ hydra:
     partition: 'gpu'
 
 defaults:
-  - model: finetune_template_gvrh
+  - model: finetune_template_dielectric
   - override hydra/launcher: submitit_slurm
 
 runs:

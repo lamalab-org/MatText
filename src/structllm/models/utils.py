@@ -21,10 +21,20 @@ _TOKENIZER_MAP = {
     "wycoff_rep": None,
 }
 
+_DEFAULT_SPECIAL_TOKENS = {
+    "unk_token": "[UNK]",
+    "pad_token": "[PAD]",
+    "cls_token": "[CLS]",
+    "sep_token": "[SEP]",
+    "mask_token": "[MASK]",
+    "eos_token": "[EOS]",
+    "bos_token": "[BOS]",
+}
+
 class TokenizerMixin:
     """Mixin class to handle tokenizer functionality."""
 
-    def __init__(self, cfg):
+    def __init__(self, cfg,special_tokens: Dict[str, str] = _DEFAULT_SPECIAL_TOKENS) -> None:
 
         self.representation = cfg
         self._wrapped_tokenizer = None
@@ -36,15 +46,8 @@ class TokenizerMixin:
         self._wrapped_tokenizer = self._tokenizer(
                     model_max_length=512, truncation=False, padding=False
                 )
-        #TODO: Add special tokens from config/ by user
-        special_tokens = {
-            "unk_token": "[UNK]",
-            "pad_token": "[PAD]",
-            "cls_token": "[CLS]",
-            "sep_token": "[SEP]",
-            "mask_token": "[MASK]",
-        }
-        self._wrapped_tokenizer.add_special_tokens(special_tokens)
+        print(f"special_tokens: {special_tokens}")
+        self._wrapped_tokenizer.add_special_tokens(special_tokens=special_tokens)
 
     def _tokenize_pad_and_truncate(self, texts: Dict[str, Any], context_length: int) -> Dict[str, Any]:
         """Tokenizes, pads, and truncates input texts."""
@@ -76,7 +79,7 @@ class CustomWandbCallback_FineTune(TrainerCallback):
         if state.is_world_process_zero:
             step = state.global_step  # Retrieve the current step
             epoch = state.epoch  # Retrieve the current epoch
-            print(f"Step: {step}, Epoch: {epoch}")
+            print(f"Step: {step}, Epoch: {round(epoch,5)}")
 
             if "loss" in logs and "eval_loss" in logs:  # Both training and evaluation losses are present
                 wandb.log({"train_loss": logs.get("loss"), "eval_loss": logs.get("eval_loss")}, step=step)
