@@ -41,7 +41,7 @@ class Matbenchmark:
             print(f"Running training on {train_data_path}, and testing on {test_data_path}")
             wandb.init(
                 config=dict(self.task_cfg.model.finetune),
-                project=self.task_cfg.logging.wandb_project, name=exp_name)
+                project=self.task_cfg.model.logging.wandb_project, name=exp_name)
 
             exp_cfg = self.task_cfg.copy()
             exp_cfg.model.finetune.exp_name = exp_name
@@ -56,7 +56,7 @@ class Matbenchmark:
 
             wandb.init(
                 config=dict(self.task_cfg.model.inference),
-                project=self.task_cfg.logging.wandb_project, name=test_name)
+                project=self.task_cfg.model.logging.wandb_project, name=test_name)
 
             exp_cfg.model.inference.path.test_data = test_data_path
             exp_cfg.model.inference.path.pretrained_checkpoint = ckpt
