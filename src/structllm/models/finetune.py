@@ -104,9 +104,9 @@ class FinetuneModel(TokenizerMixin):
                                                                    num_labels=1,
                                                                    ignore_mismatched_sizes=False)
 
-        #TODO: optional freezing of base model
-        # for param in model.base_model.parameters():
-        #     param.requires_grad = False
+        if self.cfg.freeze_base_model:
+            for param in model.base_model.parameters():
+                param.requires_grad = False
 
         if self.local_rank is not None:
             model = model.to(self.local_rank)

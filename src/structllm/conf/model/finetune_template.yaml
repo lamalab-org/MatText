@@ -6,6 +6,7 @@ logging:
 
 finetune:
   model_name: finetune_slurm_30k
+  freeze_base_model: False
   dataset_name: "matbench_dielectric"
   exp_name: [
     "train_${model.representation}_${model.finetune.dataset_name}_0",
