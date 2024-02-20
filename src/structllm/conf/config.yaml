@@ -1,24 +1,31 @@
 hydra:
+  job:
+    name: pretrain
   run:
     dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.override_dirname}
   launcher:
     _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.SlurmLauncher
     submitit_folder: ${hydra.sweep.dir}/.submitit/%j
-    timeout_min: 60
-    cpus_per_task: 2
-    gpus_per_node: 1
-    tasks_per_node: 1
+    timeout_min: 2800
     mem_gb: 100
     nodes: 1
+    gres: gpu:1
+    gpus_per_node: 1
     name: ${hydra.job.name}
     partition: 'gpu'
 
 defaults:
-  - model: pretrain_template
+  - model: finetune_template_gvrh
   - override hydra/launcher: submitit_slurm
 
 runs:
 
-  - name: pretrain_run
-    tasks: [pretrain]
+  # - name: pretrain_run
+  #   tasks: [pretrain]
+
+  - name: benchmark_run
+    tasks: [benchmark]
 
