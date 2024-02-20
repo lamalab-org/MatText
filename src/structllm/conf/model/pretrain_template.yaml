@@ -1,11 +1,11 @@
 representation: slice
 
 logging:
-  wandb_project : "30k_pt"
+  wandb_project : "pretrain_slurm_30k"
   wandb_log_model : "checkpoint"
 
 pretrain:
-  name: 30k_pt
+  name: "pretrain_slurm_30k"
   exp_name: "${model.representation}_${model.pretrain.name}"
   model_name_or_path: "bert-base-uncased"
 
