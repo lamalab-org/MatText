@@ -22,7 +22,7 @@ class PretrainModel(TokenizerMixin):
     """Class to perform pretraining of a language model."""
     def __init__(self, cfg: DictConfig, local_rank=None):
 
-        super().__init__(cfg.model.representation)
+        super().__init__(cfg=cfg.model.representation,special_tokens=cfg.model.special_tokens)
         self.local_rank = local_rank
         self.representation = cfg.model.representation
         self.cfg = cfg.model.pretrain

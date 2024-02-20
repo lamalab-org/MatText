@@ -15,7 +15,7 @@ from structllm.models.utils import CustomWandbCallback_Inference, TokenizerMixin
 class Inference(TokenizerMixin):
     def __init__(self, cfg: DictConfig):
 
-        super().__init__(cfg.model.representation)
+        super().__init__(cfg=cfg.model.representation, special_tokens=cfg.model.special_tokens)
         self.representation = cfg.model.representation
         self.cfg = cfg.model.inference
         self.context_length: int = self.cfg.context_length
@@ -63,10 +63,10 @@ class Inference(TokenizerMixin):
                 callback.on_predict_end(None, None, None, model, predictions)  # Manually trigger callback
         torch.cuda.empty_cache()
 
-
-        os.makedirs(self.cfg.path.predictions, exist_ok=True)
-        predictions_path = os.path.join(self.cfg.path.predictions, 'predictions.npy')
-        np.save(predictions_path, predictions.predictions)
+        #TODO: Save predictions to disk optional
+        # os.makedirs(self.cfg.path.predictions, exist_ok=True)
+        # predictions_path = os.path.join(self.cfg.path.predictions, 'predictions.npy')
+        # np.save(predictions_path, predictions.predictions)
 
 
         return pd.Series(predictions.predictions.flatten())

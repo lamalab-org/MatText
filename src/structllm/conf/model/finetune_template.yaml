@@ -1,4 +1,13 @@
 representation: slice
+special_tokens: {
+    "unk_token": "[UNK]",
+    "pad_token": "[PAD]",
+    "cls_token": "[CLS]",
+    "sep_token": "[SEP]",
+    "mask_token": "[MASK]",
+    "eos_token": "[EOS]",
+    "bos_token": "[BOS]",
+}
 
 logging:
   wandb_project : "finetune_slurm_30k"
@@ -18,10 +27,10 @@ finetune:
 
 
   path:
-    checkpoint_rootpath: "/work/so87pot/structllm/model_outs2/checkpoints/02_02_100k_pt_bpe_512"  # <--- Change this to the path of the pretrained checkpoint
-    checkpoint_name: "checkpoint-86000"                           # <--- Change this to the name of the pretrained checkpoint
+    checkpoint_rootpath: "/work/so87pot/structllm/model_outs2/checkpoints/02_02_100k_pt_bpe_512"  # @deprecated
+    checkpoint_name: "checkpoint-86000"         # @deprecated                    # 
+    pretrained_checkpoint: "${model.finetune.path.checkpoint_rootpath}/${model.finetune.path.checkpoint_name}"  # @override by experiment configs
 
-    pretrained_checkpoint: "${model.finetune.path.checkpoint_rootpath}/${model.finetune.path.checkpoint_name}"
 
 
     finetune_data_rootpath: "/work/so87pot/material_db/matbench_text"                     # <--- Change this to the path of the finetune data
@@ -78,7 +87,7 @@ inference:
     pretrained_checkpoint: [
    
   ] 
-    test_data_rootpath: "/work/so87pot/material_db/matbench_text"                     # <--- Change this to the path of the finetune data
+    test_data_rootpath: "/work/so87pot/material_db/matbench_text"                     # <--- Change this to the path of the finetune test data
     test_data: [
     "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_0.json",
     "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_1.json",

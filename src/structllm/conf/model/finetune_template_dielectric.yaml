@@ -16,7 +16,7 @@ logging:
 finetune:
   model_name: finetune_slurm_30k_test
   freeze_base_model: False
-  dataset_name: "matbench_log_gvrh"
+  dataset_name: "matbench_dielectric"
   exp_name: [
     "train_${model.representation}_${model.finetune.dataset_name}_0",
     "train_${model.representation}_${model.finetune.dataset_name}_1",
@@ -27,8 +27,8 @@ finetune:
 
 
   path:
-    checkpoint_rootpath: "/work/so87pot/structllm/model_outs2/checkpoints/02_02_100k_pt_bpe_512"  # <--- Change this to the path of the pretrained checkpoint
-    checkpoint_name: "checkpoint-86000"                           # <--- Change this to the name of the pretrained checkpoint
+    checkpoint_rootpath: "/work/so87pot/structllm/model_outs2/checkpoints/02_02_100k_pt_bpe_512"  # @deprecated
+    checkpoint_name: "checkpoint-86000"                           # @deprecated
 
     pretrained_checkpoint: "${model.finetune.path.checkpoint_rootpath}/${model.finetune.path.checkpoint_name}"
 
@@ -58,7 +58,7 @@ finetune:
   training_arguments:
     output_dir: "${model.finetune.path.output_dir}"
     overwrite_output_dir: True
-    num_train_epochs: 10
+    num_train_epochs: 5
     per_device_train_batch_size: 32
 #    save_strategy: "epoch"
     evaluation_strategy: 'steps'   
