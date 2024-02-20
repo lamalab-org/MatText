@@ -1,7 +1,6 @@
 from functools import partial
 from typing import Any, Dict, List
 
-import pandas as pd
 import torch
 import wandb
 from datasets import DatasetDict, load_dataset
@@ -48,7 +47,8 @@ class FinetuneModel(TokenizerMixin):
             DatasetDict: Dictionary containing training and validation datasets.
         """
 
-        dataset = load_dataset("json", data_files=path)
+        ds = load_dataset("json", data_files=path,split="train")
+        dataset = ds.train_test_split(shuffle=True, test_size=0.2, seed=42)
         filtered_dataset= dataset.filter(lambda example: example[self.representation] is not None)
         return filtered_dataset.map(
             partial(self._tokenize_pad_and_truncate, context_length=self.context_length),
@@ -74,11 +74,13 @@ class FinetuneModel(TokenizerMixin):
         label_ids = torch.tensor(p.label_ids)  # Convert label_ids to PyTorch tensor
 
         if eval:
-            return {"eval_rmse": torch.sqrt(((preds - label_ids) ** 2).mean()).item()}
+            # Calculate RMSE as evaluation metric
+            eval_rmse = torch.sqrt(((preds - label_ids) ** 2).mean()).item()
+            return {"eval_rmse": round(eval_rmse, 3)}
         else:
-            return {"train_rmse": torch.sqrt(((preds - label_ids) ** 2).mean()).item()}
-
-
+            # Calculate RMSE as training metric
+            loss = torch.sqrt(((preds - label_ids) ** 2).mean()).item()
+            return {"train_rmse": round(loss, 3), "loss": round(loss, 3)}
 
 
     def finetune(self) -> None:

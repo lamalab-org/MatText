@@ -88,6 +88,7 @@ class TaskRunner:
                 project=task_cfg.model.logging.wandb_project,
                 name=task_cfg.model.pretrain.exp_name
                     )
+        print(task_cfg)
         pretrainer = PretrainModel(task_cfg,local_rank)
         pretrainer.pretrain_mlm()
 

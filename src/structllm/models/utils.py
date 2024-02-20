@@ -1,8 +1,14 @@
-from transformers import PreTrainedTokenizerFast, TrainerCallback
-from tokenizers import Tokenizer
-from typing import Any, List, Dict, Union
+from typing import Any, Dict, Union
+
 import wandb
-from xtal2txt.tokenizer import SliceTokenizer, CompositionTokenizer, CifTokenizer, CrysllmTokenizer, RobocrysTokenizer
+from transformers import TrainerCallback
+from xtal2txt.tokenizer import (
+    CifTokenizer,
+    CompositionTokenizer,
+    CrysllmTokenizer,
+    RobocrysTokenizer,
+    SliceTokenizer,
+)
 
 _TOKENIZER_MAP = {
     "slice": SliceTokenizer,
@@ -26,11 +32,11 @@ class TokenizerMixin:
         self._tokenizer = _TOKENIZER_MAP.get(self.representation)
         if self._tokenizer is None:
             raise ValueError(f"Tokenizer not defined for {self.representation}")
-        
+
         self._wrapped_tokenizer = self._tokenizer(
                     model_max_length=512, truncation=False, padding=False
                 )
-
+        #TODO: Add special tokens from config/ by user
         special_tokens = {
             "unk_token": "[UNK]",
             "pad_token": "[PAD]",
@@ -54,7 +60,7 @@ class CustomWandbCallback_Inference(TrainerCallback):
 
     def on_predict_end(self, args: Any, state: Any, control: Any, model: Any, predictions: Any, **kwargs: Any) -> None:
         wandb.log({"predictions": predictions.predictions, })
-        
+
 
 class CustomWandbCallback_Pretrain(TrainerCallback):
     """Custom W&B callback for logging during training."""
@@ -74,7 +80,7 @@ class CustomWandbCallback_FineTune(TrainerCallback):
 
             if "loss" in logs and "eval_loss" in logs:  # Both training and evaluation losses are present
                 wandb.log({"train_loss": logs.get("loss"), "eval_loss": logs.get("eval_loss")}, step=step)
-            
+
             # if "eval_loss" not in logs:
             #     # Log eval_loss as NaN if it's missing to avoid issues with logging
             #     wandb.log({"eval_loss": float('nan')}, step=step)
