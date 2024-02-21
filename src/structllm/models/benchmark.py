@@ -74,5 +74,5 @@ class Matbenchmark:
         if not os.path.exists(self.benchmark_save_path):
             os.makedirs(self.benchmark_save_path)
 
-        file_name = os.path.join(self.benchmark_save_path, f"{self.self.representation}_{self.benchmark}.json.gz")
+        file_name = os.path.join(self.benchmark_save_path, f"{self.representation}_{self.benchmark}.json.gz")
         benchmark.to_file(file_name)
