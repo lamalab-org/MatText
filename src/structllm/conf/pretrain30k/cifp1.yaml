@@ -1,0 +1,10 @@
+# @package _global_
+model:
+  representation: cif_p1
+  pretrain:
+    context_length:  1024
+    training_arguments:
+      per_device_train_batch_size: 8
+    path:
+      data_root_path: /work/so87pot/material_db/structllm_dataset/30k
+      
