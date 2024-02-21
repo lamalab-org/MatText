@@ -69,6 +69,7 @@ class PretrainModel(TokenizerMixin):
         config_mlm = self.cfg.mlm
         config_train_args = self.cfg.training_arguments
         config_model_args = self.cfg.model_config
+        config_model_args['max_position_embeddings'] = self.context_length
 
         data_collator = DataCollatorForLanguageModeling(
             tokenizer=self._wrapped_tokenizer,

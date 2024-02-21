@@ -24,6 +24,7 @@ pretrain:
     num_attention_heads: 8
     is_decoder: False
     add_cross_attention: False
+    max_position_embeddings: 1024
 
   path:
     pretrained_checkpoint: 
