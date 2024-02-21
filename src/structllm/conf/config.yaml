@@ -12,20 +12,23 @@ hydra:
     timeout_min: 2800
     mem_gb: 100
     nodes: 1
-    gres: gpu:1
-    gpus_per_node: 1
+    #gpus_per_task: 1
+    gres: gpu:4
+    #gpus_per_node: 2
     name: ${hydra.job.name}
     partition: 'gpu'
+    #tasks_per_node: 2
+
 
 defaults:
-  - model: finetune_template_dielectric
-  - override hydra/launcher: submitit_slurm
+- model: none
+- override hydra/launcher: submitit_slurm
 
 runs:
 
-  # - name: pretrain_run
-  #   tasks: [pretrain]
+  - name: pretrain_run
+    tasks: [pretrain]
 
-  - name: benchmark_run
-    tasks: [benchmark]
+  # - name: benchmark_run
+  #   tasks: [benchmark]
 

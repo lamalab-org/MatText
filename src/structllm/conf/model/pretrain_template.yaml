@@ -1,4 +1,4 @@
-representation: slice
+representation: ???
 special_tokens: {
     "unk_token": "[UNK]",
     "pad_token": "[PAD]",
@@ -10,11 +10,11 @@ special_tokens: {
 }
 
 logging:
-  wandb_project : "pretrain_slurm_30k"
+  wandb_project : "pretrain_30k_draco"
   wandb_log_model : "checkpoint"
 
 pretrain:
-  name: "pretrain_slurm_30k"
+  name: "pretrain_30k_draco"
   exp_name: "${model.representation}_${model.pretrain.name}"
   model_name_or_path: "bert-base-uncased"
 
@@ -27,15 +27,15 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    data_root_path: "/work/so87pot/material_db/structllm_dataset/30k" #--> Change this to your dataset path
-    root_path: "/work/so87pot/structllm/results/checkpoints" #--> Change this to your preferred path where checkpints will be saved
+    data_root_path: ??? #--> Change this to your dataset path
+    root_path: "/work/so87pot/structllm/megaloop/checkpoints" #--> Change this to your preferred path where checkpints will be saved
     traindata: "${model.pretrain.path.data_root_path}/train.json"
     evaldata: "${model.pretrain.path.data_root_path}/test.json" 
     output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
     logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
     finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
 
-  context_length: 512
+  context_length: ???
 
   callbacks:
     early_stopping: True
@@ -50,7 +50,7 @@ pretrain:
     overwrite_output_dir: True     
     label_names: ["labels"]
     save_total_limit: 5      # Maximum number of checkpoints to save
-    per_device_train_batch_size: 128 # Batch size per device during training
+    per_device_train_batch_size: ??? # Batch size per device during training
     num_train_epochs: 50       # Number of training epochs
     learning_rate: 2e-4
     save_steps: 1000
