@@ -10,11 +10,11 @@ special_tokens: {
 }
 
 logging:
-  wandb_project : "pretrain_30k_draco"
+  wandb_project : "pretrain_30k_wes_draco"
   wandb_log_model : "checkpoint"
 
 pretrain:
-  name: "pretrain_30k_draco"
+  name: "pretrain_30k_wes_draco"
   exp_name: "${model.representation}_${model.pretrain.name}"
   model_name_or_path: "bert-base-uncased"
 
@@ -39,7 +39,7 @@ pretrain:
   context_length: ???
 
   callbacks:
-    early_stopping: True
+    early_stopping: False
     custom_logger: True
     early_stopping_patience: 10
     early_stopping_threshold: 0.001
