@@ -28,10 +28,10 @@ classifiers = [
 ]
 requires-python = ">=3.8, <3.13"
 dependencies = [
-    "transformers==4.35.0",
-    "tokenizers==0.14.1",
-    "datasets==2.14.6",
-    "wandb==0.15.12",
+    "transformers",
+    "tokenizers",
+    "datasets",
+    "wandb",
     "slices",
     "matbench",
     "fire",
@@ -40,7 +40,7 @@ dependencies = [
     "accelerate==0.24.1",
     "keras==2.13.1",
     "hydra-submitit-launcher",
-    "git+https://github.com/lamalab-org/xtal2txt.git",
+    "xtal2txt @ git+https://github.com/lamalab-org/xtal2txt.git@structllm_dep",
      ]
 
 [project.optional-dependencies]
