@@ -1,6 +1,6 @@
 hydra:
   job:
-    name: pretrain
+    name: finetune
   run:
     dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
   sweep:
@@ -29,9 +29,9 @@ defaults:
 
 runs:
 
-  - name: pretrain_run
-    tasks: [pretrain]
+  # - name: pretrain_run
+  #   tasks: [pretrain]
 
-  # - name: benchmark_run
-  #   tasks: [benchmark]
+  - name: benchmark_run
+    tasks: [benchmark]
 

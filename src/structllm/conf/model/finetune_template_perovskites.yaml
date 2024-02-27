@@ -10,13 +10,13 @@ special_tokens: {
 }
 
 logging:
-  wandb_project : "finetune_slurm_30k"
+  wandb_project : "finetune_30k_wes_3"
   wandb_log_model : "checkpoint"
 
 finetune:
-  model_name: finetune_slurm_30k
+  model_name: finetune_30k_wes_3
   freeze_base_model: False
-  dataset_name: "matbench_dielectric"
+  dataset_name: "matbench_perovskites"
   exp_name: [
     "train_${model.representation}_${model.finetune.dataset_name}_0",
     "train_${model.representation}_${model.finetune.dataset_name}_1",
@@ -28,9 +28,9 @@ finetune:
 
   path:
     checkpoint_rootpath: "/work/so87pot/structllm/model_outs2/checkpoints/02_02_100k_pt_bpe_512"  # @deprecated
-    checkpoint_name: "checkpoint-86000"         # @deprecated                    # 
-    pretrained_checkpoint: ??? # @override by experiment configs
+    checkpoint_name: "checkpoint-86000"                           # @deprecated
 
+    pretrained_checkpoint: ???
 
 
     finetune_data_rootpath: "/work/so87pot/material_db/matbench_text"                     # <--- Change this to the path of the finetune data
@@ -89,7 +89,7 @@ inference:
     pretrained_checkpoint: [
    
   ] 
-    test_data_rootpath: "/work/so87pot/material_db/matbench_text"                     # <--- Change this to the path of the finetune test data
+    test_data_rootpath: "/work/so87pot/material_db/matbench_text"                     # <--- Change this to the path of the finetune data
     test_data: [
     "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_0.json",
     "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_1.json",
