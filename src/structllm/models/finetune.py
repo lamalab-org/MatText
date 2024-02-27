@@ -14,7 +14,7 @@ from transformers import (
     TrainingArguments,
 )
 
-from structllm.models.utils import CustomWandbCallback_FineTune, TokenizerMixin
+from structllm.models.utils import CustomWandbCallback_FineTune, TokenizerMixin, EvaluateFirstStepCallback
 
 
 class FinetuneModel(TokenizerMixin):
@@ -66,6 +66,8 @@ class FinetuneModel(TokenizerMixin):
 
         if self.callbacks.custom_logger:
             callbacks.append(CustomWandbCallback_FineTune())
+
+        callbacks.append(EvaluateFirstStepCallback)
 
         return callbacks
 
