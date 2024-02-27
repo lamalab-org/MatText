@@ -17,11 +17,11 @@ ARG GITHUB_PAT
 RUN git clone --branch container https://$GITHUB_PAT@github.com/lamalab-org/structllm.git /app/structllm && \
     cd /app/structllm && \
     git checkout container
-
-
 WORKDIR /app/structllm
+RUN pip3 install .
+
 
 RUN pip3 install git+https://$GITHUB_PAT@github.com/lamalab-org/xtal2txt.git@structllm_dep
 
 # Set bash as the entry point
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/usr/bin/bash"]

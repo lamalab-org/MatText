@@ -10,6 +10,7 @@ readme = "README.md"
 license = { text = "MIT" }
 authors = [
   { name = "Nawaf", email = "nawaf.pvt@gmail.com" },
+  { name = "Santiago Miret", email = "santiago.miret@intel.com" },
   { name = "Kevin Jablonka", email = "mail@kjablonka.com" }]
 keywords = ["LLM", "Inverse-Design"]
 classifiers = [
@@ -26,7 +27,7 @@ classifiers = [
     "Operating System :: Unix",
     "Operating System :: MacOS",
 ]
-requires-python = ">=3.8, <3.13"
+requires-python = ">=3.9, <3.13"
 dependencies = [
     "transformers",
     "tokenizers",
@@ -37,8 +38,7 @@ dependencies = [
     "fire",
     "hydra-core",
     "torch==2.1.0",
-    "accelerate==0.24.1",
-    "keras==2.13.1",
+    "accelerate",
     "hydra-submitit-launcher",
      ]
 
