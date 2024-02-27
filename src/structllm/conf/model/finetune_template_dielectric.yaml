@@ -10,11 +10,11 @@ special_tokens: {
 }
 
 logging:
-  wandb_project : "finetune_30k_1"
+  wandb_project : "finetune_30k_wes_2"
   wandb_log_model : "checkpoint"
 
 finetune:
-  model_name: finetune_30k_1
+  model_name: finetune_30k_wes_2
   freeze_base_model: False
   dataset_name: "matbench_dielectric"
   exp_name: [
@@ -53,21 +53,23 @@ finetune:
     early_stopping: True
     custom_logger: True
     early_stopping_patience: 10
-    early_stopping_threshold: 0.01
+    early_stopping_threshold: 0.001
 
   training_arguments:
     output_dir: "${model.finetune.path.output_dir}"
     overwrite_output_dir: True
     num_train_epochs: 100
     per_device_train_batch_size: ???
-#    save_strategy: "epoch"
-    evaluation_strategy: 'steps'   
-    save_steps: 1000  # Number of epochs before saving
+    save_strategy: "epoch"
+    evaluation_strategy: 'epoch'   
+    logging_strategy: 'epoch'
+    logging_first_step: True
+    save_steps: 3 # Number of epochs before saving
     report_to: "wandb"
     save_total_limit: 5
     learning_rate: 2e-4
-    logging_steps: 100 
-    eval_steps: 50
+    logging_steps: 1 
+    eval_steps: 1
     seed: 42
     load_best_model_at_end: True
 
