@@ -84,6 +84,8 @@ class CustomWandbCallback_FineTune(TrainerCallback):
             if "loss" in logs and "eval_loss" in logs:  # Both training and evaluation losses are present
                 wandb.log({"train_loss": logs.get("loss"), "eval_loss": logs.get("eval_loss")}, step=step)
 
-            # if "eval_loss" not in logs:
-            #     # Log eval_loss as NaN if it's missing to avoid issues with logging
-            #     wandb.log({"eval_loss": float('nan')}, step=step)
+
+class EvaluateFirstStepCallback(TrainerCallback):
+    def on_step_begin(self, args, state, control, **kwargs):
+        if state.global_step == 0:
+            control.should_evaluate = True
