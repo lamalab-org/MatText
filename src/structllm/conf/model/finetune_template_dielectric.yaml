@@ -10,11 +10,11 @@ special_tokens: {
 }
 
 logging:
-  wandb_project : "finetune_30k_wes_2"
+  wandb_project : "finetune_30k_wes_3"
   wandb_log_model : "checkpoint"
 
 finetune:
-  model_name: finetune_30k_wes_2
+  model_name: finetune_30k_wes_3
   freeze_base_model: False
   dataset_name: "matbench_dielectric"
   exp_name: [

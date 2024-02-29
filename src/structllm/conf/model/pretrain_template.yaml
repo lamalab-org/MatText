@@ -10,11 +10,11 @@ special_tokens: {
 }
 
 logging:
-  wandb_project : "pretrain_30k_wes_draco"
+  wandb_project : "pt_30k_wes"
   wandb_log_model : "checkpoint"
 
 pretrain:
-  name: "pretrain_30k_wes_draco"
+  name: "pt_30k_wes"
   exp_name: "${model.representation}_${model.pretrain.name}"
   model_name_or_path: "bert-base-uncased"
 
@@ -64,4 +64,4 @@ pretrain:
 
   mlm:
     is_mlm: True 
-    mlm_probability: 0.15
+    mlm_probability: 0.50
