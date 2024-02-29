@@ -84,9 +84,15 @@ model:
 You can start a multirun job parallely with the below cli script. 
 
 ```bash
-python main.py --multirun model=pretrain_template ++hydra.launcher.gres=gpu:1 +pretrain30k=cifp1,cifsym,composition,crystal_llm,slice
+python /path/to/main.py --multirun model=pretrain_template ++hydra.launcher.gres=gpu:1 +pretrain30k=cifp1,cifsym,composition,crystal_llm,slice
 
 ```
+We use HF Trainer and hence by default it support DP but for DDP support 
+```bash
+python -m torch.distributed.run --nproc_per_node=4  /path/to/main.py --multirun model=pretrain_template ++hydra.launcher.gres=gpu:1 +pretrain30k=cifp1,cifsym,composition,crystal_llm,slice
+
+```
+
 Here `model=pretrain_template` select pretrain_template as the base config and override/extend it with `+pretrain30k=cifp1`. This would essentially start pretraining with cifp1 representation for the dataset-30K
 
 For finetuning select `model=finetune_template_<property>` as the base template
@@ -118,6 +124,6 @@ docker build --build-arg GITHUB_PAT=<your_token> -t structllm .
 ```
 
 ```bash
-docker run --gpus all -v /path/to/host/app:/app/structllm/ structllm
+docker exec -it --gpus all -v /path/to/host/structllm:/app/structllm/ structllm python main.py hydra/launcher=submitit_local --multirun +pretrain30k=cifp1,cifsym,composition,crystal_llm,slice
 
 ```
