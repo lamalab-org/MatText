@@ -38,7 +38,8 @@ dependencies = [
     "hydra-core",
     "torch==2.1.0",
     "accelerate==0.24.1",
-    "keras==2.13.1"
+    "hydra-submitit-launcher",
+    "xtal2txt @ git+https://github.com/lamalab-org/xtal2txt.git",
      ]
 
 [project.optional-dependencies]

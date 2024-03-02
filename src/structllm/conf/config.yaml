@@ -1,26 +1,37 @@
+hydra:
+  job:
+    name: finetune
+  run:
+    dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.override_dirname}
+    
+  launcher:
+    _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.SlurmLauncher
+    submitit_folder: ${hydra.sweep.dir}/.submitit/%j
+    timeout_min: 3600
+    mem_gb: 160
+    nodes: 1
+    #gpus_per_task: 1
+    gres: gpu:4
+    #gpus_per_node: 2
+    name: ${hydra.job.name}
+    partition: 'gpu'
+    additional_parameters:
+      nodelist: 'gpu[005-007,013-014]'
+    #tasks_per_node: 2
+
+
 defaults:
-  - model: none
-  - tokenizer: none
-  - matbench: matbench
-  - logging: wandb
+- model: none
+- override hydra/launcher: submitit_slurm
 
 runs:
-
-  # - name: benchmark_run
-  #   tasks: [benchmark]
-    
-  # - name: matbench_predict
-  #   tasks: [matbench_predict]
 
   - name: pretrain_run
     tasks: [pretrain]
 
-  # - name: finetune_run
-  #   tasks: [finetune]
+  # - name: benchmark_run
+  #   tasks: [benchmark]
 
-  # - name: predict
-  #   tasks: [predict]
-
-hydra:
-  run:
-    dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}

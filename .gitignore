@@ -202,7 +202,8 @@ embeddings/
 wandb/
 results/
 *.png 
-
+multirun/
+multirun/*
 
 #slurm files
 *.sh
@@ -210,3 +211,11 @@ results/
 *.out
 *.err.*
 *.out.*
+
+
+#part of experiments / data
+/notebooks/token_plots/*
+/notebooks/token_reports/*
+/results/*
+
+
