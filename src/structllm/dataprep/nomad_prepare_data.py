@@ -23,7 +23,7 @@ def read_json(json_file: str) -> List[Dict]:
 
 
 
-def process_entry(entry: dict, timeout: int) -> dict:
+def process_entry(entry: dict) -> dict:
     try:
         print(f"strating{entry['material_id']}")
         text_reps = TextRep.from_input(entry['cif']).get_all_text_reps()  # Use get_all_text_reps to get various text representations # Add chemical formula to the dictionary
