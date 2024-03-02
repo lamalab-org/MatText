@@ -40,8 +40,8 @@ finetune:
 
     finetune_testdata:
     root_path: "/work/so87pot/structllm/megaloop/finetune/${model.finetune.model_name}"  # <--- Change this to the path where chkpoints and logs will be saved
-    output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
-    logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
+    output_dir:          "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
+    logging_dir:         "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
 
   context_length: ???
@@ -94,7 +94,7 @@ inference:
     "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_4.json",
   ]
     root_path: "/home/so87pot/n0w0f/structllm/src/structllm/models/predictions"        # <--- Change this to the path where predictions will be saved
-    output_dir: "${model.inference.path.root_path}/checkpoints/${model.inference.exp_name}"
+    output_dir:  "${model.inference.path.root_path}/checkpoints/${model.inference.exp_name}"
     logging_dir: "${model.inference.path.root_path}/logs/${model.inference.exp_name}"
     predictions: "${model.inference.path.root_path}/checkpoints/inference${model.inference.exp_name}"
 
