@@ -31,9 +31,9 @@ pretrain:
     data_root_path: ??? #--> Change this to your dataset path
     root_path: "/work/so87pot/structllm/megaloop/checkpoints" #--> Change this to your preferred path where checkpints will be saved
     traindata: "${model.pretrain.path.data_root_path}/train.json"
-    evaldata: "${model.pretrain.path.data_root_path}/test.json" 
-    output_dir: "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
-    logging_dir: "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
+    evaldata:  "${model.pretrain.path.data_root_path}/test.json" 
+    output_dir:          "${model.pretrain.path.root_path}/checkpoints/${model.pretrain.exp_name}"
+    logging_dir:         "${model.pretrain.path.root_path}/logs/${model.pretrain.exp_name}"
     finetuned_modelname: "${model.pretrain.path.root_path}/output/finetuned_${model.pretrain.exp_name}"
 
   context_length: ???
@@ -46,7 +46,7 @@ pretrain:
 
 
   training_arguments:
-    output_dir: "${model.pretrain.path.output_dir}"   # Directory where model checkpoints and logs will be saved
+    output_dir:  "${model.pretrain.path.output_dir}"   # Directory where model checkpoints and logs will be saved
     logging_dir: "${model.pretrain.path.logging_dir}"
     overwrite_output_dir: True     
     label_names: ["labels"]
