@@ -15,7 +15,6 @@ scale_factor : int = 1e10 #length in nomad is in meters, scale to angstrom
 class Dataset:
   """
   Custom class for reading NOMAD dataset from MatSciML Zenodo
-
   """
 
   def __init__(self, lmdb_path, max_readers=1, transform=None, pre_transform=None):
