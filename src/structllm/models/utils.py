@@ -1,37 +1,57 @@
-from transformers import PreTrainedTokenizerFast, TrainerCallback
-from tokenizers import Tokenizer
-from typing import Any, List, Dict, Union
-import wandb
+from typing import Any, Dict, Union
 
-from structllm.tokenizer.slice_tokenizer import AtomVocabTokenizer
+import wandb
+from transformers import TrainerCallback
+from xtal2txt.tokenizer import (
+    CifTokenizer,
+    CompositionTokenizer,
+    CrysllmTokenizer,
+    RobocrysTokenizer,
+    SliceTokenizer,
+)
+
+_TOKENIZER_MAP = {
+    "slice": SliceTokenizer,
+    "composition": CompositionTokenizer,
+    "cif_symmetrized": CifTokenizer,
+    "cif_p1": CifTokenizer,
+    "cif_bonding": CifTokenizer,
+    "crystal_llm_rep": CrysllmTokenizer,
+    "robocrys_rep": RobocrysTokenizer,
+    "wycoff_rep": None,
+}
+
+_DEFAULT_SPECIAL_TOKENS = {
+    "unk_token": "[UNK]",
+    "pad_token": "[PAD]",
+    "cls_token": "[CLS]",
+    "sep_token": "[SEP]",
+    "mask_token": "[MASK]",
+    "eos_token": "[EOS]",
+    "bos_token": "[BOS]",
+}
 
 class TokenizerMixin:
     """Mixin class to handle tokenizer functionality."""
 
-    def __init__(self, tokenizer_cfg):
-        self.tokenizer_cfg = tokenizer_cfg
+    def __init__(self, cfg,special_tokens: Dict[str, str] = _DEFAULT_SPECIAL_TOKENS) -> None:
+
+        self.representation = cfg
         self._wrapped_tokenizer = None
 
-        if self.tokenizer_cfg.name == "atom":
-            self._wrapped_tokenizer = AtomVocabTokenizer(
-                self.tokenizer_cfg.path.tokenizer_path, model_max_length=512, truncation=False, padding=False
-            )
-        else:
-            self._tokenizer = Tokenizer.from_file(self.tokenizer_cfg.path.tokenizer_path)
-            self._wrapped_tokenizer = PreTrainedTokenizerFast(tokenizer_object=self._tokenizer)
+        self._tokenizer = _TOKENIZER_MAP.get(self.representation)
+        if self._tokenizer is None:
+            raise ValueError(f"Tokenizer not defined for {self.representation}")
 
-        special_tokens = {
-            "unk_token": "[UNK]",
-            "pad_token": "[PAD]",
-            "cls_token": "[CLS]",
-            "sep_token": "[SEP]",
-            "mask_token": "[MASK]",
-        }
-        self._wrapped_tokenizer.add_special_tokens(special_tokens)
+        self._wrapped_tokenizer = self._tokenizer(
+                    model_max_length=512, truncation=False, padding=False
+                )
+        print(f"special_tokens: {special_tokens}")
+        self._wrapped_tokenizer.add_special_tokens(special_tokens=special_tokens)
 
     def _tokenize_pad_and_truncate(self, texts: Dict[str, Any], context_length: int) -> Dict[str, Any]:
         """Tokenizes, pads, and truncates input texts."""
-        return self._wrapped_tokenizer(texts["slices"], truncation=True, padding="max_length", max_length=context_length)
+        return self._wrapped_tokenizer(texts[str(self.representation)], truncation=True, padding="max_length", max_length=context_length)
 
 
 
@@ -43,6 +63,7 @@ class CustomWandbCallback_Inference(TrainerCallback):
 
     def on_predict_end(self, args: Any, state: Any, control: Any, model: Any, predictions: Any, **kwargs: Any) -> None:
         wandb.log({"predictions": predictions.predictions, })
+
 
 class CustomWandbCallback_Pretrain(TrainerCallback):
     """Custom W&B callback for logging during training."""
@@ -58,11 +79,13 @@ class CustomWandbCallback_FineTune(TrainerCallback):
         if state.is_world_process_zero:
             step = state.global_step  # Retrieve the current step
             epoch = state.epoch  # Retrieve the current epoch
-            print(f"Step: {step}, Epoch: {epoch}")
+            print(f"Step: {step}, Epoch: {round(epoch,5)}")
 
             if "loss" in logs and "eval_loss" in logs:  # Both training and evaluation losses are present
                 wandb.log({"train_loss": logs.get("loss"), "eval_loss": logs.get("eval_loss")}, step=step)
-            
-            # if "eval_loss" not in logs:
-            #     # Log eval_loss as NaN if it's missing to avoid issues with logging
-            #     wandb.log({"eval_loss": float('nan')}, step=step)
+
+
+class EvaluateFirstStepCallback(TrainerCallback):
+    def on_step_begin(self, args, state, control, **kwargs):
+        if state.global_step == 0:
+            control.should_evaluate = True
