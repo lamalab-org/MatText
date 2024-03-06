@@ -98,10 +98,12 @@ def process_datasets(input_dir: str, output_dir: str, representation_context: Di
             print(f"Processing {filename}...")
             dataset = load_dataset("json", data_files=os.path.join(input_dir, filename))
             filtered_dataset, report = filter_dataset_with_context(dataset, representation_context)
-            filtered_dataset.save_to_disk(os.path.join(output_dir, filename))
+            filtered_dataset['train'].to_json(os.path.join(output_dir, filename))
             with open(os.path.join(output_dir, filename + '_report.json'), 'w') as f:
                 json.dump(report, f)
             print(f"Saved filtered dataset and report for {filename}.")
+
+
 
 def main(input_dir: str, output_dir: str) -> None:
     """
