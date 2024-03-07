@@ -1,12 +1,7 @@
 # @package _global_
 model:
-  representation: cif_symmetrized
-  logging:
-    wandb_project: pt_30k_mb_small
-
-  
+  representation: cif_symmetrized  
   finetune:
-    model_name: pt_30k_mb_small
     context_length: 1024
     training_arguments:
       per_device_train_batch_size: 64
