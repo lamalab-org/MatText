@@ -10,13 +10,13 @@ special_tokens: {
 }
 
 logging:
-  wandb_project : ???
+  wandb_project : "finetune_30k_wes_3"
   wandb_log_model : "checkpoint"
 
 finetune:
-  model_name: ???
+  model_name: finetune_30k_wes_3
   freeze_base_model: False
-  dataset_name: "matbench_log_kvrh"
+  dataset_name: "matbench_jdft2d"
   exp_name: [
     "train_${model.representation}_${model.finetune.dataset_name}_0",
     "train_${model.representation}_${model.finetune.dataset_name}_1",
@@ -29,7 +29,8 @@ finetune:
   path:
     pretrained_checkpoint: ???
 
-    finetune_data_rootpath: "/work/so87pot/material_db/matbench_sml"                     # <--- Change this to the path of the finetune data
+
+    finetune_data_rootpath: "/work/so87pot/material_db/matbench_text"                     # <--- Change this to the path of the finetune data
     finetune_traindata: [
       "${model.finetune.path.finetune_data_rootpath}/train_${model.finetune.dataset_name}_0.json",
       "${model.finetune.path.finetune_data_rootpath}/train_${model.finetune.dataset_name}_1.json",
@@ -83,7 +84,7 @@ inference:
     ]
   path:
     pretrained_checkpoint: [] 
-    test_data_rootpath: "/work/so87pot/material_db/matbench_sml"                     # <--- Change this to the path of the finetune data
+    test_data_rootpath: "/work/so87pot/material_db/matbench_text"                     # <--- Change this to the path of the finetune data
     test_data: [
       "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_0.json",
       "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_1.json",
