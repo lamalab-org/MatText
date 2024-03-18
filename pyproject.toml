@@ -28,7 +28,7 @@ classifiers = [
 ]
 requires-python = ">=3.8, <3.13"
 dependencies = [
-    "transformers==4.35.0",
+    "transformers",
     "tokenizers==0.14.1",
     "datasets==2.14.6",
     "wandb==0.15.12",

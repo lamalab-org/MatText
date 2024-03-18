@@ -27,10 +27,10 @@ class TaskRunner:
             self.run_pretraining(task_cfg)
 
 
-    def run_benchmarking(self, task_cfg: DictConfig) -> None:
+    def run_benchmarking(self, task_cfg: DictConfig,local_rank=None) -> None:
         print("Finetuning and testing on matbench dataset")
         matbench_predictor = Matbenchmark(task_cfg)
-        matbench_predictor.run_benchmarking()
+        matbench_predictor.run_benchmarking(local_rank=local_rank)
 
     def run_finetuning(self, task_cfg: DictConfig,local_rank=None) -> None:
         for exp_name, train_data_path in zip(task_cfg.model.finetune.exp_name, task_cfg.model.finetune.path.finetune_traindata):
