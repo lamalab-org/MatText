@@ -152,7 +152,7 @@ def get_token_weights(attention, masks):
     token_weights = {}
     for layer in range(attention.size(0)):
         for head in range(attention.size(1)):
-            token_weights[(layer, head)] = get_percentage_weights(attention[layer,head,:,:].detach().numpy(), masks)
+            token_weights[(layer, head)] = get_percentage_weights(attention[layer, head, :, :].detach().cpu().numpy(), masks)
 
     return token_weights
 
@@ -170,7 +170,10 @@ def aggregate_token_weights(data, model, tokenizer):
         mask_tokens = data['train']['analysis'][i]
 
         # Encode the material
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
         inputs = tokenizer.encode(material, return_tensors="pt")
+        inputs = inputs.to(device)
 
         # Run the model
         outputs = model(inputs)
@@ -211,6 +214,9 @@ def get_attention_weights(data_path: str, ckpt:str, representation:str , result_
     dataset = get_dataset(data_path,representation)
     tokenizer = get_tokenizer_from_rep(representation)
     model = AutoModel.from_pretrained(ckpt, output_attentions=True)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    model = model.to(device)
     aggregate_weights = aggregate_token_weights(dataset, model, tokenizer)
     result_name = f"{representation}_{result_json_name}"
     save_json(aggregate_weights, f"{result_name}_aggregate_weights.json")
