@@ -82,7 +82,7 @@ def process_entry_test_matbench(entry: dict, timeout: int) -> dict:
     """
     try:
         signal.alarm(timeout)  # Start the timer
-        text_reps = TextRep.from_input(entry["structure"]).get_all_text_reps()
+        text_reps = TextRep.from_input(entry["structure"],permute_atoms=True,seed_for_transformations=7).get_requested_text_reps(["crystal_llm_rep", "cif_p1", "slice", "atoms", "atoms_params"])
         text_reps['mbid'] = entry["mbid"]
         signal.alarm(0)  # Reset the timer
         return text_reps
