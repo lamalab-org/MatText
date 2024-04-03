@@ -8,6 +8,7 @@ from omegaconf import DictConfig
 
 from structllm.models.benchmark import Matbenchmark
 from structllm.models.finetune import FinetuneModel
+from structllm.models.inference import Benchmark
 from structllm.models.pretrain import PretrainModel
 
 
@@ -20,6 +21,9 @@ class TaskRunner:
         if "benchmark" in run:
             self.run_benchmarking(task_cfg)
 
+        if "inference" in run:
+            self.run_inference(task_cfg)
+
         if "finetune" in run:
             self.run_finetuning(task_cfg)
 
@@ -30,6 +34,11 @@ class TaskRunner:
     def run_benchmarking(self, task_cfg: DictConfig,local_rank=None) -> None:
         print("Finetuning and testing on matbench dataset")
         matbench_predictor = Matbenchmark(task_cfg)
+        matbench_predictor.run_benchmarking(local_rank=local_rank)
+
+    def run_inference(self, task_cfg: DictConfig,local_rank=None) -> None:
+        print("Testing on matbench dataset")
+        matbench_predictor = Benchmark(task_cfg)
         matbench_predictor.run_benchmarking(local_rank=local_rank)
 
     def run_finetuning(self, task_cfg: DictConfig,local_rank=None) -> None:
