@@ -204,6 +204,9 @@ results/
 *.png 
 multirun/
 multirun/*
+results/
+*weights.json
+*.pdf
 
 #slurm files
 *.sh
