@@ -20,7 +20,7 @@ _TOKENIZER_MAP = {
     "robocrys_rep": RobocrysTokenizer,
     "wycoff_rep": None,
     "atoms" : CompositionTokenizer,
-    "atoms_rep": CompositionTokenizer,
+    "atoms_params": CompositionTokenizer,
 }
 
 _DEFAULT_SPECIAL_TOKENS = {
