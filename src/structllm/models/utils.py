@@ -21,6 +21,7 @@ _TOKENIZER_MAP = {
     "wycoff_rep": None,
     "atoms" : CompositionTokenizer,
     "atoms_params": CompositionTokenizer,
+    "zmatrix": CrysllmTokenizer,
 }
 
 _DEFAULT_SPECIAL_TOKENS = {
