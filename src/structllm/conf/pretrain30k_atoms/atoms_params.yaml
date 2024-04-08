@@ -1,0 +1,14 @@
+# @package _global_
+model:
+  logging:
+    wandb_project: pt_30k_atoms
+
+  representation: atoms_params
+  pretrain:
+    name: pt_30k_atoms
+    context_length:  32
+    training_arguments:
+      per_device_train_batch_size: 1024
+    path:
+      data_root_path: /work/so87pot/material_db/structllm_dataset/30k/atoms
+      
