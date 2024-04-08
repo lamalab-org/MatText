@@ -58,7 +58,7 @@ def process_entry_train_matbench(entry: dict, timeout: int) -> dict:
     try:
         signal.alarm(timeout)  # Start the timer
         #text_reps = TextRep.from_input(entry["structure"]).get_all_text_reps()
-        text_reps = TextRep.from_input(entry["structure"],permute_atoms=False).get_requested_text_reps(["atoms", "atoms_params"])
+        text_reps = TextRep.from_input(entry["structure"],permute_atoms=False).get_requested_text_reps(["zmatrix"])
         text_reps['mbid'] = entry["mbid"]
         text_reps['labels'] = entry["labels"]
         signal.alarm(0)  # Reset the timer
@@ -84,7 +84,7 @@ def process_entry_test_matbench(entry: dict, timeout: int) -> dict:
     try:
         signal.alarm(timeout)  # Start the timer
         # text_reps = TextRep.from_input(entry["structure"],permute_atoms=True,seed_for_transformations=7).get_requested_text_reps(["crystal_llm_rep", "cif_p1", "slice", "atoms", "atoms_params"])
-        text_reps = TextRep.from_input(entry["structure"],permute_atoms=False).get_requested_text_reps([ "atoms", "atoms_params"])
+        text_reps = TextRep.from_input(entry["structure"],permute_atoms=False).get_requested_text_reps(["zmatrix"])
         text_reps['mbid'] = entry["mbid"]
         signal.alarm(0)  # Reset the timer
         return text_reps
@@ -116,19 +116,11 @@ def process_batch(num_workers, batch, timeout, process_entry_func):
     return [result for result in results if result is not None]
 
 
-def process_json_to_json(json_file: str, output_json_file: str, log_file_path: str,process_entry: str = 'test', num_workers: int = 48, timeout: int = 600, save_interval: int = 100, last_processed_entry: int = 0):
-    """Prepare Matbench dataset with different representation as implemented in Xtal2txt. Saves dataset in json with different representation as the keys.
-
-    Args:
-        json_file (str): The path to the input JSON file.
-        output_json_file (str): The path to the output JSON file.
-        log_file_path (str): The path to the log file.
-        process_entry (str, optional): The type of entries to process ('test' or 'train'). Defaults to 'test'.
-        num_workers (int, optional): The number of worker processes. Defaults to 48.
-        timeout (int, optional): The timeout in seconds for each entry. Defaults to 600.
-        save_interval (int, optional): The interval at which to save progress. Defaults to 100.
-        last_processed_entry (int, optional): The index of the last processed entry. Defaults to 0.
-    """
+def process_json_to_json(json_file: str, output_json_file: str, log_file_path: str, process_entry: str = 'test',
+                          num_workers: int = 48, timeout: int = 600, save_interval: int = 100,
+                          last_processed_entry: int = 0):
+    """Prepare Matbench dataset with different representation as implemented in Xtal2txt."""
+    # Your main processing function here
     num_cpus = multiprocessing.cpu_count()
 
     process_entry_funcs = {
@@ -150,16 +142,14 @@ def process_json_to_json(json_file: str, output_json_file: str, log_file_path: s
     if last_processed_entry > 0:
         data = data[last_processed_entry:]
 
+    processed_entries = []
+
     batch_iterator = (data[i:i + batch_size] for i in range(0, len(data), batch_size))
 
     for i, batch_data in enumerate(batch_iterator, start=1):
-        batch_results = process_batch(num_workers,batch_data, timeout, process_entry_func)
+        batch_results = process_batch(num_workers, batch_data, timeout, process_entry_func)
 
-        # Append batch_results to the output JSON file
-        with open(output_json_file, 'a') as f:
-            for result in batch_results:
-                json.dump(result, f)
-                f.write('\n')
+        processed_entries.extend(batch_results)
 
         last_processed_entry += len(batch_data)
         if i % save_interval == 0:
@@ -167,8 +157,11 @@ def process_json_to_json(json_file: str, output_json_file: str, log_file_path: s
                 log_file.write(f"Last processed entry index: {last_processed_entry}\n")
                 log_file.write(f"Last processed batch number: {i}\n")
 
-    print(f"Finished !!! logging at {log_file_path}")
+    with open(output_json_file, 'w') as f:
+        json.dump(processed_entries, f)
 
+    print(f"Finished !!! logging at {log_file_path}")
 
 if __name__ == "__main__":
     fire.Fire(process_json_to_json)
+
