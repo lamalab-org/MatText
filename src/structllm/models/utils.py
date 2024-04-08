@@ -19,6 +19,9 @@ _TOKENIZER_MAP = {
     "crystal_llm_rep": CrysllmTokenizer,
     "robocrys_rep": RobocrysTokenizer,
     "wycoff_rep": None,
+    "atoms" : CompositionTokenizer,
+    "atoms_params": CompositionTokenizer,
+    "zmatrix": CrysllmTokenizer,
 }
 
 _DEFAULT_SPECIAL_TOKENS = {

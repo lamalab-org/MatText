@@ -32,8 +32,8 @@ runs:
   # - name: pretrain_run
   #   tasks: [pretrain]
 
-  # - name: benchmark_run
-  #   tasks: [benchmark]
+  - name: benchmark_run
+    tasks: [benchmark]
 
-  - name: test_run
-    tasks: [inference]
+  # - name: test_run
+  #   tasks: [inference]
