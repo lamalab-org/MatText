@@ -30,6 +30,7 @@ class FinetuneModel(TokenizerMixin):
         super().__init__(cfg=cfg.model.representation,special_tokens=cfg.model.special_tokens)
         self.local_rank = local_rank
         self.representation = cfg.model.representation
+        self.num_data_points_to_train_on = cfg.model.num_data_points_to_train_on if hasattr(cfg.model, 'num_data_points_to_train_on') else None
         self.cfg = cfg.model.finetune
         self.context_length: int = self.cfg.context_length
         self.callbacks = self.cfg.callbacks
@@ -50,6 +51,12 @@ class FinetuneModel(TokenizerMixin):
         ds = load_dataset("json", data_files=path,split="train")
         dataset = ds.train_test_split(shuffle=True, test_size=0.2, seed=42)
         #dataset= dataset.filter(lambda example: example[self.representation] is not None)
+
+        if self.num_data_points_to_train_on:
+            seed = 42
+            dataset['train'] = dataset['train'].shuffle(seed=seed).select(range(1000))
+
+        print(dataset)
         return dataset.map(
             partial(self._tokenize_pad_and_truncate, context_length=self.context_length),
             batched=True)
