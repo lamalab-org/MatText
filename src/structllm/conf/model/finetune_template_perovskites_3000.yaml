@@ -1,5 +1,5 @@
 representation: ???
-num_data_points_to_train_on: 3000
+num_data_points_to_train_on: 2500
 special_tokens: {
     "unk_token": "[UNK]",
     "pad_token": "[PAD]",
