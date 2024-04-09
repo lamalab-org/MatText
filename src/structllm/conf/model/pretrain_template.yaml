@@ -28,7 +28,7 @@ pretrain:
 
   path:
     pretrained_checkpoint: 
-    data_root_path: ??? #--> Change this to your dataset path
+    data_root_path: ??? 
     root_path: "/work/so87pot/structllm/megaloop/checkpoints" #--> Change this to your preferred path where checkpints will be saved
     traindata: "${model.pretrain.path.data_root_path}/train.json"
     evaldata:  "${model.pretrain.path.data_root_path}/test.json" 
