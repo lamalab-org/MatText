@@ -31,7 +31,7 @@ finetune:
     pretrained_checkpoint: ???
 
 
-    finetune_data_rootpath: "/work/so87pot/material_db/matbench_sml"                     # <--- Change this to the path of the finetune data
+    finetune_data_rootpath: "/work/so87pot/material_db/all_1"                     # <--- Change this to the path of the finetune data
     finetune_traindata: [
       "${model.finetune.path.finetune_data_rootpath}/train_${model.finetune.dataset_name}_0.json",
       "${model.finetune.path.finetune_data_rootpath}/train_${model.finetune.dataset_name}_1.json",
@@ -84,7 +84,7 @@ inference:
     ]
   path:
     pretrained_checkpoint: [] 
-    test_data_rootpath: "/work/so87pot/material_db/matbench_sml"                     # <--- Change this to the path of the finetune data
+    test_data_rootpath: "/work/so87pot/material_db/all_1"                     # <--- Change this to the path of the finetune data
     test_data: [
       "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_0.json",
       "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_1.json",

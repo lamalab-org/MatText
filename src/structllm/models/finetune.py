@@ -54,7 +54,7 @@ class FinetuneModel(TokenizerMixin):
 
         if self.num_data_points_to_train_on:
             seed = 42
-            dataset['train'] = dataset['train'].shuffle(seed=seed).select(range(1000))
+            dataset['train'] = dataset['train'].shuffle(seed=seed).select(range(self.num_data_points_to_train_on))
 
         print(dataset)
         return dataset.map(
