@@ -2,12 +2,12 @@
 model:
   representation: zmatrix
   logging:
-    wandb_project: zmatrix_finetune
+    wandb_project: ft_zmatrix_512
   
   finetune:
     model_name: ft_100k_zmatrix
-    context_length: 32
+    context_length: 512
     training_arguments:
-      per_device_train_batch_size: 1024
+      per_device_train_batch_size: 128
     path:
-      pretrained_checkpoint: /work/so87pot/structllm/megaloop/checkpoints/checkpoints/zmatrix_pt_100k_zmatrix/checkpoint-4000
+      pretrained_checkpoint: /work/so87pot/structllm/megaloop/checkpoints/checkpoints/zmatrix_pt_100k_zmatrix/checkpoint-77000
