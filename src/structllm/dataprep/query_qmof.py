@@ -1,5 +1,6 @@
 import os
 import json
+from tqdm import tqdm
 
 from mpcontribs.client import Client
 from pymatgen.core import Structure
@@ -28,7 +29,7 @@ class MOFContributions:
     ):
         self.client = Client(apikey=api_key, host=host, project=project)
         self.callbacks = ContribScreeningCallbacks()
-        self.save_directory = "mof_data"
+        self.save_directory = "qmof_dataset"
 
     def query_contributions(self, num_atoms):
         query = {"num_atoms": num_atoms}
@@ -46,11 +47,11 @@ class MOFContributions:
 
     def get_structures_from_data(self, data):
         json_data = []
-        for d in data:
+        for d in tqdm(data):
             _id = d["structures"][0]["id"]
             structure = self.client.get_structure(_id)
             structure_data = structure.as_dict()
-            json_data.append({"id": _id, "structure": structure_data})
+            json_data.append({"id": _id, "structure": structure_data, "data": d["data"]})
         self.save_data_as_json(json_data, "screened_mofs.json")
 
 
