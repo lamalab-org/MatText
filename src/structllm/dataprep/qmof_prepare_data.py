@@ -58,9 +58,14 @@ def process_entry_train_matbench(entry: dict, timeout: int) -> dict:
     try:
         signal.alarm(timeout)  # Start the timer
         #text_reps = TextRep.from_input(entry["structure"]).get_all_text_reps()
-        text_reps = TextRep.from_input(entry["structure"],translate_single_atom=True).get_requested_text_reps(["cif_p1","cif_symmetrized","crystal_llm_rep","zmatrix"])
-        text_reps['mbid'] = entry["mbid"]
-        text_reps['labels'] = entry["labels"]
+        text_reps = TextRep.from_input(entry["structure"],transformations=[]).get_requested_text_reps(["cif_p1","cif_symmetrized","crystal_llm_rep","zmatrix","atoms","atoms_params","slice", "composition"])
+        text_reps['id'] = entry["id"]
+        text_reps['natoms'] = entry["natoms"]
+        text_reps['pld'] = entry["pld"]
+        text_reps['lcd'] = entry["lcd"]
+        text_reps['density'] = entry["density"]
+        text_reps['EgPBE'] = entry["EgPBE"]
+        text_reps['volume'] = entry["volume"]
         signal.alarm(0)  # Reset the timer
         return text_reps
     except TimeoutException:
@@ -116,7 +121,7 @@ def process_batch(num_workers, batch, timeout, process_entry_func):
     return [result for result in results if result is not None]
 
 
-def process_json_to_json(json_file: str, output_json_file: str, log_file_path: str, process_entry: str = 'test',
+def process_json_to_json(json_file: str, output_json_file: str, log_file_path: str, process_entry: str = 'train',
                           num_workers: int = 48, timeout: int = 600, save_interval: int = 100,
                           last_processed_entry: int = 0):
     """Prepare Matbench dataset with different representation as implemented in Xtal2txt."""
