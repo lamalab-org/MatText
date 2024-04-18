@@ -30,11 +30,19 @@ class TaskRunner:
         if "pretrain" in run:
             self.run_pretraining(task_cfg)
 
+        if "qmof" in run:
+            self.run_qmof(task_cfg)
+
 
     def run_benchmarking(self, task_cfg: DictConfig,local_rank=None) -> None:
         print("Finetuning and testing on matbench dataset")
         matbench_predictor = Matbenchmark(task_cfg)
         matbench_predictor.run_benchmarking(local_rank=local_rank)
+
+    def run_qmof(self, task_cfg: DictConfig,local_rank=None) -> None:
+        print("Finetuning on qmof")
+        matbench_predictor = Matbenchmark(task_cfg)
+        matbench_predictor.run_qmof(local_rank=local_rank)
 
     def run_inference(self, task_cfg: DictConfig,local_rank=None) -> None:
         print("Testing on matbench dataset")
