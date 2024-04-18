@@ -20,8 +20,7 @@ from xtal2txt.tokenizer import (
     SliceTokenizer,
 )
 
-# Mapping of representation types to their corresponding tokenizer classes
-_TOKENIZER_MAP: Dict[str, Type] = {
+_TOKENIZER_MAP = {
     "slice": SliceTokenizer,
     "composition": CompositionTokenizer,
     "cif_symmetrized": CifTokenizer,
@@ -30,6 +29,9 @@ _TOKENIZER_MAP: Dict[str, Type] = {
     "crystal_llm_rep": CrysllmTokenizer,
     "robocrys_rep": RobocrysTokenizer,
     "wycoff_rep": None,
+    "atoms" : CompositionTokenizer,
+    "atoms_params": CompositionTokenizer,
+    "zmatrix": CrysllmTokenizer,
 }
 
 _REPRESENTATION_CONTEXT = {
@@ -37,7 +39,10 @@ _REPRESENTATION_CONTEXT = {
         "cif_symmetrized" : 1024,
         "slice" : 512,
         "crystal_llm_rep" : 512,
-        "composition" : 32
+        "composition" : 32,
+        "zmatrix" : 512,
+        "atoms" : 32,
+        "atoms_params" : 32,
     }
 
 _DEFAULT_SPECIAL_TOKENS = {
