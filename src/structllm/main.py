@@ -8,6 +8,7 @@ from omegaconf import DictConfig
 
 from structllm.models.benchmark import Matbenchmark
 from structllm.models.finetune import FinetuneModel
+from structllm.models.llama import FinetuneLLama
 from structllm.models.inference import Benchmark
 from structllm.models.pretrain import PretrainModel
 
@@ -33,6 +34,9 @@ class TaskRunner:
         if "qmof" in run:
             self.run_qmof(task_cfg)
 
+        if "llama" in run:
+            self.run_llama(task_cfg,local_rank=local_rank)
+
 
     def run_benchmarking(self, task_cfg: DictConfig,local_rank=None) -> None:
         print("Finetuning and testing on matbench dataset")
@@ -48,6 +52,23 @@ class TaskRunner:
         print("Testing on matbench dataset")
         matbench_predictor = Benchmark(task_cfg)
         matbench_predictor.run_benchmarking(local_rank=local_rank)
+
+    def run_llama(self, task_cfg: DictConfig,local_rank=None) -> None:
+        for exp_name, train_data_path in zip(task_cfg.model.finetune.exp_name, task_cfg.model.finetune.path.finetune_traindata):
+            wandb.init(
+                config=dict(task_cfg.model.finetune),
+                project=task_cfg.model.logging.wandb_project, name=exp_name)
+
+            exp_cfg = task_cfg.copy()
+            exp_cfg.model.finetune.exp_name = exp_name
+            exp_cfg.model.finetune.path.finetune_traindata = train_data_path
+
+
+            finetuner = FinetuneLLama(exp_cfg,local_rank)
+            f = finetuner.finetune()
+            print(f)
+            wandb.finish()
+
 
     def run_finetuning(self, task_cfg: DictConfig,local_rank=None) -> None:
         for exp_name, train_data_path in zip(task_cfg.model.finetune.exp_name, task_cfg.model.finetune.path.finetune_traindata):
