@@ -1,18 +1,10 @@
-import torch
-import os
 
+import os
 import numpy as np
 import pandas as pd
 
-from transformers import ( 
-    LlamaTokenizer, 
-    AutoTokenizer,
-    Trainer, 
-    TrainingArguments,
-)
 
 from torch.utils.data import Dataset
-
 from peft import (
     LoraConfig, 
     get_peft_model, 
@@ -25,16 +17,22 @@ import torch
 import wandb
 from datasets import DatasetDict, load_dataset
 from omegaconf import DictConfig
+
 from torch import nn
 from transformers import (
-    AutoModelForSequenceClassification,
-    EarlyStoppingCallback,
-    Trainer,
-    TrainerCallback,
+    BitsAndBytesConfig,
+    LlamaTokenizer, 
+    LlamaForSequenceClassification,
+    #AutoTokenizer,
+    Trainer, 
     TrainingArguments,
+    #AutoModelForSequenceClassification,
+    EarlyStoppingCallback,
+    TrainerCallback,
 )
 
 from structllm.models.utils import CustomWandbCallback_FineTune, EvaluateFirstStepCallback
+
 
 
 IGNORE_INDEX = -100
@@ -43,7 +41,6 @@ DEFAULT_PAD_TOKEN = "[PAD]"
 DEFAULT_EOS_TOKEN = "</s>"
 DEFAULT_BOS_TOKEN = "<s>"
 DEFAULT_UNK_TOKEN = "<unk>"
-
 
 
 
@@ -68,6 +65,8 @@ def smart_tokenizer_and_embedding_resize(
      #   output_embeddings_avg = output_embeddings[:-num_new_tokens].mean(dim=0, keepdim=True)
 
         input_embeddings[-num_new_tokens:] = input_embeddings_avg
+
+    model.config.pad_token_id = llama_tokenizer.pad_token_id
      #   output_embeddings[-num_new_tokens:] = output_embeddings_avg
 
 
@@ -87,41 +86,56 @@ class FinetuneLLama():
         self.callbacks = self.cfg.callbacks
         self.model, self.tokenizer = self._setup_model_tokenizer()
         self.tokenized_dataset = self._prepare_datasets(self.cfg.path.finetune_traindata)
+        self.ckpt = self.cfg.path.pretrained_checkpoint
+        self.bnb_config = self.cfg.bnb_config
 
     def _setup_model_tokenizer(self) -> None:
 
-        pretrained_ckpt = "meta-llama/Llama-2-7b-hf"
 
-        llama_tokenizer = AutoTokenizer.from_pretrained(
-        pretrained_ckpt,
+        llama_tokenizer = LlamaTokenizer.from_pretrained(
+        self.ckpt,
         model_max_length=MAX_LENGTH,
         padding_side="right",
         use_fast=False,
-    )
-
-        model = AutoModelForSequenceClassification.from_pretrained(pretrained_ckpt,
-                                                                   num_labels=1,
-                                                                   ignore_mismatched_sizes=False,
-                                                                   load_in_8bit=True,
-                                                                    device_map={"": self.local_rank},)
-        
-        lora_config = LoraConfig(
-            r=8,
-            lora_alpha=32,
-            lora_dropout=0.05,
-            bias="none",
-            task_type="FEATURE_EXTRACTION",
         )
 
+        if (self.bnb_config.use_4bit and self.bnb_config.use_8bit):
+            raise ValueError("You can't load the model in 8 bits and 4 bits at the same time")
+
+        elif (self.bnb_config.use_4bit or self.bnb_config.use_8bit):
+            compute_dtype = getattr(torch,  self.bnb_config.bnb_4bit_compute_dtype)
+            bnb_config = BitsAndBytesConfig(
+            load_in_4bit= self.bnb_config.use_4bit,
+
+            bnb_4bit_quant_type= self.bnb_config.bnb_4bit_quant_type,
+            bnb_4bit_compute_dtype=compute_dtype,
+            bnb_4bit_use_double_quant= self.bnb_config.use_nested_quant,
+            )
+        else:
+            bnb_config = None
+
+        # Check GPU compatibility with bfloat16
+        if compute_dtype == torch.float16:
+            major, _ = torch.cuda.get_device_capability()
+            if major >= 8:
+                print("=" * 80)
+                print("Your GPU supports bfloat16: accelerate training with bf16=True")
+                print("=" * 80)
+
+        device_map = {"": 0}
+        model = LlamaForSequenceClassification.from_pretrained(self.ckpt,
+                                                            num_labels=1,
+                                                            quantization_config=bnb_config,
+                                                            device_map=device_map
+                                                            )
+        
+        lora_config = LoraConfig(
+            **self.cfg.lora_config
+        )
         model = get_peft_model(model, lora_config)
         model.print_trainable_parameters()
         
 
-        if self.cfg.freeze_base_model:
-            for param in model.base_model.parameters():
-                param.requires_grad = False
-
-        
         special_tokens_dict = dict()
         if llama_tokenizer.pad_token is None:
             special_tokens_dict["pad_token"] = DEFAULT_PAD_TOKEN
@@ -132,28 +146,21 @@ class FinetuneLLama():
         if llama_tokenizer.unk_token is None:
             special_tokens_dict["unk_token"] = DEFAULT_UNK_TOKEN
 
-        # llama_tokenizer.add_special_tokens(special_tokens_dict)
-
-        
-
         smart_tokenizer_and_embedding_resize(
             special_tokens_dict=special_tokens_dict,
             llama_tokenizer=llama_tokenizer,
             model=model,
         )
-        # llama_tokenizer.pad_token = llama_tokenizer.eos_token
-        # print(llama_tokenizer.pad_token)
-        # print(llama_tokenizer.eos_token)
-        print(len(llama_tokenizer))
 
+        print(len(llama_tokenizer))
         return model, llama_tokenizer
     
     def _tokenize(self, examples):
-        # Tokenize the 'crystal_llm' column using the LAMA tokenizer
-        tokenized_examples = self.tokenizer(examples["crystal_llm_rep"])
+        tokenized_examples = self.tokenizer(
+            examples[self.representation], truncation=True, padding=True, return_tensors="pt"
+        )
         return tokenized_examples
     
-
 
     def _prepare_datasets(self, path: str) -> DatasetDict:
         """
@@ -208,25 +215,18 @@ class FinetuneLLama():
         Perform fine-tuning of the language model.
         """
 
-        
-
         config_train_args = self.cfg.training_arguments
         callbacks = self._callbacks()
 
-        os.environ["ACCELERATE_MIXED_PRECISION"] = "no"
+
+        #os.environ["ACCELERATE_MIXED_PRECISION"] = "no"
         training_args = TrainingArguments(
-            fsdp=False,
-            fp16=True,
-            bf16=False,
-            gradient_checkpointing=False,
-            ddp_find_unused_parameters=False,
             **config_train_args,
             metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
             greater_is_better=False,  # Lower eval_rmse is better
-            dataloader_num_workers=8,
-        )
 
-        
+        )
+    
         trainer = Trainer(
             model=self.model,
             args=training_args,
@@ -242,6 +242,7 @@ class FinetuneLLama():
         wandb.log({"model_summary": str(self.model)})
 
         trainer.train()
+        trainer.save_model(f"{self.cfg.path.finetuned_modelname}/llamav2-7b-lora-fine-tune")
 
         eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset['test'])
         wandb.log(eval_result)
