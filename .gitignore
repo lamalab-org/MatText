@@ -220,5 +220,6 @@ results/
 /notebooks/token_plots/*
 /notebooks/token_reports/*
 /results/*
+llama_out/
 
 
