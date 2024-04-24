@@ -84,10 +84,10 @@ class FinetuneLLama():
         self.cfg = cfg.model.finetune
         self.context_length: int = self.cfg.context_length
         self.callbacks = self.cfg.callbacks
-        self.model, self.tokenizer = self._setup_model_tokenizer()
-        self.tokenized_dataset = self._prepare_datasets(self.cfg.path.finetune_traindata)
         self.ckpt = self.cfg.path.pretrained_checkpoint
         self.bnb_config = self.cfg.bnb_config
+        self.model, self.tokenizer = self._setup_model_tokenizer()
+        self.tokenized_dataset = self._prepare_datasets(self.cfg.path.finetune_traindata)
 
     def _setup_model_tokenizer(self) -> None:
 
@@ -106,7 +106,7 @@ class FinetuneLLama():
             compute_dtype = getattr(torch,  self.bnb_config.bnb_4bit_compute_dtype)
             bnb_config = BitsAndBytesConfig(
             load_in_4bit= self.bnb_config.use_4bit,
-
+            load_in_8bit= self.bnb_config.use_8bit,
             bnb_4bit_quant_type= self.bnb_config.bnb_4bit_quant_type,
             bnb_4bit_compute_dtype=compute_dtype,
             bnb_4bit_use_double_quant= self.bnb_config.use_nested_quant,

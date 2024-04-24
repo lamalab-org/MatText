@@ -1,4 +1,4 @@
-representation: crystal_llm_rep
+representation: ???
 special_tokens: {
     "unk_token": "[UNK]",
     "pad_token": "[PAD]",
@@ -10,13 +10,13 @@ special_tokens: {
 }
 
 logging:
-  wandb_project : lama
+  wandb_project : ???
   wandb_log_model : "checkpoint"
 
 finetune:
-  model_name: lama
+  model_name: ???
   freeze_base_model: False
-  dataset_name: "matbench_perovskites"
+  dataset_name: "matbench_log_gvrh"
   exp_name: [
     "train_${model.representation}_${model.finetune.dataset_name}_0",
     ]
@@ -26,7 +26,7 @@ finetune:
     pretrained_checkpoint: "meta-llama/Llama-2-7b-hf"
 
 
-    finetune_data_rootpath: "/work/so87pot/material_db/matbench_sml"                     # <--- Change this to the path of the finetune data
+    finetune_data_rootpath: "/work/so87pot/material_db/all_1"                     # <--- Change this to the path of the finetune data
     finetune_traindata: [
       "${model.finetune.path.finetune_data_rootpath}/train_${model.finetune.dataset_name}_0.json",
        ]
@@ -51,7 +51,6 @@ finetune:
     bnb_4bit_quant_type: "nf4"
     use_nested_quant: False
 
-
   lora_config:
     r: 8
     lora_alpha: 32
@@ -61,15 +60,14 @@ finetune:
     #target_modules: ['q_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj', 'k_proj', 'v_proj'] # Choose all linear layers from the model
 
 
-
   training_arguments:
     output_dir: "${model.finetune.path.output_dir}"
     bf16: True
     fp16: False
     overwrite_output_dir: True
     dataloader_num_workers: 2
-    num_train_epochs: 15
-    per_device_train_batch_size: 256
+    num_train_epochs: 30
+    per_device_train_batch_size: 128
     save_strategy: "steps"
     do_eval: False
     evaluation_strategy: 'steps'   
@@ -98,10 +96,3 @@ finetune:
     lr_scheduler_type : "cosine"
     # Ratio of steps for a linear warmup (from 0 to learning rate)
     warmup_ratio : 0.03
-
-
-# # Number of training steps (overrides num_train_epochs)
-# max_steps : -1
-# # Group sequences into batches with same length
-# # Saves memory and speeds up training considerably
-# group_by_length : True
