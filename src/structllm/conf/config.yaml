@@ -32,8 +32,8 @@ runs:
   # - name: pretrain_run
   #   tasks: [pretrain]
 
-  # - name: benchmark_run
-  #   tasks: [benchmark]
+  - name: benchmark_run
+    tasks: [benchmark]
 
   # - name: test_run
   #   tasks: [inference]
@@ -41,6 +41,6 @@ runs:
   # - name: qmof_run
   #   tasks: [qmof]
 
-  - name: llama_run
-    tasks: [llama]
+  # - name: llama_run
+  #   tasks: [llama]
 

@@ -57,10 +57,14 @@ def process_entry_train_matbench(entry: dict, timeout: int) -> dict:
     """
     try:
         signal.alarm(timeout)  # Start the timer
-        #text_reps = TextRep.from_input(entry["structure"]).get_all_text_reps()
-        text_reps = TextRep.from_input(entry["structure"],perturb_structure=True).get_requested_text_reps(["cif_p1","cif_symmetrized","crystal_llm_rep","zmatrix"])
-        text_reps['mbid'] = entry["mbid"]
-        text_reps['labels'] = entry["labels"]
+        text_reps = TextRep.from_input(entry["structure"],transformations=[]).get_requested_text_reps(["cif_p1","cif_symmetrized","crystal_llm_rep","zmatrix","atoms","atoms_params","slice", "composition"])
+        text_reps['id'] = entry["id"]
+        text_reps['natoms'] = entry["natoms"]
+        text_reps['pld'] = entry["pld"]
+        text_reps['lcd'] = entry["lcd"]
+        text_reps['density'] = entry["density"]
+        text_reps['EgPBE'] = entry["EgPBE"]
+        text_reps['volume'] = entry["volume"]
         signal.alarm(0)  # Reset the timer
         return text_reps
     except TimeoutException:
@@ -71,7 +75,7 @@ def process_entry_train_matbench(entry: dict, timeout: int) -> dict:
         return None
 
 
-def process_entry_test_matbench(entry: dict, timeout: int) -> dict:
+def process_entry_train_matbench(entry: dict, timeout: int, transformations:dict = {}, list_of_rep = ["cif_p1","cif_symmetrized","crystal_llm_rep","zmatrix"]) -> dict:
     """Process an entry for Matbench test dataset with a timeout.
 
     Args:
@@ -83,8 +87,7 @@ def process_entry_test_matbench(entry: dict, timeout: int) -> dict:
     """
     try:
         signal.alarm(timeout)  # Start the timer
-        # text_reps = TextRep.from_input(entry["structure"],permute_atoms=True,seed_for_transformations=7).get_requested_text_reps(["crystal_llm_rep", "cif_p1", "slice", "atoms", "atoms_params"])
-        text_reps = TextRep.from_input(entry["structure"],perturb_structure=True).get_requested_text_reps(["cif_p1","cif_symmetrized","crystal_llm_rep","zmatrix"])
+        text_reps = TextRep.from_input(entry["structure"],transformation=transformations).get_requested_text_reps(list_of_rep)
         text_reps['mbid'] = entry["mbid"]
         signal.alarm(0)  # Reset the timer
         return text_reps
@@ -96,7 +99,7 @@ def process_entry_test_matbench(entry: dict, timeout: int) -> dict:
         return None
 
 
-def process_batch(num_workers, batch, timeout, process_entry_func):
+def process_batch(num_workers, batch, timeout, process_entry_func, transformation , representations):
     """Process a batch of entries in parallel.
 
     Args:
@@ -108,7 +111,7 @@ def process_batch(num_workers, batch, timeout, process_entry_func):
     Returns:
         list: The processed entries.
     """
-    process_entry_with_timeout = partial(process_entry_func, timeout=timeout)
+    process_entry_with_timeout = partial(process_entry_func, timeout=timeout, transformations=transformation, list_of_rep=representations )
 
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         results = list(executor.map(process_entry_with_timeout, batch))
@@ -116,15 +119,24 @@ def process_batch(num_workers, batch, timeout, process_entry_func):
     return [result for result in results if result is not None]
 
 
-def process_json_to_json(json_file: str, output_json_file: str, log_file_path: str, process_entry: str = 'test',
-                          num_workers: int = 48, timeout: int = 600, save_interval: int = 100,
-                          last_processed_entry: int = 0):
+def process_json_to_json(
+        json_file: str, 
+        output_json_file: str, 
+        log_file_path: str, 
+        process_entry: str = 'test',
+        num_workers: int = 48, 
+        timeout: int = 600, 
+        save_interval: int = 100,
+        last_processed_entry: int = 0,
+        transformations:dict = {},
+        text_reps:list = ["cif_p1","cif_symmetrized","crystal_llm_rep","zmatrix"]
+        ):
     """Prepare Matbench dataset with different representation as implemented in Xtal2txt."""
     # Your main processing function here
     num_cpus = multiprocessing.cpu_count()
 
     process_entry_funcs = {
-        'test': process_entry_test_matbench,
+        'test': process_entry_train_matbench,
         'train': process_entry_train_matbench
     }
     # Get the selected function
@@ -147,7 +159,7 @@ def process_json_to_json(json_file: str, output_json_file: str, log_file_path: s
     batch_iterator = (data[i:i + batch_size] for i in range(0, len(data), batch_size))
 
     for i, batch_data in enumerate(batch_iterator, start=1):
-        batch_results = process_batch(num_workers, batch_data, timeout, process_entry_func)
+        batch_results = process_batch(num_workers, batch_data, timeout, process_entry_func, transformations, text_reps)
 
         processed_entries.extend(batch_results)
 
