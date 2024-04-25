@@ -4,6 +4,7 @@ from tqdm import tqdm
 
 from mpcontribs.client import Client
 from pymatgen.core import Structure
+from dotenv import load_dotenv
 
 
 class ContribScreeningCallbacks:
@@ -56,7 +57,8 @@ class MOFContributions:
 
 
 def main():
-    apikey = "5srf9fnUNYO2axnZBN1hYprUVtQT0Onh"
+    load_dotenv()
+    apikey = os.getenv("MP_API_KEY")
     mof_contribs = MOFContributions(api_key=apikey)
 
     num_atoms = 150
