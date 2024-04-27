@@ -47,10 +47,16 @@ class TokenizerMixin:
             raise ValueError(f"Tokenizer not defined for {self.representation}")
 
         self._wrapped_tokenizer = self._tokenizer(
-                    model_max_length=512, truncation=False, padding=False
+                    special_num_token=True,
+                    special_tokens=special_tokens,
+                    model_max_length=512, 
+                    truncation=False, 
+                    padding=False
                 )
         print(f"special_tokens: {special_tokens}")
-        self._wrapped_tokenizer.add_special_tokens(special_tokens=special_tokens)
+        print(self._wrapped_tokenizer.tokenize("Se2Se3"))
+
+        #self._wrapped_tokenizer.add_special_tokens(special_tokens=special_tokens)
 
     def _tokenize_pad_and_truncate(self, texts: Dict[str, Any], context_length: int) -> Dict[str, Any]:
         """Tokenizes, pads, and truncates input texts."""
