@@ -1,6 +1,6 @@
 hydra:
   job:
-    name: pretrain
+    name: llama_sft
   run:
     dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
   sweep:
@@ -19,7 +19,7 @@ hydra:
     name: ${hydra.job.name}
     partition: 'gpu'
     additional_parameters:
-      nodelist: 'gpu[005-007,013-014]'
+      nodelist: 'gpu[005,007,013-014]'
     tasks_per_node: 1
 
 
@@ -43,4 +43,7 @@ runs:
 
   # - name: llama_run
   #   tasks: [llama]
+
+  # - name: llama_sft_run
+  #   tasks: [llama_sft]
 

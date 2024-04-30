@@ -88,10 +88,11 @@ class FinetuneLLamaSFT():
         self.ckpt = self.cfg.path.pretrained_checkpoint
         self.bnb_config = self.cfg.bnb_config
         self.model, self.tokenizer, self.peft_config = self._setup_model_tokenizer()
-        self.trainset, self.testset = self._prepare_datasets(self.cfg.path.finetune_traindata)
-        
         self.property_ = self.property_map[self.cfg.dataset_name]
         self.material_ = self.material_map[self.cfg.dataset_name]
+        self.trainset, self.testset = self._prepare_datasets(self.cfg.path.finetune_traindata)
+        
+        
 
     def _setup_model_tokenizer(self) -> None:
 
@@ -136,8 +137,8 @@ class FinetuneLLamaSFT():
         lora_config = LoraConfig(
             **self.cfg.lora_config
         )
-        model = get_peft_model(model, lora_config)
-        model.print_trainable_parameters()
+        # model = get_peft_model(model, lora_config)
+        # model.print_trainable_parameters()
         
 
         special_tokens_dict = dict()
@@ -178,7 +179,7 @@ class FinetuneLLamaSFT():
 
     # template dataset to add prompt to each sample
     def template_dataset_test(self,sample):
-        sample["text"] = f"{self.format_qstns(sample)}{self.llama_tokenizer.eos_token}"
+        sample["text"] = f"{self.format_qstns(sample)}{self.tokenizer.eos_token}"
         return sample
     
 
@@ -249,23 +250,13 @@ class FinetuneLLamaSFT():
         #os.environ["ACCELERATE_MIXED_PRECISION"] = "no"
         training_args = TrainingArguments(
             **config_train_args,
-            metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
+            # metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
             greater_is_better=False,  # Lower eval_rmse is better
 
         )
-    
-        trainer = Trainer(
-            model=self.model,
-            args=training_args,
-            data_collator=None,
-            compute_metrics=self._compute_metrics,
-            tokenizer=self.tokenizer,
-            train_dataset=self.tokenized_dataset['train'],
-            eval_dataset=self.tokenized_dataset['test'],
-            callbacks=callbacks,
-        )
 
-        max_seq_length = None
+
+        max_seq_length = MAX_LENGTH
         packing = False
         trainer = SFTTrainer(
             model=self.model,
@@ -274,9 +265,12 @@ class FinetuneLLamaSFT():
             eval_dataset=self.testset,
             dataset_text_field="text",
             max_seq_length=max_seq_length,
-            tokenizer=self.llama_tokenizer,
+            tokenizer=self.tokenizer,
             args=training_args,
-            packing=packing,)
+            packing=packing,
+            compute_metrics=self._compute_metrics,
+            callbacks=callbacks,
+            )
 
 
 
