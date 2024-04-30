@@ -34,7 +34,7 @@ logging:
 finetune:
   model_name: ???
   freeze_base_model: False
-  dataset_name: "matbench_log_gvrh"
+  dataset_name: "matbench_perovskites"
   exp_name: [
     "train_${model.representation}_${model.finetune.dataset_name}_0",
     ]
@@ -74,7 +74,7 @@ finetune:
     lora_alpha: 32
     lora_dropout: 0.05
     bias: "none"
-    task_type: "TOKEN_CLS"
+    task_type: "CAUSAL_LM"
     #target_modules: ['q_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj', 'k_proj', 'v_proj'] # Choose all linear layers from the model
 
 
