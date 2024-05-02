@@ -15,7 +15,7 @@ from structllm.models.utils import CustomWandbCallback_Inference, TokenizerMixin
 class Inference(TokenizerMixin):
     def __init__(self, cfg: DictConfig):
 
-        super().__init__(cfg=cfg.model.representation, special_tokens=cfg.model.special_tokens)
+        super().__init__(cfg=cfg.model.representation, special_tokens=cfg.model.special_tokens, special_num_token=cfg.model.special_num_token)
         self.representation = cfg.model.representation
         self.cfg = cfg.model.inference
         self.context_length: int = self.cfg.context_length
