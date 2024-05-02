@@ -27,7 +27,7 @@ class FinetuneModel(TokenizerMixin):
     """
     def __init__(self, cfg: DictConfig,local_rank=None) -> None:
 
-        super().__init__(cfg=cfg.model.representation,special_tokens=cfg.model.special_tokens)
+        super().__init__(cfg=cfg.model.representation,special_tokens=cfg.model.special_tokens,special_num_token=cfg.model.special_num_token)
         self.local_rank = local_rank
         self.representation = cfg.model.representation
         self.cfg = cfg.model.finetune
