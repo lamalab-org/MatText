@@ -1,0 +1,13 @@
+# @package _global_
+model:
+  representation: cif_symmetrized
+  logging:
+    wandb_project: 2m_intel_ft
+  
+  finetune:
+    model_name: 2m_intel_ft
+    context_length: 1024
+    training_arguments:
+      per_device_train_batch_size: 32
+    path:
+      pretrained_checkpoint: /work/so87pot/structllm/megaloop2/checkpoints/checkpoints/cif_symmetrized_pt_30k_rt/checkpoint-45000

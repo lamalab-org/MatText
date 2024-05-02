@@ -1,4 +1,5 @@
 representation: ???
+special_num_token: ???
 special_tokens: {
     "unk_token": "[UNK]",
     "pad_token": "[PAD]",
