@@ -1,0 +1,14 @@
+# @package _global_
+model:
+  logging:
+    wandb_project: pt_300k_rt
+
+  representation: slice
+  pretrain:
+    name: pt_300k_rt
+    context_length:  512
+    training_arguments:
+      per_device_train_batch_size: 128
+    path:
+      data_root_path: /work/so87pot/material_db/structllm_dataset/300k
+      
