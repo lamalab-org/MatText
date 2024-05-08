@@ -1,5 +1,5 @@
 representation: ???
-special_num_token: True
+special_num_token: False
 special_tokens: {
     "unk_token": "[UNK]",
     "pad_token": "[PAD]",

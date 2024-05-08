@@ -218,7 +218,7 @@ class FinetuneLLamaSFT():
         if self.callbacks.custom_logger:
             callbacks.append(CustomWandbCallback_FineTune())
 
-        #callbacks.append(EvaluateFirstStepCallback)
+        callbacks.append(EvaluateFirstStepCallback)
 
         return callbacks
 
@@ -251,17 +251,18 @@ class FinetuneLLamaSFT():
         training_args = TrainingArguments(
             **config_train_args,
             # metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
-            #greater_is_better=False,  # Lower eval_rmse is better
+            greater_is_better=False,  # Lower eval_rmse is better
 
         )
 
 
         max_seq_length = MAX_LENGTH
         packing = False
-        trainer = SFTTrainer(
+        trainer =   (
             model=self.model,
             peft_config=self.peft_config,
             train_dataset=self.trainset,
+            eval_dataset=self.testset,
             dataset_text_field="text",
             max_seq_length=max_seq_length,
             tokenizer=self.tokenizer,
@@ -279,8 +280,8 @@ class FinetuneLLamaSFT():
         trainer.train()
         trainer.save_model(f"{self.cfg.path.finetuned_modelname}/llamav2-7b-lora-fine-tune")
 
-        # eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset['test'])
-        # wandb.log(eval_result)
+        eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset['test'])
+        wandb.log(eval_result)
 
         self.model.save_pretrained(self.cfg.path.finetuned_modelname)
         wandb.finish()
