@@ -45,7 +45,7 @@ def timeout_handler(signum, frame):
 signal.signal(signal.SIGALRM, timeout_handler)
 
 
-def process_entry_train_matbench(entry: dict, timeout: int, transformations:dict = {}, list_of_rep = ["cif_p1","cif_symmetrized","crystal_llm_rep","zmatrix"]) -> dict:
+def process_entry_train_matbench(entry: dict, timeout: int) -> dict:
     """Process as entry for Matbench train dataset with a timeout.
 
     Args:
@@ -57,9 +57,14 @@ def process_entry_train_matbench(entry: dict, timeout: int, transformations:dict
     """
     try:
         signal.alarm(timeout)  # Start the timer
-        text_reps = TextRep.from_input(entry["structure"],transformation=transformations).get_requested_text_reps(list_of_rep)
-        text_reps['labels'] = entry["labels"]
-        text_reps['mbid'] = entry["mbid"]
+        text_reps = TextRep.from_input(entry["structure"],transformations=[]).get_requested_text_reps(["cif_p1","cif_symmetrized","crystal_llm_rep","zmatrix","atoms","atoms_params","slice", "composition"])
+        text_reps['id'] = entry["id"]
+        text_reps['natoms'] = entry["natoms"]
+        text_reps['pld'] = entry["pld"]
+        text_reps['lcd'] = entry["lcd"]
+        text_reps['density'] = entry["density"]
+        text_reps['EgPBE'] = entry["EgPBE"]
+        text_reps['volume'] = entry["volume"]
         signal.alarm(0)  # Reset the timer
         return text_reps
     except TimeoutException:
@@ -70,13 +75,14 @@ def process_entry_train_matbench(entry: dict, timeout: int, transformations:dict
         return None
 
 
-def process_entry_test_matbench(entry: dict, timeout: int,transformations:dict = {}, list_of_rep = ["cif_p1","cif_symmetrized","crystal_llm_rep","zmatrix"]) -> dict:
+def process_entry_train_matbench(entry: dict, timeout: int, transformations:dict = {}, list_of_rep = ["cif_p1","cif_symmetrized","crystal_llm_rep","zmatrix"]) -> dict:
     """Process an entry for Matbench test dataset with a timeout.
 
     Args:
         entry (dict): The entry to process.
         timeout (int): The timeout in seconds.
-
+        transformations (dict): Transformations to apply to the structure 
+        list_of_rep (List{str]): representations to obtain for the entry
     Returns:
         dict: The processed entry, or None if an error occurred.
     """
@@ -102,7 +108,8 @@ def process_batch(num_workers, batch, timeout, process_entry_func, transformatio
         batch (list): The batch of entries to process.
         timeout (int): The timeout in seconds for each entry.
         process_entry_func (function): The function to process an entry.
-
+        transformations (dict): Transformations to apply to the structure 
+        list_of_rep (List{str]): representations to obtain for the entry
     Returns:
         list: The processed entries.
     """
@@ -131,7 +138,7 @@ def process_json_to_json(
     num_cpus = multiprocessing.cpu_count()
 
     process_entry_funcs = {
-        'test': process_entry_test_matbench,
+        'test': process_entry_train_matbench,
         'train': process_entry_train_matbench
     }
     # Get the selected function

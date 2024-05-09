@@ -1,0 +1,65 @@
+representation: crystal_llm_rep
+special_tokens: {
+    "unk_token": "[UNK]",
+    "pad_token": "[PAD]",
+    "cls_token": "[CLS]",
+    "sep_token": "[SEP]",
+    "mask_token": "[MASK]",
+    "eos_token": "[EOS]",
+    "bos_token": "[BOS]",
+}
+
+logging:
+  wandb_project : lama
+  wandb_log_model : "checkpoint"
+
+finetune:
+  model_name: lama
+  freeze_base_model: False
+  dataset_name: "matbench_log_gvrh"
+  exp_name: [
+    "train_${model.representation}_${model.finetune.dataset_name}_0",
+    ]
+
+
+  path:
+    pretrained_checkpoint: "meta-llama/Llama-2-7b-hf"
+
+
+    finetune_data_rootpath: "/work/so87pot/material_db/all_1"                     # <--- Change this to the path of the finetune data
+    finetune_traindata: [
+      "${model.finetune.path.finetune_data_rootpath}/train_${model.finetune.dataset_name}_0.json",
+       ]
+
+    finetune_testdata:
+    root_path: "/work/so87pot/structllm/megaloop/finetune/${model.finetune.model_name}"  # <--- Change this to the path where chkpoints and logs will be saved
+    output_dir:          "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
+    logging_dir:         "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
+    finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
+
+  context_length: 1024
+  callbacks:
+    early_stopping: False
+    custom_logger: False
+    early_stopping_patience: 10
+    early_stopping_threshold: 0.001
+
+  training_arguments:
+    output_dir: "${model.finetune.path.output_dir}"
+    overwrite_output_dir: True
+    num_train_epochs: 30
+    per_device_train_batch_size: 8
+    save_strategy: "epoch"
+    #evaluation_strategy: "no" 
+    do_eval: True
+    evaluation_strategy: 'steps'   
+    logging_strategy: 'steps'
+    logging_first_step: True
+    save_steps: 5 # Number of epochs before saving
+    report_to: "wandb"
+    save_total_limit: 5
+    learning_rate: 5e-4
+    logging_steps: 100
+    eval_steps: 100
+    seed: 42
+    #load_best_model_at_end: True
