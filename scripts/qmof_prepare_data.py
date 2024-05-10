@@ -81,7 +81,8 @@ def process_entry_train_matbench(entry: dict, timeout: int, transformations:dict
     Args:
         entry (dict): The entry to process.
         timeout (int): The timeout in seconds.
-
+        transformations (dict): Transformations to apply to the structure 
+        list_of_rep (List{str]): representations to obtain for the entry
     Returns:
         dict: The processed entry, or None if an error occurred.
     """
@@ -107,7 +108,8 @@ def process_batch(num_workers, batch, timeout, process_entry_func, transformatio
         batch (list): The batch of entries to process.
         timeout (int): The timeout in seconds for each entry.
         process_entry_func (function): The function to process an entry.
-
+        transformations (dict): Transformations to apply to the structure 
+        list_of_rep (List{str]): representations to obtain for the entry
     Returns:
         list: The processed entries.
     """
