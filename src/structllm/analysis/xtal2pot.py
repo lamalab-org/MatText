@@ -149,7 +149,7 @@ class Xtal2Pot:
         self.geometry_interaction_order = geometry_interaction_order
         self.atomic_parameter = _ATOM_PARAMETERS[atomic_parameter]
 
-    def get_potential(self, struct: Structure, alpha: float = 0.5) -> float:
+    def get_potential(self, struct: Structure) -> float:
         composition_energy = composition_potential(
             struct.composition.as_dict(),
             self.mixing_rule,
@@ -160,5 +160,13 @@ class Xtal2Pot:
         geometry_energy = geometry_potential(
             struct, self.geometry_interaction_order, self.geometry_potential
         )
-
-        return alpha * composition_energy + (1 - alpha) * geometry_energy
+        return composition_energy,geometry_energy
+    
+    def get_total_energy(self, struct: Structure, alphas: list[float] = [0.5]):
+        energies = {}
+        for alpha in alphas:
+            composition_energy, geometry_energy = self.get_potential(struct)
+            total_energy = alpha * composition_energy + (1 - alpha) * geometry_energy
+            energies[alpha] = total_energy
+        return energies
+            
