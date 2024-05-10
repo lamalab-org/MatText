@@ -5,7 +5,6 @@ from math import sqrt
 
 import numpy as np
 import pandas as pd
-import pystow
 from pymatgen.core import Structure
 from sklearn.neighbors import KDTree
 
@@ -15,19 +14,19 @@ _MIXING_RULES = {}
 _ATOM_PARAMETERS = {}
 _GEOMETRY_POTENTIALS = {}
 
-_df_uff_energy: pd.DataFrame = pystow.ensure_csv(
-    structllm_storage,
+_df_uff_energy: pd.DataFrame = structllm_storage.ensure_csv(
     url="https://www.dropbox.com/scl/fi/fnla7a64yjpk9ca65d69y/element_to_energy.csv?rlkey=d97gp2idkbgdemncv1cys7hye&dl=1",
+    read_csv_kwargs={"sep": ","},
 )
 
-_df_uff_xi: pd.DataFrame = pystow.ensure_csv(
-    structllm_storage,
+_df_uff_xi: pd.DataFrame = structllm_storage.ensure_csv(
     url="https://www.dropbox.com/scl/fi/hz7wdi1ug31gdfddxb600/element_to_xi.csv?rlkey=wdwtowjx2jyp9m636ed4z60ki&dl=1",
+    read_csv_kwargs={"sep": ","},
 )
 
-_df_uff_z: pd.DataFrame = pystow.ensure_csv(
-    structllm_storage,
+_df_uff_z: pd.DataFrame = structllm_storage.ensure_csv(
     url="https://www.dropbox.com/scl/fi/ieqcfyw6g5zsa4memcb5f/element_to_zi.csv?rlkey=nn307r5k0h4yuph6pjmk44omr&dl=1",
+    read_csv_kwargs={"sep": ","},
 )
 
 _ATOM_PARAMETERS["uff_energy"] = dict(
@@ -88,7 +87,7 @@ def composition_potential(
 
     composition_energy = 0
 
-    atom_list = [[atom] * count for atom, count in composition.items()]
+    atom_list = [[atom] * int(count) for atom, count in composition.items()]
     atom_list = functools.reduce(operator.iadd, atom_list, [])
     for combination in combinations(atom_list, interaction_order):
         atomic_parameters_of_combination = [
