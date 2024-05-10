@@ -4,62 +4,65 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "structllm"
-description="LLM applied on materials"
+description = "LLM applied on materials"
 version = "0.0.1"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [
   { name = "Nawaf", email = "nawaf.pvt@gmail.com" },
-  { name = "Kevin Jablonka", email = "mail@kjablonka.com" }]
+  { name = "Kevin Jablonka", email = "mail@kjablonka.com" },
+]
 keywords = ["LLM", "Inverse-Design"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Science/Research",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Intended Audience :: Science/Research",
-    "Topic :: Scientific/Engineering",
-    "Operating System :: Microsoft :: Windows",
-    "Operating System :: Unix",
-    "Operating System :: MacOS",
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: Unix",
+  "Operating System :: MacOS",
 ]
 requires-python = ">=3.8, <3.13"
 dependencies = [
-    "transformers",
-    "tokenizers==0.14.1",
-    "datasets==2.14.6",
-    "wandb==0.15.12",
-    "slices",
-    "matbench",
-    "fire",
-    "hydra-core",
-    "torch==2.1.0",
-    "accelerate==0.24.1",
-    "hydra-submitit-launcher",
-    "python-dotenv",
-    #"xtal2txt @ git+https://github.com/lamalab-org/xtal2txt.git",
-     ]
+  "transformers",
+  "tokenizers==0.14.1",
+  "datasets==2.14.6",
+  "wandb==0.15.12",
+  "slices",
+  "matbench",
+  "fire",
+  "hydra-core",
+  "torch==2.1.0",
+  "accelerate==0.24.1",
+  "hydra-submitit-launcher",
+  "python-dotenv",
+  "pystow",
+  #"xtal2txt @ git+https://github.com/lamalab-org/xtal2txt.git",
+]
 
 [project.optional-dependencies]
 dev = [
-    "jupyter==1.0.0",
-    "black>=23.7.0", 
-    "docformatter>=1.7.5", 
-    "isort>=5.12.0", 
-    "pytest>=7.4.0", 
-    "pytest-cov>=3.0.0", 
-    "ruff>=0.0.285"]
-    
+  "jupyter==1.0.0",
+  "black>=23.7.0",
+  "docformatter>=1.7.5",
+  "isort>=5.12.0",
+  "pytest>=7.4.0",
+  "pytest-cov>=3.0.0",
+  "ruff>=0.0.285",
+]
+
 docs = [
-    "mkdocs-material>=9.4.0",
-    "mkdocstrings[python]>=0.22.0",
-    "mkdocs-gen-files>=0.5.0",
-    "mkdocs-literate-nav>=0.6.0",
-    "pillow>=10.0.0",
-    "cairosvg>=2.7.1"
+  "mkdocs-material>=9.4.0",
+  "mkdocstrings[python]>=0.22.0",
+  "mkdocs-gen-files>=0.5.0",
+  "mkdocs-literate-nav>=0.6.0",
+  "pillow>=10.0.0",
+  "cairosvg>=2.7.1",
 ]
 
 [tool.setuptools.package-data]
@@ -93,44 +96,46 @@ source = ["src"]
 
 [tool.coverage.report]
 exclude_also = [
-    "if TYPE_CHECKING:",
-    "if __name__ == .__main__.:",
-    "except ImportError",
+  "if TYPE_CHECKING:",
+  "if __name__ == .__main__.:",
+  "except ImportError",
 ]
 
 [tool.ruff]
 select = [
-  "E", "F", "W", # flake8
-  "B",           # flake8-bugbear
-  "I",           # isort
-  "ARG",         # flake8-unused-arguments
-  "C4",          # flake8-comprehensions
-  "EM",          # flake8-errmsg
-  "ICN",         # flake8-import-conventions
-  "ISC",         # flake8-implicit-str-concat
-  "G",           # flake8-logging-format
-  "PGH",         # pygrep-hooks
-  "PIE",         # flake8-pie
-  "PL",          # pylint
-  "PT",          # flake8-pytest-style
-  "PTH",         # flake8-use-pathlib
-  "RET",         # flake8-return
-  "RUF",         # Ruff-specific
-  "SIM",         # flake8-simplify
-  "T20",         # flake8-print
-  "UP",          # pyupgrade
-  "YTT",         # flake8-2020
-  "EXE",         # flake8-executable
-  "NPY",         # NumPy specific rules
-  "PD",          # pandas-vet
+  "E",
+  "F",
+  "W",   # flake8
+  "B",   # flake8-bugbear
+  "I",   # isort
+  "ARG", # flake8-unused-arguments
+  "C4",  # flake8-comprehensions
+  "EM",  # flake8-errmsg
+  "ICN", # flake8-import-conventions
+  "ISC", # flake8-implicit-str-concat
+  "G",   # flake8-logging-format
+  "PGH", # pygrep-hooks
+  "PIE", # flake8-pie
+  "PL",  # pylint
+  "PT",  # flake8-pytest-style
+  "PTH", # flake8-use-pathlib
+  "RET", # flake8-return
+  "RUF", # Ruff-specific
+  "SIM", # flake8-simplify
+  "T20", # flake8-print
+  "UP",  # pyupgrade
+  "YTT", # flake8-2020
+  "EXE", # flake8-executable
+  "NPY", # NumPy specific rules
+  "PD",  # pandas-vet
 ]
 extend-ignore = [
-  "PLR",    # Design related pylint codes
-  "E501",   # Line too long
-  "PT004",  # Use underscore for non-returning fixture (use usefixture instead)
-  "B028",   # No explicit stacklevel
-  "EM101",  # Exception must not use a string literal
-  "EM102",  # Exception must not use an f-string literal
+  "PLR",   # Design related pylint codes
+  "E501",  # Line too long
+  "PT004", # Use underscore for non-returning fixture (use usefixture instead)
+  "B028",  # No explicit stacklevel
+  "EM101", # Exception must not use a string literal
+  "EM102", # Exception must not use an f-string literal
 ]
 typing-modules = ["mypackage._compat.typing"]
 src = ["src"]
