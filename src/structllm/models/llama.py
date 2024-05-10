@@ -167,7 +167,7 @@ class FinetuneLLama():
         Prepare training and validation datasets.
 
         Args:
-            train_df (pd.DataFrame): DataFrame containing training data.
+           path (Union[str, Path]): Path to json file containing the data
 
         Returns:
             DatasetDict: Dictionary containing training and validation datasets.
