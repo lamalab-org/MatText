@@ -70,6 +70,14 @@ def average_of_squares_mixing(parameters: np.array) -> float:
     return np.mean(parameters**2)
 
 
+def get_atomic_parameters(
+    atomic_parameters: dict,
+    atom: str,
+):
+    try:
+        return atomic_parameters[atom]
+    except KeyError:
+        return np.mean(list(atomic_parameters.values()))
 
 
 def composition_potential(
@@ -93,7 +101,7 @@ def composition_potential(
     atom_list = functools.reduce(operator.iadd, atom_list, [])
     for combination in combinations(atom_list, interaction_order):
         atomic_parameters_of_combination = [
-            atomic_parameters.get(atom, np.mean(list(atomic_parameters.values()))) for atom in combination
+            get_atomic_parameters(atomic_parameters, atom) for atom in combination
         ]
         composition_energy += mixing_rule(atomic_parameters_of_combination)
 
