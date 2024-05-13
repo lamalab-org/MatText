@@ -9,8 +9,10 @@ from omegaconf import DictConfig
 from structllm.models.benchmark import Matbenchmark
 from structllm.models.finetune import FinetuneModel
 from structllm.models.llama import FinetuneLLama
+from structllm.models.llama_sft import FinetuneLLamaSFT
 from structllm.models.inference import Benchmark
 from structllm.models.pretrain import PretrainModel
+from structllm.models.potential import PotentialModel
 
 
 class TaskRunner:
@@ -36,6 +38,12 @@ class TaskRunner:
 
         if "llama" in run:
             self.run_llama(task_cfg,local_rank=local_rank)
+
+        if "llama_sft" in run:
+            self.run_llama_sft(task_cfg,local_rank=local_rank)
+
+        if "potential" in run:
+            self.run_potential(task_cfg)
 
 
     def run_benchmarking(self, task_cfg: DictConfig,local_rank=None) -> None:
@@ -69,6 +77,22 @@ class TaskRunner:
             print(f)
             wandb.finish()
 
+    def run_llama_sft(self, task_cfg: DictConfig,local_rank=None) -> None:
+        for exp_name, train_data_path in zip(task_cfg.model.finetune.exp_name, task_cfg.model.finetune.path.finetune_traindata):
+            wandb.init(
+                config=dict(task_cfg.model.finetune),
+                project=task_cfg.model.logging.wandb_project, name=exp_name)
+
+            exp_cfg = task_cfg.copy()
+            exp_cfg.model.finetune.exp_name = exp_name
+            exp_cfg.model.finetune.path.finetune_traindata = train_data_path
+
+
+            finetuner = FinetuneLLamaSFT(exp_cfg,local_rank)
+            f = finetuner.finetune()
+            print(f)
+            wandb.finish()
+
 
     def run_finetuning(self, task_cfg: DictConfig,local_rank=None) -> None:
         for exp_name, train_data_path in zip(task_cfg.model.finetune.exp_name, task_cfg.model.finetune.path.finetune_traindata):
@@ -84,6 +108,22 @@ class TaskRunner:
             finetuner = FinetuneModel(exp_cfg,local_rank)
             finetuner.finetune()
             wandb.finish()
+
+    def run_potential(self, task_cfg: DictConfig,local_rank=None) -> None:
+        for exp_name, train_data_path in zip(task_cfg.model.finetune.exp_name, task_cfg.model.finetune.path.finetune_traindata):
+            wandb.init(
+                config=dict(task_cfg.model.finetune),
+                project=task_cfg.model.logging.wandb_project, name=exp_name)
+
+            exp_cfg = task_cfg.copy()
+            exp_cfg.model.finetune.exp_name = exp_name
+            exp_cfg.model.finetune.path.finetune_traindata = train_data_path
+
+
+            finetuner = PotentialModel(exp_cfg,local_rank)
+            finetuner.finetune()
+            wandb.finish()
+
 
     def run_pretraining(self, task_cfg: DictConfig,local_rank=None) -> None:
 

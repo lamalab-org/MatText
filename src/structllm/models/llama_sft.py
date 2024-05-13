@@ -15,16 +15,16 @@ from peft import (
 from torch import nn
 from torch.utils.data import Dataset
 from transformers import (
+    AutoModelForCausalLM,
     BitsAndBytesConfig,
-    # AutoModelForSequenceClassification,
     EarlyStoppingCallback,
     LlamaForSequenceClassification,
     LlamaTokenizer,
-    # AutoTokenizer,
     Trainer,
     TrainerCallback,
     TrainingArguments,
 )
+from trl import SFTTrainer
 
 from structllm.models.utils import (
     CustomWandbCallback_FineTune,
@@ -67,7 +67,7 @@ def smart_tokenizer_and_embedding_resize(
     #   output_embeddings[-num_new_tokens:] = output_embeddings_avg
 
 
-class FinetuneLLama:
+class FinetuneLLamaSFT:
     """Class to perform finetuning of a language model.
         Initialize the FinetuneModel.
 
@@ -79,13 +79,17 @@ class FinetuneLLama:
     def __init__(self, cfg: DictConfig, local_rank=None) -> None:
         self.local_rank = local_rank
         self.representation = cfg.model.representation
+        self.property_map = cfg.model.PROPERTY_MAP
+        self.material_map = cfg.model.MATERIAL_MAP
         self.cfg = cfg.model.finetune
         self.context_length: int = self.cfg.context_length
         self.callbacks = self.cfg.callbacks
         self.ckpt = self.cfg.path.pretrained_checkpoint
         self.bnb_config = self.cfg.bnb_config
-        self.model, self.tokenizer = self._setup_model_tokenizer()
-        self.tokenized_dataset = self._prepare_datasets(
+        self.model, self.tokenizer, self.peft_config = self._setup_model_tokenizer()
+        self.property_ = self.property_map[self.cfg.dataset_name]
+        self.material_ = self.material_map[self.cfg.dataset_name]
+        self.trainset, self.testset = self._prepare_datasets(
             self.cfg.path.finetune_traindata
         )
 
@@ -123,7 +127,7 @@ class FinetuneLLama:
                 print("=" * 80)
 
         device_map = {"": 0}
-        model = LlamaForSequenceClassification.from_pretrained(
+        model = AutoModelForCausalLM.from_pretrained(
             self.ckpt,
             num_labels=1,
             quantization_config=bnb_config,
@@ -131,8 +135,8 @@ class FinetuneLLama:
         )
 
         lora_config = LoraConfig(**self.cfg.lora_config)
-        model = get_peft_model(model, lora_config)
-        model.print_trainable_parameters()
+        # model = get_peft_model(model, lora_config)
+        # model.print_trainable_parameters()
 
         special_tokens_dict = dict()
         if llama_tokenizer.pad_token is None:
@@ -151,7 +155,7 @@ class FinetuneLLama:
         )
 
         print(len(llama_tokenizer))
-        return model, llama_tokenizer
+        return model, llama_tokenizer, lora_config
 
     def _tokenize(self, examples):
         tokenized_examples = self.tokenizer(
@@ -162,12 +166,26 @@ class FinetuneLLama:
         )
         return tokenized_examples
 
+    def format_qstns(self, sample):
+        material = "material"
+        question = f"<s>Question: What is the {self.property_} of the {self.material_} "
+        material = f"{sample[self.representation]}"
+        response = f" Answer: {round(float(sample['labels']),3)}"
+        # join all the parts together
+        prompt = "".join([i for i in [question, material, response] if i is not None])
+        return prompt
+
+    # template dataset to add prompt to each sample
+    def template_dataset_test(self, sample):
+        sample["text"] = f"{self.format_qstns(sample)}{self.tokenizer.eos_token}"
+        return sample
+
     def _prepare_datasets(self, path: str) -> DatasetDict:
         """
         Prepare training and validation datasets.
 
         Args:
-           path (Union[str, Path]): Path to json file containing the data
+            train_df (pd.DataFrame): DataFrame containing training data.
 
         Returns:
             DatasetDict: Dictionary containing training and validation datasets.
@@ -175,7 +193,13 @@ class FinetuneLLama:
 
         ds = load_dataset("json", data_files=path, split="train")
         dataset = ds.train_test_split(shuffle=True, test_size=0.2, seed=42)
-        return dataset.map(self._tokenize, batched=True)
+        ds = dataset.map(self._tokenize, batched=True)
+
+        trainset = ds["train"].map(self.template_dataset_test)
+        testset = ds["test"].map(self.template_dataset_test)
+        print(trainset[0]["text"])
+        print(testset[0]["text"])
+        return trainset, testset
 
     def _callbacks(self) -> List[TrainerCallback]:
         """Returns a list of callbacks for early stopping, and custom logging."""
@@ -192,7 +216,7 @@ class FinetuneLLama:
         if self.callbacks.custom_logger:
             callbacks.append(CustomWandbCallback_FineTune())
 
-        callbacks.append(EvaluateFirstStepCallback)
+        # callbacks.append(EvaluateFirstStepCallback)
 
         return callbacks
 
@@ -222,18 +246,22 @@ class FinetuneLLama:
         # os.environ["ACCELERATE_MIXED_PRECISION"] = "no"
         training_args = TrainingArguments(
             **config_train_args,
-            metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
-            greater_is_better=False,  # Lower eval_rmse is better
+            # metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
+            # greater_is_better=False,  # Lower eval_rmse is better
         )
 
-        trainer = Trainer(
+        max_seq_length = MAX_LENGTH
+        packing = False
+        trainer = SFTTrainer(
             model=self.model,
-            args=training_args,
-            data_collator=None,
-            compute_metrics=self._compute_metrics,
+            peft_config=self.peft_config,
+            train_dataset=self.trainset,
+            dataset_text_field="text",
+            max_seq_length=max_seq_length,
             tokenizer=self.tokenizer,
-            train_dataset=self.tokenized_dataset["train"],
-            eval_dataset=self.tokenized_dataset["test"],
+            args=training_args,
+            packing=packing,
+            #            compute_metrics=self._compute_metrics,
             callbacks=callbacks,
         )
 
@@ -245,8 +273,8 @@ class FinetuneLLama:
             f"{self.cfg.path.finetuned_modelname}/llamav2-7b-lora-fine-tune"
         )
 
-        eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset["test"])
-        wandb.log(eval_result)
+        # eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset['test'])
+        # wandb.log(eval_result)
 
         self.model.save_pretrained(self.cfg.path.finetuned_modelname)
         wandb.finish()
