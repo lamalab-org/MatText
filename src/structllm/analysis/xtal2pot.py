@@ -70,6 +70,8 @@ def average_of_squares_mixing(parameters: np.array) -> float:
     return np.mean(parameters**2)
 
 
+
+
 def composition_potential(
     composition: dict,
     mixing_rule: callable,
@@ -91,9 +93,8 @@ def composition_potential(
     atom_list = functools.reduce(operator.iadd, atom_list, [])
     for combination in combinations(atom_list, interaction_order):
         atomic_parameters_of_combination = [
-            atomic_parameters[atom] for atom in combination
+            atomic_parameters.get(atom, np.mean(list(atomic_parameters.values()))) for atom in combination
         ]
-
         composition_energy += mixing_rule(atomic_parameters_of_combination)
 
     return composition_energy
@@ -160,8 +161,8 @@ class Xtal2Pot:
         geometry_energy = geometry_potential(
             struct, self.geometry_interaction_order, self.geometry_potential
         )
-        return composition_energy,geometry_energy
-    
+        return composition_energy, geometry_energy
+
     def get_total_energy(self, struct: Structure, alphas: list[float] = [0.5]):
         energies = {}
         for alpha in alphas:
@@ -169,4 +170,3 @@ class Xtal2Pot:
             total_energy = alpha * composition_energy + (1 - alpha) * geometry_energy
             energies[alpha] = total_energy
         return energies
-            
