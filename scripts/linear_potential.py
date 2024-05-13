@@ -7,9 +7,9 @@ from typing import Dict, List
 
 import fire
 from pymatgen.core import Structure
+from xtal2txt.core import TextRep
 
 from structllm.analysis.xtal2pot import Xtal2Pot
-from xtal2txt.core import TextRep
 
 linearpotential = Xtal2Pot()
 
@@ -59,9 +59,11 @@ def process_entry_train_matbench(entry: dict, timeout: int, alphas=None) -> dict
             structure = Structure.from_str(str(entry["structure"]), "cif")
         except Exception as e:
             print(e)
-        #text_reps = linearpotential.get_total_energy(structure, alphas=alphas)
+        # text_reps = linearpotential.get_total_energy(structure, alphas=alphas)
         text_reps = {}
-        text_reps["crystal_llm_rep"] = TextRep.from_input(entry["structure"]).get_crystal_llm_rep()
+        text_reps["crystal_llm_rep"] = TextRep.from_input(
+            entry["structure"]
+        ).get_crystal_llm_rep()
         text_reps["labels"] = entry["labels"]
         text_reps["mbid"] = entry["mbid"]
         composition_energy, geometry_energy = linearpotential.get_potential(structure)
@@ -91,9 +93,11 @@ def process_entry_test_matbench(entry: dict, timeout: int, alphas=None) -> dict:
     try:
         signal.alarm(timeout)  # Start the timer
         structure = Structure.from_str(str(entry["structure"]), "cif")
-        #text_reps = linearpotential.get_total_energy(structure, alphas=alphas)
+        # text_reps = linearpotential.get_total_energy(structure, alphas=alphas)
         text_reps = {}
-        text_reps["crystal_llm_rep"] = TextRep.from_input(entry["structure"]).get_crystal_llm_rep()
+        text_reps["crystal_llm_rep"] = TextRep.from_input(
+            entry["structure"]
+        ).get_crystal_llm_rep()
         text_reps["mbid"] = entry["mbid"]
         composition_energy, geometry_energy = linearpotential.get_potential(structure)
         text_reps["composition_energy"] = composition_energy
