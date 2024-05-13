@@ -22,15 +22,18 @@ def read_json(json_file: str) -> List[Dict]:
     return data
 
 
-
 def process_entry(entry: dict) -> dict:
     try:
         print(f"strating{entry['material_id']}")
-        text_reps = TextRep.from_input(entry['cif_p1']).get_requested_text_reps(["zmatrix"])
-        print(text_reps)
-        #text_reps['mbid'] = entry["mbid"] # Use get_all_text_reps to get various text representations # Add chemical formula to the dictionary
-        #text_reps['crystal_system'] = entry['structural_info']['crystal_system']  # Add crystal system to the dictionary
-        text_reps['material_id'] = entry['material_id']  # Add material id to the dictionary
+        text_reps = TextRep.from_input(entry["cif_p1"]).get_requested_text_reps(
+            ["zmatrix", "atoms", "atoms_params"]
+        )
+        # print(text_reps)
+        # text_reps['mbid'] = entry["mbid"] # Use get_all_text_reps to get various text representations # Add chemical formula to the dictionary
+        # text_reps['crystal_system'] = entry['structural_info']['crystal_system']  # Add crystal system to the dictionary
+        text_reps["material_id"] = entry[
+            "material_id"
+        ]  # Add material id to the dictionary
         return text_reps  # Return the entire dictionary
     except TimeoutError:
         print("Timeout error processing a row")
@@ -40,10 +43,8 @@ def process_entry(entry: dict) -> dict:
         return None
 
 
-
-def process_batch(num_workers,batch, timeout):
-
-    #process_entry_with_timeout = partial(process_entry, timeout=timeout)
+def process_batch(num_workers, batch, timeout):
+    # process_entry_with_timeout = partial(process_entry, timeout=timeout)
 
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         results = list(executor.map(process_entry, batch))
@@ -51,9 +52,15 @@ def process_batch(num_workers,batch, timeout):
     return [result for result in results if result is not None]
 
 
-
-def process_json_to_json(json_file: str, output_json_file: str, log_file_path: str, num_workers: int = 48, timeout: int = 600, save_interval: int = 100, last_processed_entry: int = 0):
-
+def process_json_to_json(
+    json_file: str,
+    output_json_file: str,
+    log_file_path: str,
+    num_workers: int = 48,
+    timeout: int = 600,
+    save_interval: int = 100,
+    last_processed_entry: int = 0,
+):
     num_cpus = multiprocessing.cpu_count()
     print(num_workers)
 
@@ -69,16 +76,16 @@ def process_json_to_json(json_file: str, output_json_file: str, log_file_path: s
     if last_processed_entry > 0:
         data = data[last_processed_entry:]
 
-    batch_iterator = (data[i:i + batch_size] for i in range(0, len(data), batch_size))
+    batch_iterator = (data[i : i + batch_size] for i in range(0, len(data), batch_size))
 
     for i, batch_data in enumerate(batch_iterator, start=1):
         batch_results = process_batch(num_workers, batch_data, timeout)
 
         # Append batch_results to the output JSON file
-        with open(output_json_file, 'a') as f:
+        with open(output_json_file, "a") as f:
             for result in batch_results:
                 json.dump(result, f)
-                f.write('\n')
+                f.write("\n")
 
         last_processed_entry += len(batch_data)
         if i % save_interval == 0:
@@ -91,5 +98,3 @@ def process_json_to_json(json_file: str, output_json_file: str, log_file_path: s
 
 if __name__ == "__main__":
     fire.Fire(process_json_to_json)
-
-

@@ -37,11 +37,10 @@ _DEFAULT_SPECIAL_TOKENS = {
 class TokenizerMixin:
     """Mixin class to handle tokenizer functionality."""
 
-    def __init__(self, cfg,special_tokens: Dict[str, str] = _DEFAULT_SPECIAL_TOKENS, special_num_token =True) -> None:
+    def __init__(self, cfg,special_tokens: Dict[str, str] = _DEFAULT_SPECIAL_TOKENS, special_num_token =False) -> None:
 
         self.representation = cfg
         self._wrapped_tokenizer = None
-
         self._tokenizer = _TOKENIZER_MAP.get(self.representation)
         if self._tokenizer is None:
             raise ValueError(f"Tokenizer not defined for {self.representation}")

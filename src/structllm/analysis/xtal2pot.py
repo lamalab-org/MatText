@@ -103,7 +103,6 @@ def composition_potential(
         atomic_parameters_of_combination = [
             get_atomic_parameters(atomic_parameters, atom) for atom in combination
         ]
-
         composition_energy += mixing_rule(atomic_parameters_of_combination)
 
     return composition_energy
