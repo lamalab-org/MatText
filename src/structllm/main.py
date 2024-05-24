@@ -8,11 +8,11 @@ from omegaconf import DictConfig
 
 from structllm.models.benchmark import Matbenchmark
 from structllm.models.finetune import FinetuneModel
+from structllm.models.inference import Benchmark
 from structllm.models.llama import FinetuneLLama
 from structllm.models.llama_sft import FinetuneLLamaSFT
-from structllm.models.inference import Benchmark
-from structllm.models.pretrain import PretrainModel
 from structllm.models.potential import PotentialModel
+from structllm.models.pretrain import PretrainModel
 
 
 class TaskRunner:

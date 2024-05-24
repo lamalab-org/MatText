@@ -14,7 +14,11 @@ from transformers import (
     TrainingArguments,
 )
 
-from structllm.models.utils import CustomWandbCallback_FineTune, TokenizerMixin, EvaluateFirstStepCallback
+from structllm.models.utils import (
+    CustomWandbCallback_FineTune,
+    EvaluateFirstStepCallback,
+    TokenizerMixin,
+)
 
 
 class FinetuneModel(TokenizerMixin):

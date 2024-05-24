@@ -31,12 +31,11 @@ def read_json(json_file: str) -> List[Dict]:
     return data
 
 
-class TimeoutException(Exception):   
+class TimeoutException(Exception):
     """Custom exception class for timeouts."""
-    pass
 
 
-def timeout_handler(signum, frame):   
+def timeout_handler(signum, frame):
     """Custom signal handler for timeouts."""
     raise TimeoutException
 
@@ -122,12 +121,12 @@ def process_batch(num_workers, batch, timeout, process_entry_func, transformatio
 
 
 def process_json_to_json(
-        json_file: str, 
-        output_json_file: str, 
-        log_file_path: str, 
+        json_file: str,
+        output_json_file: str,
+        log_file_path: str,
         process_entry: str = 'test',
-        num_workers: int = 48, 
-        timeout: int = 600, 
+        num_workers: int = 48,
+        timeout: int = 600,
         save_interval: int = 100,
         last_processed_entry: int = 0,
         transformations:dict = {},

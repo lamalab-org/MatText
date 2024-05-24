@@ -1,10 +1,9 @@
-import os
 import json
-from tqdm import tqdm
+import os
 
-from mpcontribs.client import Client
-from pymatgen.core import Structure
 from dotenv import load_dotenv
+from mpcontribs.client import Client
+from tqdm import tqdm
 
 
 class ContribScreeningCallbacks:
