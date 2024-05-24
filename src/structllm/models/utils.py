@@ -8,6 +8,7 @@ from xtal2txt.tokenizer import (
     CrysllmTokenizer,
     RobocrysTokenizer,
     SliceTokenizer,
+    SmilesTokenizer,
     SmilesTokenizer
 )
 
@@ -24,6 +25,7 @@ _TOKENIZER_MAP = {
     "atoms_params": CompositionTokenizer,
     "zmatrix": CrysllmTokenizer,
     "local_env": SmilesTokenizer,
+    "local_env" : SmilesTokenizer
 }
 
 _DEFAULT_SPECIAL_TOKENS = {
