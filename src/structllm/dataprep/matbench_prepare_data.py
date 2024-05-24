@@ -34,7 +34,6 @@ def read_json(json_file: str) -> List[Dict]:
 class TimeoutException(Exception):
     """Custom exception class for timeouts."""
 
-    pass
 
 
 def timeout_handler(signum, frame):

@@ -9,7 +9,6 @@ from xtal2txt.tokenizer import (
     RobocrysTokenizer,
     SliceTokenizer,
     SmilesTokenizer,
-    SmilesTokenizer
 )
 
 _TOKENIZER_MAP = {
@@ -21,11 +20,10 @@ _TOKENIZER_MAP = {
     "crystal_llm_rep": CrysllmTokenizer,
     "robocrys_rep": RobocrysTokenizer,
     "wycoff_rep": None,
-    "atoms" : CompositionTokenizer,
+    "atoms": CompositionTokenizer,
     "atoms_params": CompositionTokenizer,
     "zmatrix": CrysllmTokenizer,
     "local_env": SmilesTokenizer,
-    "local_env" : SmilesTokenizer
 }
 
 _DEFAULT_SPECIAL_TOKENS = {
@@ -38,11 +36,16 @@ _DEFAULT_SPECIAL_TOKENS = {
     "bos_token": "[BOS]",
 }
 
+
 class TokenizerMixin:
     """Mixin class to handle tokenizer functionality."""
 
-    def __init__(self, cfg,special_tokens: Dict[str, str] = _DEFAULT_SPECIAL_TOKENS, special_num_token =False) -> None:
-
+    def __init__(
+        self,
+        cfg,
+        special_tokens: Dict[str, str] = _DEFAULT_SPECIAL_TOKENS,
+        special_num_token=False,
+    ) -> None:
         self.representation = cfg
         self._wrapped_tokenizer = None
         self._tokenizer = _TOKENIZER_MAP.get(self.representation)
@@ -50,21 +53,27 @@ class TokenizerMixin:
             raise ValueError(f"Tokenizer not defined for {self.representation}")
 
         self._wrapped_tokenizer = self._tokenizer(
-                    special_num_token=special_num_token,
-                    special_tokens=special_tokens,
-                    model_max_length=512, 
-                    truncation=False, 
-                    padding=False
-                )
+            special_num_token=special_num_token,
+            special_tokens=special_tokens,
+            model_max_length=512,
+            truncation=False,
+            padding=False,
+        )
         print(f"special_tokens: {special_tokens}")
         print(self._wrapped_tokenizer.tokenize("Se2Se3"))
 
-        #self._wrapped_tokenizer.add_special_tokens(special_tokens=special_tokens)
+        # self._wrapped_tokenizer.add_special_tokens(special_tokens=special_tokens)
 
-    def _tokenize_pad_and_truncate(self, texts: Dict[str, Any], context_length: int) -> Dict[str, Any]:
+    def _tokenize_pad_and_truncate(
+        self, texts: Dict[str, Any], context_length: int
+    ) -> Dict[str, Any]:
         """Tokenizes, pads, and truncates input texts."""
-        return self._wrapped_tokenizer(texts[str(self.representation)], truncation=True, padding="max_length", max_length=context_length)
-
+        return self._wrapped_tokenizer(
+            texts[str(self.representation)],
+            truncation=True,
+            padding="max_length",
+            max_length=context_length,
+        )
 
 
 class CustomWandbCallback_Inference(TrainerCallback):
@@ -73,13 +82,34 @@ class CustomWandbCallback_Inference(TrainerCallback):
     def __init__(self):
         self.predictions = []
 
-    def on_predict_end(self, args: Any, state: Any, control: Any, model: Any, predictions: Any, **kwargs: Any) -> None:
-        wandb.log({"predictions": predictions.predictions, })
+    def on_predict_end(
+        self,
+        args: Any,
+        state: Any,
+        control: Any,
+        model: Any,
+        predictions: Any,
+        **kwargs: Any,
+    ) -> None:
+        wandb.log(
+            {
+                "predictions": predictions.predictions,
+            }
+        )
 
 
 class CustomWandbCallback_Pretrain(TrainerCallback):
     """Custom W&B callback for logging during training."""
-    def on_log(self, args: Any, state: Any, control: Any, model: Any, logs: Dict[str, Union[float, Any]], **kwargs: Any) -> None:
+
+    def on_log(
+        self,
+        args: Any,
+        state: Any,
+        control: Any,
+        model: Any,
+        logs: Dict[str, Union[float, Any]],
+        **kwargs: Any,
+    ) -> None:
         if state.is_world_process_zero:
             wandb.log({"train_loss": logs.get("loss")})  # Log training loss
             wandb.log({"eval_loss": logs.get("eval_loss")})  # Log evaluation loss
@@ -87,14 +117,31 @@ class CustomWandbCallback_Pretrain(TrainerCallback):
 
 class CustomWandbCallback_FineTune(TrainerCallback):
     """Custom W&B callback for logging during training."""
-    def on_log(self, args: Any, state: Any, control: Any, model: Any, logs: Dict[str, Union[float, Any]], **kwargs: Any) -> None:
+
+    def on_log(
+        self,
+        args: Any,
+        state: Any,
+        control: Any,
+        model: Any,
+        logs: Dict[str, Union[float, Any]],
+        **kwargs: Any,
+    ) -> None:
         if state.is_world_process_zero:
             step = state.global_step  # Retrieve the current step
             epoch = state.epoch  # Retrieve the current epoch
             print(f"Step: {step}, Epoch: {round(epoch,5)}")
 
-            if "loss" in logs and "eval_loss" in logs:  # Both training and evaluation losses are present
-                wandb.log({"train_loss": logs.get("loss"), "eval_loss": logs.get("eval_loss")}, step=step)
+            if (
+                "loss" in logs and "eval_loss" in logs
+            ):  # Both training and evaluation losses are present
+                wandb.log(
+                    {
+                        "train_loss": logs.get("loss"),
+                        "eval_loss": logs.get("eval_loss"),
+                    },
+                    step=step,
+                )
 
 
 class EvaluateFirstStepCallback(TrainerCallback):
@@ -102,21 +149,31 @@ class EvaluateFirstStepCallback(TrainerCallback):
         if state.global_step == 0:
             control.should_evaluate = True
 
-class GenerationCallback(TrainerCallback):
 
-    def on_epoch_begin(self, model,tokenizer):
+class GenerationCallback(TrainerCallback):
+    def on_epoch_begin(self, model, tokenizer):
         # Generate text using the model
-          # Modify this line to select a sample from self.testset
+        # Modify this line to select a sample from self.testset
         material = "material"
         instruct = f"""### Instruction:
 Below is a {self.material_} represented as string. Followed by a question. Write a response to the question.\n"""
-        material = f"Cu2O\n"
-        question = f"""### Question:
+        material = "Cu2O\n"
+        question = """### Question:
 What is the Bulk modulus of this material? \n"""
         response = """### Response:"""
         # join all the parts together
-        prompt = "".join([i for i in [instruct, material,question, response] if i is not None])
+        prompt = "".join(
+            [i for i in [instruct, material, question, response] if i is not None]
+        )
 
-        input_ids = tokenizer(prompt, return_tensors="pt", truncation=True).input_ids.cuda()
-        outputs = model.generate(input_ids=input_ids, max_new_tokens=100, do_sample=True, top_p=0.9, temperature=0.9)
+        input_ids = tokenizer(
+            prompt, return_tensors="pt", truncation=True
+        ).input_ids.cuda()
+        outputs = model.generate(
+            input_ids=input_ids,
+            max_new_tokens=100,
+            do_sample=True,
+            top_p=0.9,
+            temperature=0.9,
+        )
         print(outputs)

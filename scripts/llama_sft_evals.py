@@ -1,7 +1,6 @@
 import json
 
 import fire
-import torch
 from datasets import DatasetDict, load_dataset
 from peft import (
     PeftModel,
