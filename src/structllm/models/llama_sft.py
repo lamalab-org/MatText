@@ -1,35 +1,23 @@
 import os
 from functools import partial
+from random import randrange
 from typing import Any, Dict, List
 
-import numpy as np
-import pandas as pd
 import torch
 import wandb
 from datasets import DatasetDict, load_dataset
 from omegaconf import DictConfig
 from peft import (
+    AutoPeftModelForCausalLM,
     LoraConfig,
-    get_peft_model,
 )
-from torch import nn
-from torch.utils.data import Dataset
 from transformers import (
     AutoModelForCausalLM,
+    AutoTokenizer,
     BitsAndBytesConfig,
-    EarlyStoppingCallback,
-    LlamaForSequenceClassification,
-    LlamaTokenizer,
-    Trainer,
-    TrainerCallback,
     TrainingArguments,
 )
-from trl import SFTTrainer
-
-from structllm.models.utils import (
-    CustomWandbCallback_FineTune,
-    EvaluateFirstStepCallback,
-)
+from trl import DataCollatorForCompletionOnlyLM, SFTTrainer
 
 IGNORE_INDEX = -100
 MAX_LENGTH = 2048
@@ -37,8 +25,19 @@ DEFAULT_PAD_TOKEN = "[PAD]"
 DEFAULT_EOS_TOKEN = "</s>"
 DEFAULT_BOS_TOKEN = "<s>"
 DEFAULT_UNK_TOKEN = "<unk>"
+use_flash_attention = True
 
 
+def unplace_flash_attn_with_attn():
+    import importlib
+
+    import transformers
+
+    print("Reloading llama model, unpatching flash attention")
+    importlib.reload(transformers.models.llama.modeling_llama)
+
+
+# adapted from crystal-text-llm :TODO give credits
 def smart_tokenizer_and_embedding_resize(
     special_tokens_dict,
     llama_tokenizer,
@@ -54,17 +53,19 @@ def smart_tokenizer_and_embedding_resize(
 
     if num_new_tokens > 0:
         input_embeddings = model.get_input_embeddings().weight.data
-        #   output_embeddings = model.get_output_embeddings().weight.data
+        output_embeddings = model.get_output_embeddings().weight.data
 
         input_embeddings_avg = input_embeddings[:-num_new_tokens].mean(
             dim=0, keepdim=True
         )
-        #   output_embeddings_avg = output_embeddings[:-num_new_tokens].mean(dim=0, keepdim=True)
+        output_embeddings_avg = output_embeddings[:-num_new_tokens].mean(
+            dim=0, keepdim=True
+        )
 
         input_embeddings[-num_new_tokens:] = input_embeddings_avg
 
     model.config.pad_token_id = llama_tokenizer.pad_token_id
-    #   output_embeddings[-num_new_tokens:] = output_embeddings_avg
+    output_embeddings[-num_new_tokens:] = output_embeddings_avg
 
 
 class FinetuneLLamaSFT:
@@ -89,17 +90,16 @@ class FinetuneLLamaSFT:
         self.model, self.tokenizer, self.peft_config = self._setup_model_tokenizer()
         self.property_ = self.property_map[self.cfg.dataset_name]
         self.material_ = self.material_map[self.cfg.dataset_name]
-        self.trainset, self.testset = self._prepare_datasets(
-            self.cfg.path.finetune_traindata
-        )
+        self.trainset = self._prepare_datasets(self.cfg.path.finetune_traindata)
 
     def _setup_model_tokenizer(self) -> None:
-        llama_tokenizer = LlamaTokenizer.from_pretrained(
+        tokenizer = AutoTokenizer.from_pretrained(
             self.ckpt,
             model_max_length=MAX_LENGTH,
             padding_side="right",
             use_fast=False,
         )
+        # tokenizer.pad_token = tokenizer.eos_token  #seperate pad token required for data - collator
 
         if self.bnb_config.use_4bit and self.bnb_config.use_8bit:
             raise ValueError(
@@ -126,58 +126,43 @@ class FinetuneLLamaSFT:
                 print("Your GPU supports bfloat16: accelerate training with bf16=True")
                 print("=" * 80)
 
-        device_map = {"": 0}
+        device_map = "auto"  # {"": 0}
         model = AutoModelForCausalLM.from_pretrained(
             self.ckpt,
-            num_labels=1,
+            use_cache=False,
+            use_flash_attention_2=use_flash_attention,
             quantization_config=bnb_config,
             device_map=device_map,
         )
 
-        lora_config = LoraConfig(**self.cfg.lora_config)
-        # model = get_peft_model(model, lora_config)
-        # model.print_trainable_parameters()
+        peft_config = LoraConfig(**self.cfg.lora_config)
+        # model = prepare_model_for_kbit_training(model)  #confirm this - base model with peft config in SFT trainer equivalent to
+        # model = get_peft_model(model, peft_config)        # peft model passed to SFT
 
         special_tokens_dict = dict()
-        if llama_tokenizer.pad_token is None:
+        if tokenizer.pad_token is None:
             special_tokens_dict["pad_token"] = DEFAULT_PAD_TOKEN
-        if llama_tokenizer.eos_token is None:
+        if tokenizer.eos_token is None:
             special_tokens_dict["eos_token"] = DEFAULT_EOS_TOKEN
-        if llama_tokenizer.bos_token is None:
+        if tokenizer.bos_token is None:
             special_tokens_dict["bos_token"] = DEFAULT_BOS_TOKEN
-        if llama_tokenizer.unk_token is None:
+        if tokenizer.unk_token is None:
             special_tokens_dict["unk_token"] = DEFAULT_UNK_TOKEN
 
         smart_tokenizer_and_embedding_resize(
             special_tokens_dict=special_tokens_dict,
-            llama_tokenizer=llama_tokenizer,
+            llama_tokenizer=tokenizer,
             model=model,
         )
-
-        print(len(llama_tokenizer))
-        return model, llama_tokenizer, lora_config
-
-    def _tokenize(self, examples):
-        tokenized_examples = self.tokenizer(
-            examples[self.representation],
-            truncation=True,
-            padding=True,
-            return_tensors="pt",
-        )
-        return tokenized_examples
+        return model, tokenizer, peft_config
 
     def format_qstns(self, sample):
-        material = "material"
-        question = f"<s>Question: What is the {self.property_} of the {self.material_} "
-        material = f"{sample[self.representation]}"
-        response = f" Answer: {round(float(sample['labels']),3)}"
-        # join all the parts together
-        prompt = "".join([i for i in [question, material, response] if i is not None])
-        return prompt
+        question = f"""Question: What is the {self.property_} of the material {sample[self.representation]}?\n"""
+        response = f"""Answer:{round(float(sample['labels']),3)}###"""
+        return "".join([i for i in [question, response] if i is not None])
 
-    # template dataset to add prompt to each sample
-    def template_dataset_test(self, sample):
-        sample["text"] = f"{self.format_qstns(sample)}{self.tokenizer.eos_token}"
+    def template_dataset(self, sample):
+        sample["text"] = f"{self.format_qstns(sample)}"
         return sample
 
     def _prepare_datasets(self, path: str) -> DatasetDict:
@@ -192,48 +177,48 @@ class FinetuneLLamaSFT:
         """
 
         ds = load_dataset("json", data_files=path, split="train")
-        dataset = ds.train_test_split(shuffle=True, test_size=0.2, seed=42)
-        ds = dataset.map(self._tokenize, batched=True)
+        return ds.map(self.template_dataset, remove_columns=list(ds.features))
 
-        trainset = ds["train"].map(self.template_dataset_test)
-        testset = ds["test"].map(self.template_dataset_test)
-        print(trainset[0]["text"])
-        print(testset[0]["text"])
-        return trainset, testset
+    def generate_once_and_save(self):
+        if use_flash_attention:
+            # unpatch flash attention
+            unplace_flash_attn_with_attn()
 
-    def _callbacks(self) -> List[TrainerCallback]:
-        """Returns a list of callbacks for early stopping, and custom logging."""
-        callbacks = []
+        model = AutoPeftModelForCausalLM.from_pretrained(
+            self.output_dir_,
+            low_cpu_mem_usage=True,
+            torch_dtype=torch.float16,
+            load_in_4bit=True,
+        )
+        tokenizer = AutoTokenizer.from_pretrained(self.output_dir_)
+        sample_prompt = self.trainset["text"][0][:-6]
 
-        if self.callbacks.early_stopping:
-            callbacks.append(
-                EarlyStoppingCallback(
-                    early_stopping_patience=self.callbacks.early_stopping_patience,
-                    early_stopping_threshold=self.callbacks.early_stopping_threshold,
-                )
-            )
+        input_ids = tokenizer(
+            sample_prompt, return_tensors="pt", truncation=True
+        ).input_ids.cuda()
+        outputs = model.generate(
+            input_ids=input_ids, max_new_tokens=100, do_sample=True, temperature=0.01
+        )
 
-        if self.callbacks.custom_logger:
-            callbacks.append(CustomWandbCallback_FineTune())
+        print(f"Prompt:\n{sample_prompt}\n")
+        print(
+            f"Generated instruction:\n{tokenizer.batch_decode(outputs.detach().cpu().numpy(), skip_special_tokens=True)[0][len(sample_prompt):]}"
+        )
 
-        # callbacks.append(EvaluateFirstStepCallback)
+        model = AutoPeftModelForCausalLM.from_pretrained(
+            self.output_dir_,
+            low_cpu_mem_usage=True,
+        )
 
-        return callbacks
-
-    def _compute_metrics(self, p: Any, eval=True) -> Dict[str, float]:
-        preds = torch.tensor(
-            p.predictions.squeeze()
-        )  # Convert predictions to PyTorch tensor
-        label_ids = torch.tensor(p.label_ids)  # Convert label_ids to PyTorch tensor
-
-        if eval:
-            # Calculate RMSE as evaluation metric
-            eval_rmse = torch.sqrt(((preds - label_ids) ** 2).mean()).item()
-            return {"eval_rmse": round(eval_rmse, 3)}
-        else:
-            # Calculate RMSE as training metric
-            loss = torch.sqrt(((preds - label_ids) ** 2).mean()).item()
-            return {"train_rmse": round(loss, 3), "loss": round(loss, 3)}
+        # Merge LoRA and base model
+        merged_model = model.merge_and_unload()
+        # Save the merged model
+        merged_model.save_pretrained(
+            f"{self.cfg.path.finetuned_modelname}/llamav2-7b-lora-save-pretrain",
+            save_config=True,
+            safe_serialization=True,
+        )
+        tokenizer.save_pretrained("merged_model")
 
     def finetune(self) -> None:
         """
@@ -241,13 +226,16 @@ class FinetuneLLamaSFT:
         """
 
         config_train_args = self.cfg.training_arguments
-        callbacks = self._callbacks()
-
-        # os.environ["ACCELERATE_MIXED_PRECISION"] = "no"
         training_args = TrainingArguments(
             **config_train_args,
-            # metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
-            # greater_is_better=False,  # Lower eval_rmse is better
+        )
+
+        response_template_with_context = "Answer:"
+        response_template_ids = self.tokenizer.encode(
+            response_template_with_context, add_special_tokens=False
+        )
+        data_collator = DataCollatorForCompletionOnlyLM(
+            response_template_ids, tokenizer=self.tokenizer
         )
 
         max_seq_length = MAX_LENGTH
@@ -256,32 +244,26 @@ class FinetuneLLamaSFT:
             model=self.model,
             peft_config=self.peft_config,
             train_dataset=self.trainset,
+            data_collator=data_collator,
             dataset_text_field="text",
             max_seq_length=max_seq_length,
             tokenizer=self.tokenizer,
             args=training_args,
             packing=packing,
-            #            compute_metrics=self._compute_metrics,
-            callbacks=callbacks,
         )
 
         wandb.log({"Training Arguments": str(config_train_args)})
         wandb.log({"model_summary": str(self.model)})
 
-        trainer.train()
         trainer.save_model(
+            f"{self.cfg.path.finetuned_modelname}/llamav2-7b-no-fine-tune"
+        )
+        self.output_dir_ = (
             f"{self.cfg.path.finetuned_modelname}/llamav2-7b-lora-fine-tune"
         )
-
-        # eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset['test'])
-        # wandb.log(eval_result)
-
-        self.model.save_pretrained(self.cfg.path.finetuned_modelname)
+        trainer.train()
+        trainer.save_state()
+        trainer.save_model(self.output_dir_)
+        self.generate_once_and_save()
         wandb.finish()
         return self.cfg.path.finetuned_modelname
-
-    def evaluate(self):
-        """
-        Evaluate the fine-tuned model on the test dataset.
-        """
-        ckpt = self.finetune()
