@@ -154,7 +154,7 @@ class FinetuneLLamaSFT:
 
     def format_qstns(self, sample):
         question = f"""Question: What is the {self.property_} of the material {sample[self.representation]}?\n"""
-        response = f"""Answer:{round(float(sample['labels']),3)}###"""
+        response = f"""Answer: {round(float(sample['labels']),3)}###"""
         return "".join([i for i in [question, response] if i is not None])
 
     def template_dataset(self, sample):
@@ -226,10 +226,10 @@ class FinetuneLLamaSFT:
             **config_train_args,
         )
 
-        response_template_with_context = "Answer:"
+        response_template_with_context = "\nAnswer:"
         response_template_ids = self.tokenizer.encode(
             response_template_with_context, add_special_tokens=False
-        )
+        )[2:]
         data_collator = DataCollatorForCompletionOnlyLM(
             response_template_ids, tokenizer=self.tokenizer
         )
