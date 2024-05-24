@@ -8,6 +8,7 @@ from xtal2txt.tokenizer import (
     CrysllmTokenizer,
     RobocrysTokenizer,
     SliceTokenizer,
+    SmilesTokenizer
 )
 
 _TOKENIZER_MAP = {
@@ -22,6 +23,7 @@ _TOKENIZER_MAP = {
     "atoms" : CompositionTokenizer,
     "atoms_params": CompositionTokenizer,
     "zmatrix": CrysllmTokenizer,
+    "local_env": SmilesTokenizer,
 }
 
 _DEFAULT_SPECIAL_TOKENS = {
@@ -97,3 +99,22 @@ class EvaluateFirstStepCallback(TrainerCallback):
     def on_step_begin(self, args, state, control, **kwargs):
         if state.global_step == 0:
             control.should_evaluate = True
+
+class GenerationCallback(TrainerCallback):
+
+    def on_epoch_begin(self, model,tokenizer):
+        # Generate text using the model
+          # Modify this line to select a sample from self.testset
+        material = "material"
+        instruct = f"""### Instruction:
+Below is a {self.material_} represented as string. Followed by a question. Write a response to the question.\n"""
+        material = f"Cu2O\n"
+        question = f"""### Question:
+What is the Bulk modulus of this material? \n"""
+        response = """### Response:"""
+        # join all the parts together
+        prompt = "".join([i for i in [instruct, material,question, response] if i is not None])
+
+        input_ids = tokenizer(prompt, return_tensors="pt", truncation=True).input_ids.cuda()
+        outputs = model.generate(input_ids=input_ids, max_new_tokens=100, do_sample=True, top_p=0.9, temperature=0.9)
+        print(outputs)

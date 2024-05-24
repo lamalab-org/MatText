@@ -61,15 +61,16 @@ class PotentialModel(TokenizerMixin):
         """
 
         ds = load_dataset("json", data_files=path, split="train")
-        with contextlib.suppress(KeyError):
+        # with contextlib.suppress(KeyError):
+        #     ds = ds.remove_columns("labels")
+        if split == "train":
             ds = ds.remove_columns("labels")
+        else:
+            print("test set")
+
         labal_name = f"total_energy_alpha_{self.alpha}"
         ds = ds.rename_column(labal_name, "labels")
-
-        if split == "train":
-            dataset = ds.train_test_split(shuffle=True, test_size=0.2, seed=42)
-        else:
-            dataset = ds
+        dataset = ds.train_test_split(shuffle=True, test_size=0.2, seed=42)
         # dataset= dataset.filter(lambda example: example[self.representation] is not None)
         return dataset.map(
             partial(
