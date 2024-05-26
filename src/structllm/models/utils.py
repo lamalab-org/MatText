@@ -1,7 +1,10 @@
 from typing import Any, Dict, Union
 
+import torch
 import wandb
-from transformers import TrainerCallback
+from tqdm import tqdm
+from transformers import GenerationConfig, TrainerCallback
+from transformers.integrations import WandbCallback
 from xtal2txt.tokenizer import (
     CifTokenizer,
     CompositionTokenizer,
@@ -36,6 +39,53 @@ _DEFAULT_SPECIAL_TOKENS = {
     "bos_token": "[BOS]",
 }
 
+DEFAULT_PAD_TOKEN = "[PAD]"
+DEFAULT_EOS_TOKEN = "</s>"
+DEFAULT_BOS_TOKEN = "<s>"
+DEFAULT_UNK_TOKEN = "<unk>"
+
+def assign_special_tokens(tokenizer):
+    special_tokens_dict = dict()
+    if tokenizer.pad_token is None:
+        special_tokens_dict["pad_token"] = DEFAULT_PAD_TOKEN
+    if tokenizer.eos_token is None:
+        special_tokens_dict["eos_token"] = DEFAULT_EOS_TOKEN
+    if tokenizer.bos_token is None:
+        special_tokens_dict["bos_token"] = DEFAULT_BOS_TOKEN
+    if tokenizer.unk_token is None:
+        special_tokens_dict["unk_token"] = DEFAULT_UNK_TOKEN
+    return special_tokens_dict
+
+
+# adapted from crystal-text-llm :TODO give credits
+def smart_tokenizer_and_embedding_resize(
+    special_tokens_dict,
+    llama_tokenizer,
+    model,
+):
+    """Resize tokenizer and embedding.
+
+    Note: This is the unoptimized version that may make your embedding size not be divisible by 64.
+    """
+    num_new_tokens = llama_tokenizer.add_special_tokens(special_tokens_dict)
+    llama_tokenizer.add_special_tokens(special_tokens_dict)
+    model.resize_token_embeddings(len(llama_tokenizer), pad_to_multiple_of=8)
+
+    if num_new_tokens > 0:
+        input_embeddings = model.get_input_embeddings().weight.data
+        output_embeddings = model.get_output_embeddings().weight.data
+
+        input_embeddings_avg = input_embeddings[:-num_new_tokens].mean(
+            dim=0, keepdim=True
+        )
+        output_embeddings_avg = output_embeddings[:-num_new_tokens].mean(
+            dim=0, keepdim=True
+        )
+
+        input_embeddings[-num_new_tokens:] = input_embeddings_avg
+
+    model.config.pad_token_id = llama_tokenizer.pad_token_id
+    output_embeddings[-num_new_tokens:] = output_embeddings_avg
 
 class TokenizerMixin:
     """Mixin class to handle tokenizer functionality."""
@@ -150,30 +200,36 @@ class EvaluateFirstStepCallback(TrainerCallback):
             control.should_evaluate = True
 
 
-class GenerationCallback(TrainerCallback):
-    def on_epoch_begin(self, model, tokenizer):
-        # Generate text using the model
-        # Modify this line to select a sample from self.testset
-        material = "material"
-        instruct = f"""### Instruction:
-Below is a {self.material_} represented as string. Followed by a question. Write a response to the question.\n"""
-        material = "Cu2O\n"
-        question = """### Question:
-What is the Bulk modulus of this material? \n"""
-        response = """### Response:"""
-        # join all the parts together
-        prompt = "".join(
-            [i for i in [instruct, material, question, response] if i is not None]
-        )
+class LLMSampleCB(WandbCallback):
+    """A CallBack to log samples a wandb.Table during training"""
+    def __init__(self, trainer, test_dataset, num_samples=5, max_new_tokens=10, log_model="checkpoint"):
+        super().__init__()
+        self._log_model = log_model
+        self.sample_dataset = test_dataset.select(range(num_samples))
+        self.model, self.tokenizer = trainer.model, trainer.tokenizer
+        self.gen_config = GenerationConfig.from_pretrained(trainer.model.name_or_path, max_new_tokens=max_new_tokens)
 
-        input_ids = tokenizer(
-            prompt, return_tensors="pt", truncation=True
-        ).input_ids.cuda()
-        outputs = model.generate(
-            input_ids=input_ids,
-            max_new_tokens=100,
-            do_sample=True,
-            top_p=0.9,
-            temperature=0.9,
-        )
-        print(outputs)
+    def generate(self, prompt):
+        tokenized_prompt = self.tokenizer(prompt, return_tensors='pt')['input_ids'].cuda()
+        with torch.cuda.amp.autocast():
+            output = self. model.generate(tokenized_prompt,generation_config=self.gen_config).to("cuda")
+        return self.tokenizer.decode(output[0][len(tokenized_prompt[0]):], skip_special_tokens=True)
+
+    def samples_table(self, examples):
+        """Create a wandb.Table to store the generations"""
+        records_table = wandb.Table(columns=["prompt", "generation"] + list(self.gen_config.to_dict().keys()))
+        for example in tqdm(examples, leave=False):
+            prompt = example["text"]
+            generation = self.generate(prompt=prompt)
+            records_table.add_data(prompt, generation, *list(self.gen_config.to_dict().values()))
+        return records_table
+
+    def on_evaluate(self, args, state, control,  **kwargs):
+        """Log the wandb.Table after calling trainer.evaluate"""
+        super().on_evaluate(args, state, control, **kwargs)
+        records_table = self.samples_table(self.sample_dataset)
+        self._wandb.log({"sample_predictions": records_table})
+        #"Log the wandb.Table after calling trainer.evaluate"
+        super().on_evaluate(args, state, control, **kwargs)
+        records_table = self.samples_table(self.sample_dataset)
+        self._wandb.log({"sample_predictions":records_table})
