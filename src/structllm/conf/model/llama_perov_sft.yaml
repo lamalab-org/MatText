@@ -50,7 +50,7 @@ finetune:
        ]
 
     finetune_testdata:
-    root_path: "/work/so87pot/structllm/megaloop2/finetune/${model.finetune.model_name}"  # <--- Change this to the path where chkpoints and logs will be saved
+    root_path: "/work/so87pot/structllm/magaloop3/${model.finetune.model_name}"  # <--- Change this to the path where chkpoints and logs will be saved
     output_dir:          "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
     logging_dir:         "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
@@ -84,7 +84,7 @@ finetune:
     fp16: False
     overwrite_output_dir: True
     dataloader_num_workers: 2
-    num_train_epochs: 20
+    num_train_epochs: 40
     per_device_train_batch_size: 32
     #per_device_eval_batch_size: 16
     save_strategy: "steps"
@@ -106,7 +106,7 @@ finetune:
     # Maximum gradient normal (gradient clipping)
     max_grad_norm : 0.3
     # Initial learning rate (AdamW optimizer)
-    learning_rate : 2e-4  # 0.0005 crystal-llm
+    learning_rate : 1e-4  # 0.0005 crystal-llm
     # Weight decay to apply to all layers except bias/LayerNorm weights
     weight_decay : 0.001
     # Optimizer to use
