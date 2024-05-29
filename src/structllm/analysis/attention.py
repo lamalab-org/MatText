@@ -1,6 +1,6 @@
 import json
 from functools import partial
-from typing import Any, Dict, Type
+from typing import Any, Dict
 
 import fire
 import matplotlib.pyplot as plt

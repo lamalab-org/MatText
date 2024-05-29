@@ -1,7 +1,6 @@
 import json
 import multiprocessing
 from concurrent.futures import ProcessPoolExecutor, TimeoutError
-from functools import partial
 from typing import Dict, List
 
 import fire

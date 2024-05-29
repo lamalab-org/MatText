@@ -14,7 +14,11 @@ from transformers import (
     TrainingArguments,
 )
 
-from structllm.models.utils import CustomWandbCallback_FineTune, TokenizerMixin, EvaluateFirstStepCallback
+from structllm.models.utils import (
+    CustomWandbCallback_FineTune,
+    EvaluateFirstStepCallback,
+    TokenizerMixin,
+)
 
 
 class FinetuneModel(TokenizerMixin):
@@ -47,9 +51,21 @@ class FinetuneModel(TokenizerMixin):
             DatasetDict: Dictionary containing training and validation datasets.
         """
 
+        def replace_none(example, replacement = "[PAD]"):
+            for key, value in example.items():
+                if value is None:
+                    example[key] = replacement
+            return example
+
         ds = load_dataset("json", data_files=path,split="train")
         dataset = ds.train_test_split(shuffle=True, test_size=0.2, seed=42)
-        #dataset= dataset.filter(lambda example: example[self.representation] is not None)
+        dataset= dataset.filter(lambda example: example[self.representation] is not None)
+        # replacement = "[PAD]"
+
+        # dataset = dataset.map(
+        #     partial(replace_none, replacement=replacement),
+        #     batched=True
+        # )
         return dataset.map(
             partial(self._tokenize_pad_and_truncate, context_length=self.context_length),
             batched=True)

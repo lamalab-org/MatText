@@ -2,10 +2,8 @@ import json
 import os
 
 import hydra
-import pandas as pd
 from matbench.bench import MatbenchBenchmark
 from omegaconf import DictConfig
-from pymatgen.core import Structure
 
 # Check if the specified benchmark exists
 available_benchmarks = [

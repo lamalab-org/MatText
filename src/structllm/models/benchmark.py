@@ -78,7 +78,7 @@ class Matbenchmark:
         benchmark.to_file(file_name)
 
     def run_qmof(self, local_rank=None) -> None:
-        
+
         for i, (exp_name, test_name, train_data_path, test_data_path) in enumerate(
             zip(self.exp_names, self.test_exp_names, self.train_data, self.test_data)
         ):
@@ -108,7 +108,7 @@ class Matbenchmark:
             try:
                 predict = Inference(exp_cfg)
                 predictions = predict.predict()
-                
+
             except Exception as e:
                 print(f"Error occurred during inference for finetuned checkpoint '{exp_name}':")
                 print(traceback.format_exc())
