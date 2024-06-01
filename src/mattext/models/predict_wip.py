@@ -67,7 +67,7 @@ class Inference(TokenizerMixin):
             model=model.to("cuda"), data_collator=None, callbacks=callbacks
         )
 
-        predictions = trainer.predict(self.tokenized_test_datasets["train"])
+        predictions = trainer.predict(self.tokenized_test_datasets)
         for callback in callbacks:
             callback.on_predict_end(
                 None, None, None, model, predictions

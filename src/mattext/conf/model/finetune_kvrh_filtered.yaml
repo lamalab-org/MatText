@@ -1,6 +1,7 @@
 representation: ???
 special_num_token: ???
 dataset_type: "filtered"
+fold : 5
 special_tokens:
   {
     "unk_token": "[UNK]",
@@ -32,7 +33,7 @@ finetune:
   path:
     pretrained_checkpoint: ???
 
-    finetune_data_rootpath: /work/so87pot/material_db/all_1 # <--- Change this to the path of the finetune data
+    finetune_data_rootpath: results # <--- Change this to the path of the finetune data
     finetune_traindata:
       [
         "kvrh-train-filtered"
@@ -82,7 +83,7 @@ inference:
     ]
   path:
     pretrained_checkpoint: []
-    test_data_rootpath: /work/so87pot/material_db/all_1 # <--- Change this to the path of the finetune data
+    test_data_rootpath: # <--- Change this to the path of the finetune data
     test_data:
       [
         "kvrh-test-filtered"
