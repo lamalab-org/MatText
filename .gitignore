@@ -191,10 +191,10 @@ pyrightconfig.json
 outputs/
 data/
 logs/
-src/structllm/models/finetune/*
-src/structllm/models/pretrain/*
-src/structllm/models/wandb
-src/structllm/models/outputs
+src/mattext/models/finetune/*
+src/mattext/models/pretrain/*
+src/mattext/models/wandb
+src/mattext/models/outputs
 checkpoints/*
 predictions/
 checkpoints/

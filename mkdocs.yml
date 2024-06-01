@@ -1,0 +1,115 @@
+site_name: mattext
+site_url: https://lamalab-org.github.io/mattext/
+site_description: >-
+  A framework for text-based materials modeling
+
+# Repository
+repo_name: lamalab-org/mattext
+repo_url: https://github.com/lamalab-org/mattext.git
+
+copyright: LAMAlab
+
+docs_dir: docs
+site_dir: site
+
+
+theme:
+  name: material
+  logo: static/logo.png
+  favicon: static/logo.png
+  features:
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+    - content.code.copy_button
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - search.share
+    - navigation.tabs.sticky
+
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline 
+        name: Switch to dark mode
+      primary: black #teal
+      accent: purple 
+    - scheme: slate 
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode    
+      primary: black #teal
+      accent: lime
+
+  hide:
+    - navigation
+    - toc
+
+  font:
+    text: Roboto #Helvetica
+    code: Monaco #Roboto Mono
+
+plugins:
+  - search
+  - autorefs
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            preload_modules:
+              - xtal2txt
+
+markdown_extensions:
+  - meta
+  - tables
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.mark
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+
+
+
+extra_javascript:
+  - https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js
+  - javascripts/tablesort.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/lamalab-org/
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/jablonkagroup
+#     - icon: fontawesome/brands/linkedin
+#       link: https://www.linkedin.com/in/willettjames/
+
+
+  
+# extra_css:
+#   - stylesheets/aesthetic_fixes.css
+
+
+nav:
+  - Home: index.md
+  - Getting Started: getting_started.md
+  - Usage: usage.md
+  - API Reference: api.md
