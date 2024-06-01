@@ -22,6 +22,7 @@ class Inference(TokenizerMixin):
         )
         self.fold = fold
         self.representation = cfg.model.representation
+        self.data_repository = cfg.model.data_repository
         self.dataset_name = cfg.model.finetune.dataset_name
         self.cfg = cfg.model.inference
         self.context_length: int = self.cfg.context_length
@@ -38,7 +39,7 @@ class Inference(TokenizerMixin):
         Returns:
             DatasetDict: Dictionary containing training and validation datasets.
         """
-        dataset = load_dataset("n0w0f/MatText", path )
+        dataset = load_dataset(self.data_repository, path )
         filtered_dataset = dataset[self.fold].filter(
             lambda example: example[self.representation] is not None
         )

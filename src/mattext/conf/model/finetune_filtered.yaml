@@ -1,7 +1,9 @@
 representation: ???
 special_num_token: ???
+dataset: ???
 dataset_type: "filtered"
 fold : 5
+data_repository: "n0w0f/MatText"
 special_tokens:
   {
     "unk_token": "[UNK]",
@@ -20,7 +22,7 @@ logging:
 finetune:
   model_name: ???
   freeze_base_model: False
-  dataset_name: "kvrh-train-filtered"
+  dataset_name: "${model.dataset}-train-${model.dataset_type}"  
   exp_name:
     [
       "train_${model.representation}_${model.finetune.dataset_name}_0",
@@ -36,15 +38,15 @@ finetune:
     finetune_data_rootpath: results # <--- Change this to the path of the finetune data
     finetune_traindata:
       [
-        "kvrh-train-filtered",
-        "kvrh-train-filtered",
-        "kvrh-train-filtered",
-        "kvrh-train-filtered",
-        "kvrh-train-filtered"
+        # "kvrh-train-filtered",
+        # "kvrh-train-filtered",
+        # "kvrh-train-filtered",
+        # "kvrh-train-filtered",
+        # "kvrh-train-filtered"
       ]
 
     finetune_testdata:
-    root_path: "checkpoints/${model.finetune.model_name}" # <--- Change this to the path where chkpoints and logs will be saved
+    root_path: "${hydra:runtime.cwd}/results/${now:%Y-%m-%d}/${now:%H-%M-%S}/${model.finetune.model_name}" # <--- Change this to the path where chkpoints and logs will be saved
     output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
     logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
@@ -75,7 +77,7 @@ finetune:
     load_best_model_at_end: True
 
 inference:
-  benchmark_dataset: "${model.finetune.dataset_name}"
+  benchmark_dataset: "${model.finetune.dataset}-test-${model.dataset_type}"  
   context_length: "${model.finetune.context_length}"
   exp_name:
     [
@@ -90,11 +92,11 @@ inference:
     test_data_rootpath: # <--- Change this to the path of the finetune data
     test_data:
       [
-        "kvrh-train-filtered",
-        "kvrh-train-filtered",
-        "kvrh-train-filtered",
-        "kvrh-train-filtered",
-        "kvrh-train-filtered"
+        # "kvrh-train-filtered",
+        # "kvrh-train-filtered",
+        # "kvrh-train-filtered",
+        # "kvrh-train-filtered",
+        # "kvrh-train-filtered"
       ]
     root_path: "/home/so87pot/n0w0f/mattext/src/mattext/models/predictions" # <--- Change this to the path where predictions will be saved
     output_dir: "${model.inference.path.root_path}/checkpoints/${model.inference.exp_name}"

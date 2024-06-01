@@ -6,7 +6,7 @@ from matbench.bench import MatbenchBenchmark
 from omegaconf import DictConfig
 
 from mattext.models.finetune import FinetuneModel
-from mattext.models.predict import 
+from mattext.models.predict import Inference
 
 def fold_key_namer(fold_key):
     return f"fold_{fold_key}"
