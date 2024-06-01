@@ -1,4 +1,4 @@
-name: structllm
+name: mattext
 channels:
   - pytorch
   - nvidia
@@ -322,4 +322,4 @@ dependencies:
       - xxhash==3.4.1
       - yarl==1.9.2
       - zipp==3.17.0
-prefix: /home/so87pot/miniconda3/envs/structllm
+prefix: /home/so87pot/miniconda3/envs/mattext
