@@ -1,6 +1,7 @@
 import math
 
 import numpy as np
+import pandas as pd
 from matbench.data_ops import load
 import json
 from sklearn.metrics import (
@@ -91,7 +92,20 @@ class Task:
         return task
 
     @staticmethod
+    def _prepare_for_serialization(obj):
+        if isinstance(obj, dict):
+            return {k: Task._prepare_for_serialization(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [Task._prepare_for_serialization(v) for v in obj]
+        elif isinstance(obj, pd.Series):
+            return obj.tolist()
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return obj
+
+    @staticmethod
     def _json_serializable(obj):
-        if isinstance(obj, np.ndarray):
+        if isinstance(obj, (np.ndarray, pd.Series)):
             return obj.tolist()
         raise TypeError(f"Type {type(obj)} not serializable")
