@@ -7,11 +7,9 @@ from omegaconf import DictConfig
 
 from mattext.models.finetune_wip import FinetuneModel
 from mattext.models.predict_wip import Inference
-from mattext.models.score import Task
+from mattext.models.score import MatTextTask
+from mattext.models.utils import fold_key_namer
 
-
-def fold_key_namer(fold_key):
-    return f"fold_{fold_key}"
 
 class Matbenchmark:
     """
@@ -62,7 +60,7 @@ class Matbenchmark:
         # mb = MatbenchBenchmark(autoload=False)
         # benchmark = getattr(mb, self.benchmark)
         # benchmark.load()
-        task = Task(task_name=self.task)
+        task = MatTextTask(task_name=self.task)
 
         for i, (exp_name, test_name) in enumerate(
             zip(self.exp_names, self.test_exp_names)

@@ -1,0 +1,54 @@
+  hydra:
+    job:
+      name: llama_sft
+    run:
+      dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    sweep:
+      dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+      subdir: ${hydra.job.override_dirname}
+      
+    launcher:
+      _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.SlurmLauncher
+      submitit_folder: ${hydra.sweep.dir}/.submitit/%j
+      timeout_min: 3600
+      mem_gb: 160
+      nodes: 1
+      #gpus_per_task: 1
+      gres: gpu:1
+      #gpus_per_node: 2
+      name: ${hydra.job.name}
+      partition: 'gpu'
+      additional_parameters:
+        nodelist: 'gpu[005,007,013-014]'
+      tasks_per_node: 1
+
+
+  defaults:
+  - model: none
+  - override hydra/launcher: submitit_slurm
+
+
+
+  runs:
+
+    # - name: pretrain_run
+    #   tasks: [pretrain]
+
+    - name: benchmark_run
+      tasks: [benchmark]
+
+    # - name: test_run
+    #   tasks: [inference]
+
+    # - name: qmof_run
+    #   tasks: [qmof]
+
+    # - name: llama_run
+    #   tasks: [llama]
+
+    # - name: llama_sft_run
+    #   tasks: [llama_sft]
+
+    # - name: potential_run
+    #   tasks: [potential]
+
