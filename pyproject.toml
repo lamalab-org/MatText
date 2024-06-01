@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mattext"
-description = "LLM applied on materials"
+description = "A framework for text-based materials modeling"
 version = "0.0.1"
 readme = "README.md"
 license = { text = "MIT" }
