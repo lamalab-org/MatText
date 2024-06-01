@@ -56,12 +56,13 @@ theme:
 plugins:
   - search
   - autorefs
-  # - social
   - mkdocstrings:
       handlers:
-      python:
-        paths: [src]
-  
+        python:
+          paths: [src]
+          options:
+            preload_modules:
+              - xtal2txt
 
 markdown_extensions:
   - meta
