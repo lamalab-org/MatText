@@ -30,7 +30,13 @@
 We recommend that you create a virtual conda environment on your computer in which you install the dependencies for this package. To do so head over to [Miniconda](https://docs.conda.io/en/latest/miniconda.html) and follow the installation instructions there.
 
 
-### Clone our repository
+<!-- ### Install latest release
+
+```bash
+pip install mattext
+``` -->
+
+### Install development version
 
 Clone this repository (you need `git` for this, if you get a `missing command` error for `git` you can install it with `sudo apt-get install git`)
 
@@ -38,9 +44,6 @@ Clone this repository (you need `git` for this, if you get a `missing command` e
 git clone https://github.com/lamalab-org/mattext.git
 cd mattext
 ```
-
-### Install our package
-
 
 ```bash
 pip install -e .
