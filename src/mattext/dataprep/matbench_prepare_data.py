@@ -14,7 +14,8 @@ from functools import partial
 from typing import Dict, List
 
 import fire
-from xtal2txt.core import TextRep
+
+from mattext.representations import TextRep
 
 
 def read_json(json_file: str) -> List[Dict]:
@@ -33,7 +34,6 @@ def read_json(json_file: str) -> List[Dict]:
 
 class TimeoutException(Exception):
     """Custom exception class for timeouts."""
-
 
 
 def timeout_handler(signum, frame):

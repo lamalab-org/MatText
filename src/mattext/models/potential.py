@@ -22,8 +22,8 @@ from mattext.models.utils import (
 
 
 class PotentialModel(TokenizerMixin):
-    """Class to perform finetuning of a language model.
-        Initialize the FinetuneModel.
+    """Class to perform finetuning of a language model on
+    the hypothetical potential task.
 
     Args:
         cfg (DictConfig): Configuration for the fine-tuning.

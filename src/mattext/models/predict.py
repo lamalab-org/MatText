@@ -11,6 +11,8 @@ from mattext.models.utils import CustomWandbCallback_Inference, TokenizerMixin
 
 
 class Inference(TokenizerMixin):
+    """Class to perform inference on a language model with a sequence classification head."""
+
     def __init__(self, cfg: DictConfig):
 
         super().__init__(
