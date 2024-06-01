@@ -9,7 +9,7 @@ import fire
 from pymatgen.core import Structure
 from xtal2txt.core import TextRep
 
-from structllm.analysis.xtal2pot import Xtal2Pot
+from mattext.analysis.xtal2pot import Xtal2Pot
 
 linearpotential = Xtal2Pot()
 
@@ -30,7 +30,6 @@ def read_json(json_file: str) -> List[Dict]:
 
 class TimeoutException(Exception):
     """Custom exception class for timeouts."""
-
 
 
 def timeout_handler(signum, frame):
@@ -63,10 +62,18 @@ def process_entry_train_matbench(entry: dict, timeout: int, alphas=None) -> dict
         # text_reps["crystal_llm_rep"] = TextRep.from_input(
         #     entry["structure"]
         # ).get_crystal_llm_rep()
-        list_of_rep =["zmatrix", "atoms_params", "local_env","cif_p1", "composition", "atoms_params","crystal_llm_rep"]
-        text_reps = TextRep.from_input(
-            entry["structure"]
-        ).get_requested_text_reps(list_of_rep)
+        list_of_rep = [
+            "zmatrix",
+            "atoms_params",
+            "local_env",
+            "cif_p1",
+            "composition",
+            "atoms_params",
+            "crystal_llm_rep",
+        ]
+        text_reps = TextRep.from_input(entry["structure"]).get_requested_text_reps(
+            list_of_rep
+        )
         text_reps["labels"] = entry["labels"]
         text_reps["mbid"] = entry["mbid"]
         composition_energy, geometry_energy = linearpotential.get_potential(structure)
@@ -101,10 +108,18 @@ def process_entry_test_matbench(entry: dict, timeout: int, alphas=None) -> dict:
         # text_reps["crystal_llm_rep"] = TextRep.from_input(
         #     entry["structure"]
         # ).get_crystal_llm_rep()
-        list_of_rep = ["zmatrix", "atoms_params", "local_env","cif_p1", "composition", "atoms_params","crystal_llm_rep"]
-        text_reps = TextRep.from_input(
-            entry["structure"]
-        ).get_requested_text_reps(list_of_rep)
+        list_of_rep = [
+            "zmatrix",
+            "atoms_params",
+            "local_env",
+            "cif_p1",
+            "composition",
+            "atoms_params",
+            "crystal_llm_rep",
+        ]
+        text_reps = TextRep.from_input(entry["structure"]).get_requested_text_reps(
+            list_of_rep
+        )
         text_reps["mbid"] = entry["mbid"]
         composition_energy, geometry_energy = linearpotential.get_potential(structure)
         text_reps["composition_energy"] = composition_energy
