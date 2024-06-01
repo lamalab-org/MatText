@@ -1,5 +1,6 @@
 representation: ???
 special_num_token: ???
+dataset_type: "filtered"
 special_tokens:
   {
     "unk_token": "[UNK]",
@@ -18,7 +19,7 @@ logging:
 finetune:
   model_name: ???
   freeze_base_model: False
-  dataset_name: "matbench_log_kvrh"
+  dataset_name: "kvrh-train-filtered"
   exp_name:
     [
       "train_${model.representation}_${model.finetune.dataset_name}_0",
@@ -34,15 +35,11 @@ finetune:
     finetune_data_rootpath: /work/so87pot/material_db/all_1 # <--- Change this to the path of the finetune data
     finetune_traindata:
       [
-        "${model.finetune.path.finetune_data_rootpath}/train_${model.finetune.dataset_name}_0.json",
-        "${model.finetune.path.finetune_data_rootpath}/train_${model.finetune.dataset_name}_1.json",
-        "${model.finetune.path.finetune_data_rootpath}/train_${model.finetune.dataset_name}_2.json",
-        "${model.finetune.path.finetune_data_rootpath}/train_${model.finetune.dataset_name}_3.json",
-        "${model.finetune.path.finetune_data_rootpath}/train_${model.finetune.dataset_name}_4.json",
+        "kvrh-train-filtered"
       ]
 
     finetune_testdata:
-    root_path: "/work/so87pot/mattext/megaloop/finetune/${model.finetune.model_name}" # <--- Change this to the path where chkpoints and logs will be saved
+    root_path: "checkpoints/${model.finetune.model_name}" # <--- Change this to the path where chkpoints and logs will be saved
     output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
     logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
@@ -88,11 +85,7 @@ inference:
     test_data_rootpath: /work/so87pot/material_db/all_1 # <--- Change this to the path of the finetune data
     test_data:
       [
-        "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_0.json",
-        "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_1.json",
-        "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_2.json",
-        "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_3.json",
-        "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_4.json",
+        "kvrh-test-filtered"
       ]
     root_path: "/home/so87pot/n0w0f/mattext/src/mattext/models/predictions" # <--- Change this to the path where predictions will be saved
     output_dir: "${model.inference.path.root_path}/checkpoints/${model.inference.exp_name}"
