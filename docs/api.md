@@ -27,29 +27,29 @@
 
 ## Models  
 
-::: mattext.models.benchmark.py
+::: mattext.models.benchmark
     heading_level: 3
 
 ::: mattext.models.finetune
     heading_level: 3
 
-::: mattext.models.llama_sft.py
+::: mattext.models.llama_sft
     heading_level: 3
 
-::: mattext.models.llama.py
+::: mattext.models.llama
     heading_level: 3
 
-::: mattext.models.potential.py
+::: mattext.models.potential
     heading_level: 3
 
-::: mattext.models.predict.py
+::: mattext.models.predict
     heading_level: 3
 
-::: mattext.models.pretrain.py
+::: mattext.models.pretrain
     heading_level: 3
 
-## Dataprep
+<!-- ## Dataprep
 
 
 ::: mattext.dataprep
-    heading_level: 3
+    heading_level: 3 -->
