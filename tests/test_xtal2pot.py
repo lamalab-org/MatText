@@ -1,4 +1,4 @@
-from structllm.analysis.xtal2pot import Xtal2Pot
+from mattext.analysis.xtal2pot import Xtal2Pot
 from pymatgen.core import Structure, Lattice
 
 

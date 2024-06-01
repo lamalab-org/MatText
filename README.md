@@ -15,8 +15,8 @@ We recommend that you create a virtual conda environment on your computer in whi
 Clone this repository (you need `git` for this, if you get a `missing command` error for `git` you can install it with `sudo apt-get install git`)
 
 ```bash
-git clone https://github.com/lamalab-org/structllm.git
-cd structllm
+git clone https://github.com/lamalab-org/mattext.git
+cd mattext
 ```
 
 ### Install our package
@@ -31,7 +31,7 @@ pip install -e .
 
 All config file can be found here, inside respective directories
 ```bash
-cd /src/structllm/conf/
+cd /src/mattext/conf/
 ```
 The main configuration for the run is in config.yaml and other configs are grouped in respective folders. An example directory structure of configs is below.
 ```bash
@@ -120,10 +120,10 @@ Build Docker image
 
 ```bash 
 cd docker
-docker build --build-arg GITHUB_PAT=<your_token> -t structllm .
+docker build --build-arg GITHUB_PAT=<your_token> -t mattext .
 ```
 
 ```bash
-docker exec -it --gpus all -v /path/to/host/structllm:/app/structllm/ structllm python main.py hydra/launcher=submitit_local --multirun +pretrain30k=cifp1,cifsym,composition,crystal_llm,slice
+docker exec -it --gpus all -v /path/to/host/mattext:/app/mattext/ mattext python main.py hydra/launcher=submitit_local --multirun +pretrain30k=cifp1,cifsym,composition,crystal_llm,slice
 
 ```
