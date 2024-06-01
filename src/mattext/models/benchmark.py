@@ -18,7 +18,15 @@ class Matbenchmark:
     """
 
     def __init__(self, task_cfg: DictConfig):
-        self.task_cfg = task_cfg
+        """
+        Initializes the object with the given task configuration.
+
+        Parameters:
+            task_cfg (DictConfig): The configuration dictionary containing task parameters.
+
+        Returns:
+            None
+        """
         self.representation = self.task_cfg.model.representation
         self.benchmark = self.task_cfg.model.inference.benchmark_dataset
         self.exp_names = self.task_cfg.model.finetune.exp_name
@@ -31,6 +39,19 @@ class Matbenchmark:
         self.wandb_project = self.task_cfg.model.logging.wandb_project
 
     def run_benchmarking(self, local_rank=None) -> None:
+        """
+        Runs benchmarking on the specified dataset.
+
+        Args:
+            local_rank (int, optional): The local rank for distributed training. Defaults to None.
+
+        Returns:
+            None
+
+        Raises:
+            Exception: If an error occurs during inference for a finetuned checkpoint.
+
+        """
         mb = MatbenchBenchmark(autoload=False)
         benchmark = getattr(mb, self.benchmark)
         benchmark.load()

@@ -41,8 +41,7 @@ def unplace_flash_attn_with_attn():
 
 
 class FinetuneLLamaSFT:
-    """Class to perform finetuning of a language model.
-        Initialize the FinetuneModel.
+    """Class to perform supervised finetuning of a language model.
 
     Args:
         cfg (DictConfig): Configuration for the fine-tuning.

@@ -17,7 +17,15 @@ class Benchmark:
     """
 
     def __init__(self, task_cfg: DictConfig):
-        self.task_cfg = task_cfg
+        """
+        Initializes the object with the given task configuration.
+
+        Parameters:
+            task_cfg (DictConfig): The configuration dictionary containing task parameters.
+
+        Returns:
+            None
+        """
         self.representation = self.task_cfg.model.representation
         self.benchmark = self.task_cfg.model.inference.benchmark_dataset
         self.exp_names = self.task_cfg.model.finetune.exp_name
@@ -31,6 +39,25 @@ class Benchmark:
         self.wandb_project = self.task_cfg.model.logging.wandb_project
 
     def run_benchmarking(self, local_rank=None) -> None:
+        """
+        Runs benchmarking on the specified dataset.
+
+        This function loads the MatbenchBenchmark dataset and iterates over the exp_names, test_exp_names, train_data, and test_data lists.
+        For each iteration, it prints the training and testing data paths.
+        It then initializes the experiment configuration, sets the exp_name, train_data_path, and test_data_path in the configuration.
+        It prints the finetuned model name and initializes the wandb configuration for the inference.
+        It sets the test_data_path and pretrained_checkpoint in the configuration.
+        It then tries to predict using the Inference class and records the predictions using the MatbenchBenchmark class.
+        If an exception occurs during inference, it prints the error message and traceback.
+        Finally, it saves the benchmark results to a JSON file.
+
+        Parameters:
+            local_rank (int, optional): The local rank for distributed training. Defaults to None.
+
+        Returns:
+            None
+        """
+
         mb = MatbenchBenchmark(autoload=False)
         benchmark = getattr(mb, self.benchmark)
         benchmark.load()

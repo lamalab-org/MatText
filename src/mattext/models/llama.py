@@ -62,8 +62,8 @@ def smart_tokenizer_and_embedding_resize(
 
 
 class FinetuneLLama:
-    """Class to perform finetuning of a language model.
-        Initialize the FinetuneModel.
+    """Class to perform finetuning of LLama using
+    a regression head.
 
     Args:
         cfg (DictConfig): Configuration for the fine-tuning.

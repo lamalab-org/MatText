@@ -4,7 +4,8 @@ from concurrent.futures import ProcessPoolExecutor, TimeoutError
 from typing import Dict, List
 
 import fire
-from xtal2txt.core import TextRep
+
+from mattext.representations import TextRep
 
 
 def read_json(json_file: str) -> List[Dict]:
