@@ -159,7 +159,7 @@ class TaskRunner:
             )
 
 
-@hydra_main(config_path="conf", config_name="config")
+@hydra_main(config_path="../../conf", config_name="config")
 def main(cfg: DictConfig) -> None:
     print(f"Working directory : {os.getcwd()}")
     print(

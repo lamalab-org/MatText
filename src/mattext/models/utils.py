@@ -5,6 +5,7 @@ import wandb
 from tqdm import tqdm
 from transformers import GenerationConfig, TrainerCallback
 from transformers.integrations import WandbCallback
+
 from mattext.tokenizer import (
     CifTokenizer,
     CompositionTokenizer,
@@ -43,6 +44,10 @@ DEFAULT_PAD_TOKEN = "[PAD]"
 DEFAULT_EOS_TOKEN = "</s>"
 DEFAULT_BOS_TOKEN = "<s>"
 DEFAULT_UNK_TOKEN = "<unk>"
+
+
+def fold_key_namer(fold_key):
+    return f"fold_{fold_key}"
 
 
 def assign_special_tokens(tokenizer):

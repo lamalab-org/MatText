@@ -1,17 +1,15 @@
+import json
 import math
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
 from matbench.data_ops import load
-import json
 from sklearn.metrics import (
     mean_absolute_error,
     mean_squared_error,
 )
-
-from dataclasses import dataclass, field,asdict
-from typing import List, Dict, Any
-
 
 MATTEXT_MATBENCH = {
     "kvrh": "matbench_log_kvrh",
@@ -29,7 +27,6 @@ METRIC_MAP = {
     "mae": mean_absolute_error,
     "rmse": lambda true, pred: math.sqrt(mean_squared_error(true, pred)),
 }
-
 
 
 def fold_key_namer(fold_key):
@@ -51,15 +48,17 @@ def mattext_score(prediction_ids, predictions, task_name):
     return mean_squared_error(true, predictions)
 
 
-
 @dataclass
-class Task:
+class MatTextTask:
     task_name: str
-    #metric: str
+    num_folds: int = 5
+    # metric: str
     folds_results: Dict[int, Dict[str, Any]] = field(default_factory=dict)
     recorded_folds: List[int] = field(default_factory=list)
 
-    def record_fold(self, fold: int, prediction_ids: List[str], predictions: List[float]):
+    def record_fold(
+        self, fold: int, prediction_ids: List[str], predictions: List[float]
+    ):
         if fold in self.recorded_folds:
             raise ValueError(f"Fold {fold} has already been recorded.")
         true_scores = load_true_scores(self.task_name, prediction_ids)
@@ -70,34 +69,46 @@ class Task:
             "predictions": predictions,
             "true_scores": true_scores,
             "mae": mae,
-            "rmse": rmse
+            "rmse": rmse,
         }
         self.recorded_folds.append(fold)
-    
-    def get_final_results(self):
-        if len(self.recorded_folds) < 5:
-            raise ValueError("All 5 folds must be recorded before getting final results.")
-        final_scores_mae = [self.folds_results[fold]["mae"] for fold in range(5)]
-        final_scores_rmse = [self.folds_results[fold]["rmse"] for fold in range(5)]
 
-        final_result = {
+    def get_final_results(self):
+        if len(self.recorded_folds) < self.num_folds:
+            raise ValueError(
+                f"All {self.num_folds} folds must be recorded before getting final results."
+            )
+        final_scores_mae = [
+            self.folds_results[fold]["mae"] for fold in range(self.num_folds)
+        ]
+        final_scores_rmse = [
+            self.folds_results[fold]["rmse"] for fold in range(self.num_folds)
+        ]
+
+        return {
             "mean_mae_score": np.mean(final_scores_mae),
             "std_mae_score": np.std(final_scores_mae),
             "mean_rmse_score": np.mean(final_scores_rmse),
             "std_rmse_score": np.std(final_scores_rmse),
-            "std_score": np.std(final_scores_mae)
+            "std_score": np.std(final_scores_mae),
         }
-        return final_result
 
     def to_file(self, file_path: str):
-        with open(file_path, 'w') as f:
-            json.dump(asdict(self), f, default=self._json_serializable)
-    
+        final_results = (
+            self.get_final_results()
+            if len(self.recorded_folds) == self.num_folds
+            else {}
+        )
+        data_to_save = asdict(self)
+        data_to_save["final_results"] = final_results
+        with open(file_path, "w") as f:
+            json.dump(data_to_save, f, default=self._json_serializable)
+
     @staticmethod
     def from_file(file_path: str):
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             data = json.load(f)
-        task = Task(task_name=data["task_name"], metric=data["metric"])
+        task = MatTextTask(task_name=data["task_name"], metric=data["metric"])
         task.folds_results = data["folds_results"]
         task.recorded_folds = data["recorded_folds"]
         return task
@@ -105,13 +116,13 @@ class Task:
     @staticmethod
     def _prepare_for_serialization(obj):
         if isinstance(obj, dict):
-            return {k: Task._prepare_for_serialization(v) for k, v in obj.items()}
-        elif isinstance(obj, list):
-            return [Task._prepare_for_serialization(v) for v in obj]
-        elif isinstance(obj, pd.Series):
-            return obj.tolist()
-        elif isinstance(obj, np.ndarray):
-            return obj.tolist()
+            return {k: MatTextTask._prepare_for_serialization(v) for k, v in obj.items()}
+        elif (
+            isinstance(obj, list)
+            or isinstance(obj, pd.Series)
+            or isinstance(obj, np.ndarray)
+        ):
+            return MatTextTask._prepare_for_serialization(obj.tolist())
         else:
             return obj
 
