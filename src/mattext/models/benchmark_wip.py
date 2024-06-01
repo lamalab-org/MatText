@@ -6,10 +6,8 @@ from matbench.bench import MatbenchBenchmark
 from omegaconf import DictConfig
 
 from mattext.models.finetune import FinetuneModel
-from mattext.models.predict import 
+from mattext.models.predict import Inference
 
-def fold_key_namer(fold_key):
-    return f"fold_{fold_key}"
 
 class Matbenchmark:
     """
@@ -39,6 +37,7 @@ class Matbenchmark:
 
         # override wandb project name & tokenizer
         self.wandb_project = self.task_cfg.model.logging.wandb_project
+
 
     def run_benchmarking(self, local_rank=None) -> None:
         """
@@ -73,9 +72,8 @@ class Matbenchmark:
             exp_cfg = self.task_cfg.copy()
             exp_cfg.model.finetune.exp_name = exp_name
             exp_cfg.model.finetune.path.finetune_traindata = train_data_path
-            fold = fold_key_namer(i)
 
-            finetuner = FinetuneModel(exp_cfg, local_rank,fold)
+            finetuner = FinetuneModel(exp_cfg, local_rank)
             ckpt = finetuner.finetune()
             print("-------------------------")
             print(ckpt)
@@ -91,10 +89,11 @@ class Matbenchmark:
             exp_cfg.model.inference.path.pretrained_checkpoint = ckpt
 
             try:
-                predict = Inference(exp_cfg,fold=fold)
+                predict = Inference(exp_cfg)
                 predictions = predict.predict()
-
-                #benchmark.record(i, predictions)
+                prediction_ids = predict.prediction_ids
+                result = mattext_score(prediction_ids, predictions)
+                benchmark.record(i, predictions)
             except Exception as e:
                 print(
                     f"Error occurred during inference for finetuned checkpoint '{exp_name}':"
