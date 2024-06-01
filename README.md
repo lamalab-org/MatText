@@ -1,8 +1,7 @@
-Struct_llm
+MatText
 ==============================
 
-
-Pretrain and Finetune LLMs with different material representations.
+> A framework for text-based materials modeling. 
 
 
 ## Local Installation
@@ -113,7 +112,7 @@ New experiments can be easily added with the following step.
 python main.py --multirun model=pretrain_template ++hydra.launcher.gres=gpu:1 +<new_exp_group>=<new_exp_template_1>,<new_exp_template_2>, ..
 
 ```
-
+<!-- 
 ### Run with Docker 
 
 Build Docker image
@@ -126,4 +125,4 @@ docker build --build-arg GITHUB_PAT=<your_token> -t mattext .
 ```bash
 docker exec -it --gpus all -v /path/to/host/mattext:/app/mattext/ mattext python main.py hydra/launcher=submitit_local --multirun +pretrain30k=cifp1,cifsym,composition,crystal_llm,slice
 
-```
+``` -->
