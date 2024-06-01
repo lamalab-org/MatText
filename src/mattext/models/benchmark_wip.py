@@ -74,12 +74,13 @@ class Matbenchmark:
                 project=self.task_cfg.model.logging.wandb_project,
                 name=exp_name,
             )
+            fold_name = fold_key_namer(i)
 
             exp_cfg = self.task_cfg.copy()
             exp_cfg.model.finetune.exp_name = exp_name
             exp_cfg.model.finetune.path.finetune_traindata = train_data_path
 
-            finetuner = FinetuneModel(exp_cfg, local_rank)
+            finetuner = FinetuneModel(exp_cfg, local_rank,fold=fold_name)
             ckpt = finetuner.finetune()
             print("-------------------------")
             print(ckpt)
@@ -93,13 +94,14 @@ class Matbenchmark:
 
             exp_cfg.model.inference.path.test_data = test_data_path
             exp_cfg.model.inference.path.pretrained_checkpoint = ckpt
-            fold_name = fold_key_namer(i)
+            
             print(fold_name)
 
             try:
-                predict = Inference(exp_cfg)
-                predictions = predict.predict()
-                prediction_ids = predict.prediction_ids
+                predict = Inference(exp_cfg,fold=fold_name)
+                predictions,prediction_ids = predict.predict()
+                #prediction_ids = predict.prediction_ids
+                print(prediction_ids, predictions)
                 task.record_fold(fold=i, prediction_ids=prediction_ids, predictions=predictions)
 
                 #benchmark.record(i, predictions)
