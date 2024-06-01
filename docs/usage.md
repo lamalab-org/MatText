@@ -41,7 +41,7 @@ requested_text_reps = text_rep.get_requested_text_reps(requested_reps)
 
 ### Supported text representations
 
-The [`TextRep`](api.md#mattext.representations.TextRep class currently supports the following text representations:
+The [`TextRep`](api.md#mattext.representations.TextRep) class currently supports the following text representations:
 
 - **SlICES** (`slice`): SLICE representation of the crystal structure.
 - **Composition** (`composition`): Chemical composition in hill format.
@@ -55,3 +55,106 @@ The [`TextRep`](api.md#mattext.representations.TextRep class currently supports 
 - **Local Env** (`local_env`):  List of Wyckoff label and SMILES separated by line breaks for each local environment.
 
 For more details on each representation and how to obtain them, refer to the respective method documentation in the `TextRep` class.
+
+
+## Transformations 
+
+
+The `TextRep` class supports various transformations that can be applied to the input structure.
+
+
+
+### Permute Structure 
+
+The `permute_structure` transformation randomly permutes the order of atoms in a structure. 
+
+
+```python
+from mattext.representations import TextRep
+from pymatgen.core.structure import Structure
+
+structure_1 = Structure.from_file("N2_p1.cif", "cif")
+
+transformations = [("permute_structure", {"seed": 42})]
+
+text_rep = TextRep.from_input(structure_1, transformations)
+text_representations_requested = ["atoms", "crystal_llm_rep"]
+print("Permuted Pymatgen Structure:")
+print(text_rep.structure)
+print("Permuted Text Representations:")
+print(text_rep.get_requested_text_reps(text_representations_requested))
+```
+
+### Translate Structure 
+
+The `translate_structure` transformation randomly translates all atoms in a structure by a specified vector. This can simulate small displacements in the structure.
+
+```python
+transformations = [("translate_structure", {"seed": 42, "vector": [0.1, 0.1, 0.1]})]
+
+text_rep = TextRep.from_input(structure_1, transformations)
+text_representations_requested = ["crystal_llm_rep"]
+print("Translated Crystal-text-LLM Representations:")
+print(text_rep.get_requested_text_reps(text_representations_requested))
+```
+
+### Augmenting data
+
+In principle, we can generate valid text representations with random transformations with physically meaningful parameters. Dummy example is shown below
+
+```python
+from mattext.representations import TextRep
+
+# Define transformations
+translation_vectors = np.random.uniform(low=0.1, high=0.5, size=(3, 3))
+for vector in translation_vectors:
+    transformations = [
+        ("permute_structure", {"seed": 42}),
+        ("perturb_structure", {"seed": 42, "max_distance": 0.1}),
+        ("translate_structure", {"seed": 42, "vector": vector.tolist()})
+    ]
+    text_rep = TextRep.from_input(structure_2, transformations)
+    text_representations_requested = ["crystal_llm_rep"]
+    print("Translated Text Representations:")
+    print(text_rep.get_requested_text_reps(text_representations_requested))
+
+```
+this would output 
+
+```bash
+Translated Text Representations:
+{'crystal_llm_rep': '3.9 3.9 3.9\n90 90 90\nO2-\n0.76 0.98 0.41\nTi4+\n0.77 0.98 0.89\nO2-\n0.76 0.49 0.89\nO2-\n0.26 0.97 0.88\nSr2+\n0.25 0.47 0.38'}
+Translated Text Representations:
+{'crystal_llm_rep': '3.9 3.9 3.9\n90 90 90\nO2-\n0.85 0.66 0.18\nTi4+\n0.86 0.66 0.66\nO2-\n0.85 0.17 0.66\nO2-\n0.35 0.65 0.65\nSr2+\n0.34 0.15 0.15'}
+Translated Text Representations:
+{'crystal_llm_rep': '3.9 3.9 3.9\n90 90 90\nO2-\n0.63 0.94 0.35\nTi4+\n0.64 0.94 0.84\nO2-\n0.64 0.45 0.84\nO2-\n0.13 0.94 0.83\nSr2+\n0.12 0.43 0.33'}
+```
+
+> more examples are available as notebooks in the repository
+
+The following transformations are available for transforming structures:
+
+#### Randomly permute structure
+
+[`permute_structure`](api.md#mattext.representations.transformations.TransformationCallback.permute_structure) randomly permutes the order of atoms in a structure.
+
+#### Randomly translate single atom
+[`translate_single_atom`](api.md#mattext.representations.transformations.TransformationCallback.translate_single_atom) randomly translates one or more atoms in a structure.
+
+
+#### Randomly perturb structure
+
+[`perturb_structure`](api.md#mattext.representations.transformations.TransformationCallback.perturb_structure) randomly perturbs atoms in a structure.
+
+#### Randomly translate structure
+
+[`translate_structure`](api.md#mattext.representations.transformations.TransformationCallback.translate_structure) randomly translates the atoms in a structure.
+
+ >This transformation supports additional keyword arguments for fine-tuning the translation.
+
+MatText leverages methods from pymatgen and support all the keyword arguments in `Structure.translate_sites` method.
+
+
+All transformations utilize a common seed value for reproducibility and accept additional parameters for customization.
+
+For more details on each transformation and its parameters, refer to the respective function documentation.
