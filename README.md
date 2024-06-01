@@ -45,3 +45,36 @@ cd mattext
 ```bash
 pip install -e .
 ```
+
+
+## Getting started
+
+### Converting crystals into text
+
+```python
+from mattext.representations import TextRep
+from pymatgen.core import Structure
+
+
+# Load structure from a CIF file
+from_file = "InCuS2_p1.cif"
+structure = Structure.from_file(from_file, "cif")
+
+# Initialize TextRep Class
+text_rep = TextRep.from_input(structure)
+
+requested_reps = [
+    "cif_p1",
+    "slice",
+    "atoms_params",
+    "crystal_llm_rep",
+    "zmatrix"
+]
+
+# Get the requested text representations
+requested_text_reps = text_rep.get_requested_text_reps(requested_reps)
+```
+
+### Running a benchmark 
+
+<TODO NAWAF>
