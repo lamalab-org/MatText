@@ -19,10 +19,17 @@ MATTEXT_MATBENCH = {
     "perovskites": "matbench_perovskites",
 }
 
+MATMINER_COLUMNS = {
+    "kvrh": "log10(K_VRH)",
+    "gvrh": "log10(G_VRH)",
+    "perovskites": "e_form",
+}
+
 METRIC_MAP = {
     "mae": mean_absolute_error,
     "rmse": lambda true, pred: math.sqrt(mean_squared_error(true, pred)),
 }
+
 
 
 def fold_key_namer(fold_key):
@@ -34,7 +41,7 @@ def load_true_scores(dataset, mbids):
     scores = []
     for mbid in mbids:
         # Get the score for the mbid
-        score = data_frame.loc[mbid]["log10(K_VRH)"]
+        score = data_frame.loc[mbid][MATMINER_COLUMNS[dataset]]
         scores.append(score)
     return scores
 
@@ -44,13 +51,11 @@ def mattext_score(prediction_ids, predictions, task_name):
     return mean_squared_error(true, predictions)
 
 
-# make a data class for property which has 5 folds and when called associated fold value is recorded
-
 
 @dataclass
 class Task:
     task_name: str
-    metric: str
+    #metric: str
     folds_results: Dict[int, Dict[str, Any]] = field(default_factory=dict)
     recorded_folds: List[int] = field(default_factory=list)
 
@@ -58,23 +63,29 @@ class Task:
         if fold in self.recorded_folds:
             raise ValueError(f"Fold {fold} has already been recorded.")
         true_scores = load_true_scores(self.task_name, prediction_ids)
-        metric_function = METRIC_MAP[self.metric]
-        score = metric_function(true_scores, predictions)
+        mae = mean_absolute_error(true_scores, predictions)
+        rmse = math.sqrt(mean_squared_error(true_scores, predictions))
         self.folds_results[fold] = {
             "prediction_ids": prediction_ids,
             "predictions": predictions,
             "true_scores": true_scores,
-            "score": score
+            "mae": mae,
+            "rmse": rmse
         }
         self.recorded_folds.append(fold)
     
     def get_final_results(self):
         if len(self.recorded_folds) < 5:
             raise ValueError("All 5 folds must be recorded before getting final results.")
-        final_scores = [self.folds_results[fold]["score"] for fold in range(5)]
+        final_scores_mae = [self.folds_results[fold]["mae"] for fold in range(5)]
+        final_scores_rmse = [self.folds_results[fold]["rmse"] for fold in range(5)]
+
         final_result = {
-            "mean_score": np.mean(final_scores),
-            "std_score": np.std(final_scores)
+            "mean_mae_score": np.mean(final_scores_mae),
+            "std_mae_score": np.std(final_scores_mae),
+            "mean_rmse_score": np.mean(final_scores_rmse),
+            "std_rmse_score": np.std(final_scores_rmse),
+            "std_score": np.std(final_scores_mae)
         }
         return final_result
 

@@ -40,6 +40,7 @@ class FinetuneModel(TokenizerMixin):
         self.fold = fold
         self.local_rank = local_rank
         self.representation = cfg.model.representation
+        self.data_repository = cfg.model.data_repository
         self.cfg = cfg.model.finetune
         self.context_length: int = self.cfg.context_length
         self.callbacks = self.cfg.callbacks
@@ -47,7 +48,7 @@ class FinetuneModel(TokenizerMixin):
             self.cfg.path.finetune_traindata
         )
 
-    def _prepare_datasets(self, path: str) -> DatasetDict:
+    def _prepare_datasets(self, subset: str) -> DatasetDict:
         """
         Prepare training and validation datasets.
 
@@ -64,7 +65,7 @@ class FinetuneModel(TokenizerMixin):
                     example[key] = replacement
             return example
 
-        ds = load_dataset("n0w0f/MatText", path )
+        ds = load_dataset(self.data_repository, subset )
         dataset = ds[self.fold].train_test_split(shuffle=True, test_size=0.2, seed=42)
         dataset = dataset.filter(
             lambda example: example[self.representation] is not None

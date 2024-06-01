@@ -1,6 +1,7 @@
 # @package _global_
 model:
   representation: composition
+  dataset: "gvrh"
   special_num_token: False
   logging:
     wandb_project: test-benchmark
@@ -12,3 +13,5 @@ model:
       per_device_train_batch_size: 1024
     path:
       pretrained_checkpoint: /work/so87pot/structllm/megaloop2/checkpoints/checkpoints/composition_30k_ft/checkpoint-1000
+
+    

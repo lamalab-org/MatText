@@ -33,11 +33,12 @@ class Matbenchmark:
         """
         self.task_cfg = task_cfg
         self.representation = self.task_cfg.model.representation
+        self.task = self.task_cfg.model.dataset
         self.benchmark = self.task_cfg.model.inference.benchmark_dataset
         self.exp_names = self.task_cfg.model.finetune.exp_name
         self.test_exp_names = self.task_cfg.model.inference.exp_name
-        self.train_data = task_cfg.model.finetune.path.finetune_traindata
-        self.test_data = task_cfg.model.inference.path.test_data
+        self.train_data = self.task_cfg.model.finetune.dataset_name
+        self.test_data = self.task_cfg.model.inference.benchmark_dataset
         self.benchmark_save_path = self.task_cfg.model.inference.benchmark_save_file
 
         # override wandb project name & tokenizer
@@ -61,13 +62,13 @@ class Matbenchmark:
         # mb = MatbenchBenchmark(autoload=False)
         # benchmark = getattr(mb, self.benchmark)
         # benchmark.load()
-        task = Task(task_name="kvrh", metric="mae")
+        task = Task(task_name=self.task)
 
-        for i, (exp_name, test_name, train_data_path, test_data_path) in enumerate(
-            zip(self.exp_names, self.test_exp_names, self.train_data, self.test_data)
+        for i, (exp_name, test_name) in enumerate(
+            zip(self.exp_names, self.test_exp_names)
         ):
             print(
-                f"Running training on {train_data_path}, and testing on {test_data_path}"
+                f"Running training on {self.train_data}, and testing on {self.test_data} for fold {i}"
             )
             wandb.init(
                 config=dict(self.task_cfg.model.finetune),
@@ -75,10 +76,13 @@ class Matbenchmark:
                 name=exp_name,
             )
             fold_name = fold_key_namer(i)
+            print("-------------------------")
+            print(fold_name)
+            print("-------------------------")
 
             exp_cfg = self.task_cfg.copy()
             exp_cfg.model.finetune.exp_name = exp_name
-            exp_cfg.model.finetune.path.finetune_traindata = train_data_path
+            exp_cfg.model.finetune.path.finetune_traindata = self.train_data
 
             finetuner = FinetuneModel(exp_cfg, local_rank,fold=fold_name)
             ckpt = finetuner.finetune()
@@ -92,16 +96,13 @@ class Matbenchmark:
                 name=test_name,
             )
 
-            exp_cfg.model.inference.path.test_data = test_data_path
+            exp_cfg.model.inference.path.test_data = self.test_data
             exp_cfg.model.inference.path.pretrained_checkpoint = ckpt
-            
-            print(fold_name)
 
             try:
                 predict = Inference(exp_cfg,fold=fold_name)
                 predictions,prediction_ids = predict.predict()
-                #prediction_ids = predict.prediction_ids
-                print(prediction_ids, predictions)
+                print(len(prediction_ids), len(predictions))
                 task.record_fold(fold=i, prediction_ids=prediction_ids, predictions=predictions)
 
                 #benchmark.record(i, predictions)
