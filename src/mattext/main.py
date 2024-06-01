@@ -6,7 +6,7 @@ from hydra import main as hydra_main
 from hydra import utils
 from omegaconf import DictConfig
 
-from mattext.models.benchmark import Matbenchmark
+from mattext.models.benchmark_wip import Matbenchmark
 from mattext.models.finetune import FinetuneModel
 from mattext.models.inference import Benchmark
 from mattext.models.llama import FinetuneLLama

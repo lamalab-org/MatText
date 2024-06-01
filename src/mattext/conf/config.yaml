@@ -34,8 +34,8 @@
     # - name: pretrain_run
     #   tasks: [pretrain]
 
-    # - name: benchmark_run
-    #   tasks: [benchmark]
+    - name: benchmark_run
+      tasks: [benchmark]
 
     # - name: test_run
     #   tasks: [inference]
@@ -46,8 +46,8 @@
     # - name: llama_run
     #   tasks: [llama]
 
-    - name: llama_sft_run
-      tasks: [llama_sft]
+    # - name: llama_sft_run
+    #   tasks: [llama_sft]
 
     # - name: potential_run
     #   tasks: [potential]
