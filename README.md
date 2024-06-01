@@ -1,7 +1,28 @@
-MatText
-==============================
 
-> A framework for text-based materials modeling. 
+<p align="center">
+  <img src="https://github.com/lamalab-org/mattext/raw/main/docs/static/logo.png" height="150">
+</p>
+
+
+<h1 align="center">
+  MatText: A framework for text-based materials modeling
+</h1>
+
+<p align="center">
+    <a href="https://github.com/lamalab-org/mattext/actions/workflows/tests.yml">
+        <img alt="Tests" src="https://github.com/lamalab-org/mattext/workflows/Tests/badge.svg" />
+    </a>
+    <a href="https://pypi.org/project/mattext">
+        <img alt="PyPI" src="https://img.shields.io/pypi/v/mattext" />
+    </a>
+    <a href="https://pypi.org/project/mattext">
+        <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/mattext" />
+    </a>
+    <a href="https://github.com/lamalab-org/mattext/blob/main/LICENSE">
+        <img alt="PyPI - License" src="https://img.shields.io/pypi/l/mattext" />
+    </a>
+</p>
+
 
 
 ## Local Installation

@@ -5,7 +5,7 @@ import wandb
 from tqdm import tqdm
 from transformers import GenerationConfig, TrainerCallback
 from transformers.integrations import WandbCallback
-from xtal2txt.tokenizer import (
+from mattext.tokenizer import (
     CifTokenizer,
     CompositionTokenizer,
     CrysllmTokenizer,
@@ -44,8 +44,9 @@ DEFAULT_EOS_TOKEN = "</s>"
 DEFAULT_BOS_TOKEN = "<s>"
 DEFAULT_UNK_TOKEN = "<unk>"
 
+
 def assign_special_tokens(tokenizer):
-    special_tokens_dict = dict()
+    special_tokens_dict = {}
     if tokenizer.pad_token is None:
         special_tokens_dict["pad_token"] = DEFAULT_PAD_TOKEN
     if tokenizer.eos_token is None:
@@ -57,7 +58,6 @@ def assign_special_tokens(tokenizer):
     return special_tokens_dict
 
 
-# adapted from crystal-text-llm :TODO give credits
 def smart_tokenizer_and_embedding_resize(
     special_tokens_dict,
     llama_tokenizer,
@@ -66,6 +66,7 @@ def smart_tokenizer_and_embedding_resize(
     """Resize tokenizer and embedding.
 
     Note: This is the unoptimized version that may make your embedding size not be divisible by 64.
+    Adapted from crystal-text-llm (https://github.com/facebookresearch/crystal-text-llm)
     """
     num_new_tokens = llama_tokenizer.add_special_tokens(special_tokens_dict)
     llama_tokenizer.add_special_tokens(special_tokens_dict)
@@ -86,6 +87,7 @@ def smart_tokenizer_and_embedding_resize(
 
     model.config.pad_token_id = llama_tokenizer.pad_token_id
     output_embeddings[-num_new_tokens:] = output_embeddings_avg
+
 
 class TokenizerMixin:
     """Mixin class to handle tokenizer functionality."""
@@ -202,34 +204,54 @@ class EvaluateFirstStepCallback(TrainerCallback):
 
 class LLMSampleCB(WandbCallback):
     """A CallBack to log samples a wandb.Table during training"""
-    def __init__(self, trainer, test_dataset, num_samples=5, max_new_tokens=10, log_model="checkpoint"):
+
+    def __init__(
+        self,
+        trainer,
+        test_dataset,
+        num_samples=5,
+        max_new_tokens=10,
+        log_model="checkpoint",
+    ):
         super().__init__()
         self._log_model = log_model
         self.sample_dataset = test_dataset.select(range(num_samples))
         self.model, self.tokenizer = trainer.model, trainer.tokenizer
-        self.gen_config = GenerationConfig.from_pretrained(trainer.model.name_or_path, max_new_tokens=max_new_tokens)
+        self.gen_config = GenerationConfig.from_pretrained(
+            trainer.model.name_or_path, max_new_tokens=max_new_tokens
+        )
 
     def generate(self, prompt):
-        tokenized_prompt = self.tokenizer(prompt, return_tensors='pt')['input_ids'].cuda()
+        tokenized_prompt = self.tokenizer(prompt, return_tensors="pt")[
+            "input_ids"
+        ].cuda()
         with torch.cuda.amp.autocast():
-            output = self. model.generate(tokenized_prompt,generation_config=self.gen_config).to("cuda")
-        return self.tokenizer.decode(output[0][len(tokenized_prompt[0]):], skip_special_tokens=True)
+            output = self.model.generate(
+                tokenized_prompt, generation_config=self.gen_config
+            ).to("cuda")
+        return self.tokenizer.decode(
+            output[0][len(tokenized_prompt[0]) :], skip_special_tokens=True
+        )
 
     def samples_table(self, examples):
         """Create a wandb.Table to store the generations"""
-        records_table = wandb.Table(columns=["prompt", "generation"] + list(self.gen_config.to_dict().keys()))
+        records_table = wandb.Table(
+            columns=["prompt", "generation"] + list(self.gen_config.to_dict().keys())
+        )
         for example in tqdm(examples, leave=False):
             prompt = example["text"]
             generation = self.generate(prompt=prompt)
-            records_table.add_data(prompt, generation, *list(self.gen_config.to_dict().values()))
+            records_table.add_data(
+                prompt, generation, *list(self.gen_config.to_dict().values())
+            )
         return records_table
 
-    def on_evaluate(self, args, state, control,  **kwargs):
+    def on_evaluate(self, args, state, control, **kwargs):
         """Log the wandb.Table after calling trainer.evaluate"""
         super().on_evaluate(args, state, control, **kwargs)
         records_table = self.samples_table(self.sample_dataset)
         self._wandb.log({"sample_predictions": records_table})
-        #"Log the wandb.Table after calling trainer.evaluate"
+        # "Log the wandb.Table after calling trainer.evaluate"
         super().on_evaluate(args, state, control, **kwargs)
         records_table = self.samples_table(self.sample_dataset)
-        self._wandb.log({"sample_predictions":records_table})
+        self._wandb.log({"sample_predictions": records_table})
