@@ -28,10 +28,9 @@ classifiers = [
   "Operating System :: Unix",
   "Operating System :: MacOS",
 ]
-requires-python = ">=3.8, <3.13"
+requires-python = ">=3.9, <3.13"
 dependencies = [
-  "matminer",
-  "matbench",
+  "matbench @ git+https://github.com/materialsproject/matbench.git", # https://github.com/materialsproject/matbench/issues/269
   "xtal2txt @ git+https://github.com/lamalab-org/xtal2txt.git",
   "transformers",
   "tokenizers",
