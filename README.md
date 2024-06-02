@@ -80,4 +80,10 @@ requested_text_reps = text_rep.get_requested_text_reps(requested_reps)
 
 ### Running a benchmark 
 
-<TODO NAWAF>
+```bash
+python main.py \
+    model=finetune_filtered \
+    +model.representation=composition \ # can be any MatText Representation
+    +model.dataset=gvrh \ # can be any MatText Benchmark property 
+    +model.finetune.path.pretrained_checkpoint=composition_30k_ft/checkpoint-1000 #path to pretrain checkpoint
+``
