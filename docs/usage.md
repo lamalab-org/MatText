@@ -160,15 +160,64 @@ All transformations utilize a common seed value for reproducibility and accept a
 For more details on each transformation and its parameters, refer to the respective function documentation.
 
 
-## Model 
+## Modeling and Benchmarking 
+
+MatText have  pipelines for seamless pretraining([`pretrain`](api.md#mattext.models.pretrain)) and benchmarking ([`benchmark`](api.md#mattext.models.benchmark)) with finetuning ([`finetune`](api.md#mattext.models.finetune)) on multiple MatText representations. We use Hydra framework for dynamically creating hierarchical configuration based on the pipeline and representations that we want to use.
+
+
+### Pretraining on single MatText Representation
+
+```bash
+python main.py -cn=pretrain model=pretrain_example +model.representation=composition +model.dataset_type=pretrain30k +model.context_length=32
+
+```
+
+Here, `model=pretrain_example` would select `pretrain_example` as the base config for pretrain run `-cn=pretrain`.
+
+All config file can be found here, inside respective directories.
+```bash
+cd /conf/
+```
+Base configs can be found at `/conf/model`
+
+`+model.representation` can be any MatText representation. The pipeline would use data represented using that particular representation for training.
+`+model.dataset_type` can be one of the MatText pretraining datasets.
+`+model.context_length` would define the context length.
+
+>Note: Use meaningful context length according to the representation to avoid truncation.
+
+The `+` symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.
+
+
+Inorder to override the existing default configuration from CLI use `++`, for eg `++model.pretrain.training_arguments.per_device_train_batch_size=32`. 
+
+
+For advanced usage (changing architecture, training arguments or modelling parameters) it would be easier to make the changes in the base config file which is `/conf/model/pretrain_example` than having to override parameters with lengthy CLI commands!
+
+
+
+### Running benchmark on single MatText Representation
+
+```bash
+python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=perovskites +model.checkpoint=path/to/checkpoint  
+```
+
+
+Here for the benchmarking pipeline(`-cn=benchmark`) base config is `benchmark_example.yaml`. 
+You can define the parameters for the experiment hence at `\conf\model\benchmark_example.yaml`.
+
+> Here +model.dataset_type=filtered would select the type of benchmark. It can be `filtered` (avoid having truncated structure in train and test set, Only relatively small structures are present here, but this would also mean having less number of sampels to train on ) or `matbench` (complete dataset, there are few big structures , which would be trunated if the context length for modelling is less than `2048`).
+
+
+> `+model.dataset_type=filtered` would produce the report compatible with matbench leaderboard.
+
+
+
 
 
 ### Configuring experiments and model
 
-All config file can be found here, inside respective directories
-```bash
-cd /src/mattext/conf/
-```
+
 The main configuration for the run is in config.yaml and other configs are grouped in respective folders. An example directory structure of configs is below.
 ```bash
 ├── conf
