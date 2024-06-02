@@ -212,6 +212,7 @@ You can define the parameters for the experiment hence at `\conf\model\benchmark
 > `+model.dataset_type=filtered` would produce the report compatible with matbench leaderboard.
 
 
+Benchmark report is saved to the path defined in the base config. By default to `"${hydra:runtime.cwd}/../../results/${now:%Y-%m-%d}/${now:%H-%M-%S}/$`
 
 ### Pretraining or Benchmarking multiple MatText Representation
 
