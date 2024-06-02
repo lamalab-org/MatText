@@ -89,9 +89,11 @@ python main.py -cn=pretrain model=pretrain_example +model.representation=composi
 ### Running a benchmark 
 
 ```bash
-python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=gvrh +model.checkpoint=path/to/checkpoint  
+python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=perovskites +model.checkpoint=path/to/checkpoint  
 ```
 
 The `+` symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.
-Inorder to override the existing default configuration use `++`, for eg `++model.pretrain.training_arguments.per_device_train_batch_size=32`. Refer docs for more easier and flexible way to use the configs with config groups.
+Inorder to override the existing default configuration use `++`, for eg `++model.pretrain.training_arguments.per_device_train_batch_size=32`. Refer [docs](https://lamalab-org.github.io/MatText/) for more examples and advance way to use the configs with config groups.
+
+
 
