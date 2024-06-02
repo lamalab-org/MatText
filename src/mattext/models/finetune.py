@@ -30,15 +30,17 @@ class FinetuneModel(TokenizerMixin):
         local_rank (int, optional): Local rank for distributed training. Defaults to None.
     """
 
-    def __init__(self, cfg: DictConfig, local_rank=None) -> None:
+    def __init__(self, cfg: DictConfig, local_rank=None,fold="fold_0") -> None:
 
         super().__init__(
             cfg=cfg.model.representation,
             special_tokens=cfg.model.special_tokens,
             special_num_token=cfg.model.special_num_token,
         )
+        self.fold = fold
         self.local_rank = local_rank
         self.representation = cfg.model.representation
+        self.data_repository = cfg.model.data_repository
         self.cfg = cfg.model.finetune
         self.context_length: int = self.cfg.context_length
         self.callbacks = self.cfg.callbacks
@@ -46,7 +48,7 @@ class FinetuneModel(TokenizerMixin):
             self.cfg.path.finetune_traindata
         )
 
-    def _prepare_datasets(self, path: str) -> DatasetDict:
+    def _prepare_datasets(self, subset: str) -> DatasetDict:
         """
         Prepare training and validation datasets.
 
@@ -63,17 +65,11 @@ class FinetuneModel(TokenizerMixin):
                     example[key] = replacement
             return example
 
-        ds = load_dataset("json", data_files=path, split="train")
-        dataset = ds.train_test_split(shuffle=True, test_size=0.2, seed=42)
+        ds = load_dataset(self.data_repository, subset )
+        dataset = ds[self.fold].train_test_split(shuffle=True, test_size=0.2, seed=42)
         dataset = dataset.filter(
             lambda example: example[self.representation] is not None
         )
-        # replacement = "[PAD]"
-
-        # dataset = dataset.map(
-        #     partial(replace_none, replacement=replacement),
-        #     batched=True
-        # )
         return dataset.map(
             partial(
                 self._tokenize_pad_and_truncate, context_length=self.context_length

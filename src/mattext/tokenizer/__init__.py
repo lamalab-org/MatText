@@ -1,13 +1,12 @@
 from xtal2txt.tokenizer import (
-    NumTokenizer,
-    SliceTokenizer,
-    CompositionTokenizer,
     CifTokenizer,
+    CompositionTokenizer,
     CrysllmTokenizer,
-    SmilesTokenizer,
+    NumTokenizer,
     RobocrysTokenizer,
+    SliceTokenizer,
+    SmilesTokenizer,
 )
-
 
 __all__ = [
     "NumTokenizer",

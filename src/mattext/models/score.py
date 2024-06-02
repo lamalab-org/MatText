@@ -106,7 +106,7 @@ class MatTextTask:
 
     @staticmethod
     def from_file(file_path: str):
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             data = json.load(f)
         task = MatTextTask(task_name=data["task_name"], metric=data["metric"])
         task.folds_results = data["folds_results"]
