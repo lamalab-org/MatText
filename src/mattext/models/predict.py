@@ -43,7 +43,6 @@ class Inference(TokenizerMixin):
         filtered_dataset = dataset[self.fold].filter(
             lambda example: example[self.representation] is not None
         )
-        print(filtered_dataset)
 
         return filtered_dataset.map(
             partial(
