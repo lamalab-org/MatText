@@ -101,6 +101,7 @@ class MatTextTask:
         )
         data_to_save = asdict(self)
         data_to_save["final_results"] = final_results
+        print(final_results)
         with open(file_path, "w") as f:
             json.dump(data_to_save, f, default=self._json_serializable)
 
