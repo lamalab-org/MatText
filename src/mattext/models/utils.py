@@ -16,16 +16,16 @@ from mattext.tokenizer import (
 )
 
 _TOKENIZER_MAP = {
-    "slice": SliceTokenizer,
+    "slices": SliceTokenizer,
     "composition": CompositionTokenizer,
     "cif_symmetrized": CifTokenizer,
     "cif_p1": CifTokenizer,
     "cif_bonding": CifTokenizer,
-    "crystal_llm_rep": CrysllmTokenizer,
+    "crystal_text_llm": CrysllmTokenizer,
     "robocrys_rep": RobocrysTokenizer,
-    "wycoff_rep": None,
-    "atoms": CompositionTokenizer,
-    "atoms_params": CompositionTokenizer,
+    "wycoff_rep": RobocrysTokenizer,
+    "atom_sequences": CompositionTokenizer,
+    "atom_sequences_plusplus": CompositionTokenizer,
     "zmatrix": CrysllmTokenizer,
     "local_env": SmilesTokenizer,
 }
