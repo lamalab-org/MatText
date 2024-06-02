@@ -78,12 +78,20 @@ requested_reps = [
 requested_text_reps = text_rep.get_requested_text_reps(requested_reps)
 ```
 
+
+### Pretrain
+
+```bash
+python main.py -cn=pretrain model=pretrain_example +model.representation=composition +model.dataset_type=pretrain30k +model.context_length=32
+
+```
+
 ### Running a benchmark 
 
 ```bash
-python main.py \
-    model=finetune_filtered \
-    +model.representation=composition \ # can be any MatText Representation
-    +model.dataset=gvrh \ # can be any MatText Benchmark property 
-    +model.finetune.path.pretrained_checkpoint=composition_30k_ft/checkpoint-1000 #path to pretrain checkpoint
-``
+python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=gvrh +model.checkpoint=path/to/checkpoint  
+```
+
+The `+` symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.
+Inorder to override the existing default configuration use `++`, for eg `++model.pretrain.training_arguments.per_device_train_batch_size=32`. Refer docs for more easier and flexible way to use the configs with config groups.
+
