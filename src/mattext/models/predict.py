@@ -82,4 +82,4 @@ class Inference(TokenizerMixin):
         prediction_ids = self.tokenized_test_datasets["mbid"]
         self.prediction_ids = preidction_ids
 
-        return pd.Series(predictions.predictions.flatten()),preidction_ids
+        return pd.Series(predictions.predictions.flatten()),prediction_ids
