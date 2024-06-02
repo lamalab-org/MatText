@@ -30,18 +30,17 @@ class PretrainModel(TokenizerMixin):
         )
         self.local_rank = local_rank
         self.representation = cfg.model.representation
+        self.data_repository = cfg.model.data_repository
         self.cfg = cfg.model.pretrain
         self.context_length: int = self.cfg.context_length
         self.callbacks = self.cfg.callbacks
         self.model_name_or_path: str = self.cfg.model_name_or_path
-        self.tokenized_train_datasets = self._prepare_datasets(
-            path=self.cfg.path.traindata
-        )
-        self.tokenized_eval_datasets = self._prepare_datasets(
-            path=self.cfg.path.evaldata
+        self.tokenized_train_datasets,self.tokenized_eval_datasets = self._prepare_datasets(
+            path=self.cfg.dataset_name
         )
 
-    def _prepare_datasets(self, path: str) -> DatasetDict:
+
+    def _prepare_datasets(self, subset: str) -> DatasetDict:
         """
         Prepare training and validation datasets.
 
@@ -51,11 +50,17 @@ class PretrainModel(TokenizerMixin):
         Returns:
             DatasetDict: Dictionary containing training and validation datasets.
         """
-        dataset = load_dataset("json", data_files=path)
+        dataset = load_dataset(self.data_repository, subset)
         filtered_dataset = dataset.filter(
             lambda example: example[self.representation] is not None
         )
-        return filtered_dataset.map(
+
+        return filtered_dataset['train'].map(
+            partial(
+                self._tokenize_pad_and_truncate, context_length=self.context_length
+            ),
+            batched=True,
+        ), filtered_dataset['validation'].map(
             partial(
                 self._tokenize_pad_and_truncate, context_length=self.context_length
             ),
