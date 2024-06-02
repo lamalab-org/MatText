@@ -2,11 +2,12 @@ import os
 import traceback
 
 import wandb
+from matbench.bench import MatbenchBenchmark
 from omegaconf import DictConfig
 
 from mattext.models.finetune import FinetuneModel
 from mattext.models.predict import Inference
-from mattext.models.score import MatTextTask
+from mattext.models.score import MatTextTask, MATTEXT_MATBENCH
 from mattext.models.utils import fold_key_namer
 
 
@@ -31,6 +32,7 @@ class Matbenchmark:
         self.task_cfg = task_cfg
         self.representation = self.task_cfg.model.representation
         self.task = self.task_cfg.model.dataset
+        self.task_type = self.task_cfg.model.dataset_type
         self.benchmark = self.task_cfg.model.inference.benchmark_dataset
         self.exp_names = self.task_cfg.model.finetune.exp_name
         self.test_exp_names = self.task_cfg.model.inference.exp_name
@@ -56,10 +58,12 @@ class Matbenchmark:
             Exception: If an error occurs during inference for a finetuned checkpoint.
 
         """
-        # mb = MatbenchBenchmark(autoload=False)
-        # benchmark = getattr(mb, self.benchmark)
-        # benchmark.load()
-        task = MatTextTask(task_name=self.task)
+        if self.task_type == "matbench":
+            mb = MatbenchBenchmark(autoload=False)
+            task = getattr(mb, MATTEXT_MATBENCH[self.task])
+            task.load()
+        else:
+            task = MatTextTask(task_name=self.task)
 
         for i, (exp_name, test_name) in enumerate(
             zip(self.exp_names, self.test_exp_names)
@@ -100,9 +104,13 @@ class Matbenchmark:
                 predict = Inference(exp_cfg,fold=fold_name)
                 predictions,prediction_ids = predict.predict()
                 print(len(prediction_ids), len(predictions))
-                task.record_fold(fold=i, prediction_ids=prediction_ids, predictions=predictions)
 
-                #benchmark.record(i, predictions)
+                if self.task_type == "matbench":
+                    task.record(i, predictions)
+                else:
+                    task.record_fold(fold=i, prediction_ids=prediction_ids, predictions=predictions)
+
+
             except Exception as e:
                 print(
                     f"Error occurred during inference for finetuned checkpoint '{exp_name}':"
@@ -113,9 +121,9 @@ class Matbenchmark:
             os.makedirs(self.benchmark_save_path)
 
         file_name = os.path.join(
-            self.benchmark_save_path, f"{self.representation}_{self.benchmark}.json"
+            self.benchmark_save_path, f"mattext_benchmark_{self.representation}_{self.benchmark}.json"
         )
         task.to_file(file_name)
         # Get final results after recording all folds
-        final_results = task.get_final_results()
-        print(final_results)
+        # final_results = task.get_final_results()
+        # print(final_results)

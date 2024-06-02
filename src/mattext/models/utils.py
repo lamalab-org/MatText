@@ -40,6 +40,7 @@ _DEFAULT_SPECIAL_TOKENS = {
     "bos_token": "[BOS]",
 }
 
+
 DEFAULT_PAD_TOKEN = "[PAD]"
 DEFAULT_EOS_TOKEN = "</s>"
 DEFAULT_BOS_TOKEN = "<s>"
