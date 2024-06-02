@@ -1,9 +1,10 @@
 representation: ???
 special_num_token: False
 dataset: ???
-dataset_type: "filtered"
+dataset_type: ???
 fold : 5
 data_repository: "n0w0f/MatText"
+checkpoint: ???
 special_tokens:
   {
     "unk_token": "[UNK]",
@@ -33,7 +34,7 @@ finetune:
     ]
 
   path:
-    pretrained_checkpoint: ???
+    pretrained_checkpoint: "${model.checkpoint}"
 
     finetune_data_rootpath: results # <--- Change this to the path of the finetune data
     finetune_traindata:

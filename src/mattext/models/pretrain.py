@@ -36,7 +36,7 @@ class PretrainModel(TokenizerMixin):
         self.callbacks = self.cfg.callbacks
         self.model_name_or_path: str = self.cfg.model_name_or_path
         self.tokenized_train_datasets,self.tokenized_eval_datasets = self._prepare_datasets(
-            path=self.cfg.dataset_name
+            subset=self.cfg.dataset_name
         )
 
 
@@ -60,7 +60,7 @@ class PretrainModel(TokenizerMixin):
                 self._tokenize_pad_and_truncate, context_length=self.context_length
             ),
             batched=True,
-        ), filtered_dataset['validation'].map(
+        ), filtered_dataset['test'].map(
             partial(
                 self._tokenize_pad_and_truncate, context_length=self.context_length
             ),
@@ -118,8 +118,8 @@ class PretrainModel(TokenizerMixin):
         trainer = Trainer(
             model=model,
             data_collator=data_collator,
-            train_dataset=self.tokenized_train_datasets["train"],
-            eval_dataset=self.tokenized_eval_datasets["train"],
+            train_dataset=self.tokenized_train_datasets,
+            eval_dataset=self.tokenized_eval_datasets,
             args=training_args,
             callbacks=callbacks,
         )
