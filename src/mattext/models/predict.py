@@ -43,7 +43,6 @@ class Inference(TokenizerMixin):
         filtered_dataset = dataset[self.fold].filter(
             lambda example: example[self.representation] is not None
         )
-        print(filtered_dataset)
 
         return filtered_dataset.map(
             partial(
@@ -79,7 +78,7 @@ class Inference(TokenizerMixin):
         # os.makedirs(self.cfg.path.predictions, exist_ok=True)
         # predictions_path = os.path.join(self.cfg.path.predictions, 'predictions.npy')
         # np.save(predictions_path, predictions.predictions)
-        preidction_ids = self.tokenized_test_datasets["mbid"]
+        prediction_ids = self.tokenized_test_datasets["mbid"]
         self.prediction_ids = preidction_ids
 
-        return pd.Series(predictions.predictions.flatten()),preidction_ids
+        return pd.Series(predictions.predictions.flatten()),prediction_ids
