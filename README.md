@@ -85,7 +85,6 @@ requested_text_reps = text_rep.get_requested_text_reps(requested_reps)
 
 ```bash
 python main.py -cn=pretrain model=pretrain_example +model.representation=composition +model.dataset_type=pretrain30k +model.context_length=32
-
 ```
 
 ### Running a benchmark 
