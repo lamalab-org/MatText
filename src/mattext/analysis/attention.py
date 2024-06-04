@@ -140,20 +140,6 @@ def mask_dict(tokens):
 
     return masks
 
-
-# def mask_dict(tokens):
-#     unique_tokens = set(tokens)
-#     masks = {}
-
-#     # Create a mask for each unique token
-#     for token in unique_tokens:
-#         mask = np.array([np.array(tokens) == token] * len(tokens))
-#         mask = (mask & mask.T).astype(int)
-#         masks[token] = mask
-
-#     return masks
-
-
 def get_count_for_tokens(tokens):
     unique_tokens = set(tokens)
     token_counts = {}
@@ -171,7 +157,7 @@ def get_percentage_weights(attention_matrix, masks):
     return token_weights
 
 
-# function to loop through all layers and heads and get the token_weights for each attenction matrix. ttention matrix is of ghe form num_layers x num_heads x seq_len x seq_len
+# function to loop through all layers and heads and get the token_weights for each attention matrix. ttention matrix is of ghe form num_layers x num_heads x seq_len x seq_len
 def get_token_weights(attention, masks):
     token_weights = {}
     for layer in range(attention.size(0)):
@@ -229,7 +215,7 @@ def aggregate_token_weights(data, model, tokenizer):
 
     # Divide the aggregate weights by the total number of data points to get the average
     for token, weights in aggregate_weights.items():
-        for key in weights.keys():
+        for key in weights:
             aggregate_weights[token][key] /= limit
 
     return aggregate_weights
@@ -256,9 +242,9 @@ def _plot_heatmap(token_weights_, plot_name: str):
     """Plot a heatmap of the token weights."""
 
     # Get the set of unique tokens
-    unique_tokens = set(
-        token for weights in token_weights_.values() for token in weights.keys()
-    )
+    unique_tokens = {
+        token for weights in token_weights_.values() for token in weights
+    }
 
     # Get the global min and max weights
     global_min = min(
