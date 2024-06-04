@@ -1,6 +1,6 @@
   hydra:
     job:
-      name: benchmark
+      name: llama_sft
     run:
       dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
     sweep:
@@ -17,8 +17,8 @@
   runs:
 
 
-    - name: benchmark_run
-      tasks: [benchmark]
 
+  - name: llama_sft_run
+    tasks: [llama_sft]
 
 
