@@ -5,6 +5,7 @@ import wandb
 from tqdm import tqdm
 from transformers import GenerationConfig, TrainerCallback
 from transformers.integrations import WandbCallback
+
 from mattext.tokenizer import (
     CifTokenizer,
     CompositionTokenizer,
@@ -15,16 +16,16 @@ from mattext.tokenizer import (
 )
 
 _TOKENIZER_MAP = {
-    "slice": SliceTokenizer,
+    "slices": SliceTokenizer,
     "composition": CompositionTokenizer,
     "cif_symmetrized": CifTokenizer,
     "cif_p1": CifTokenizer,
     "cif_bonding": CifTokenizer,
-    "crystal_llm_rep": CrysllmTokenizer,
+    "crystal_text_llm": CrysllmTokenizer,
     "robocrys_rep": RobocrysTokenizer,
-    "wycoff_rep": None,
-    "atoms": CompositionTokenizer,
-    "atoms_params": CompositionTokenizer,
+    "wycoff_rep": RobocrysTokenizer,
+    "atom_sequences": CompositionTokenizer,
+    "atom_sequences_plusplus": CompositionTokenizer,
     "zmatrix": CrysllmTokenizer,
     "local_env": SmilesTokenizer,
 }
@@ -39,10 +40,15 @@ _DEFAULT_SPECIAL_TOKENS = {
     "bos_token": "[BOS]",
 }
 
+
 DEFAULT_PAD_TOKEN = "[PAD]"
 DEFAULT_EOS_TOKEN = "</s>"
 DEFAULT_BOS_TOKEN = "<s>"
 DEFAULT_UNK_TOKEN = "<unk>"
+
+
+def fold_key_namer(fold_key):
+    return f"fold_{fold_key}"
 
 
 def assign_special_tokens(tokenizer):

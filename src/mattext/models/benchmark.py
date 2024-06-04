@@ -7,6 +7,8 @@ from omegaconf import DictConfig
 
 from mattext.models.finetune import FinetuneModel
 from mattext.models.predict import Inference
+from mattext.models.score import MatTextTask, MATTEXT_MATBENCH
+from mattext.models.utils import fold_key_namer
 
 
 class Matbenchmark:
@@ -27,16 +29,20 @@ class Matbenchmark:
         Returns:
             None
         """
+        self.task_cfg = task_cfg
         self.representation = self.task_cfg.model.representation
+        self.task = self.task_cfg.model.dataset
+        self.task_type = self.task_cfg.model.dataset_type
         self.benchmark = self.task_cfg.model.inference.benchmark_dataset
         self.exp_names = self.task_cfg.model.finetune.exp_name
         self.test_exp_names = self.task_cfg.model.inference.exp_name
-        self.train_data = task_cfg.model.finetune.path.finetune_traindata
-        self.test_data = task_cfg.model.inference.path.test_data
+        self.train_data = self.task_cfg.model.finetune.dataset_name
+        self.test_data = self.task_cfg.model.inference.benchmark_dataset
         self.benchmark_save_path = self.task_cfg.model.inference.benchmark_save_file
 
         # override wandb project name & tokenizer
         self.wandb_project = self.task_cfg.model.logging.wandb_project
+
 
     def run_benchmarking(self, local_rank=None) -> None:
         """
@@ -52,27 +58,34 @@ class Matbenchmark:
             Exception: If an error occurs during inference for a finetuned checkpoint.
 
         """
-        mb = MatbenchBenchmark(autoload=False)
-        benchmark = getattr(mb, self.benchmark)
-        benchmark.load()
+        if self.task_type == "matbench":
+            mb = MatbenchBenchmark(autoload=False)
+            task = getattr(mb, MATTEXT_MATBENCH[self.task])
+            task.load()
+        else:
+            task = MatTextTask(task_name=self.task)
 
-        for i, (exp_name, test_name, train_data_path, test_data_path) in enumerate(
-            zip(self.exp_names, self.test_exp_names, self.train_data, self.test_data)
+        for i, (exp_name, test_name) in enumerate(
+            zip(self.exp_names, self.test_exp_names)
         ):
             print(
-                f"Running training on {train_data_path}, and testing on {test_data_path}"
+                f"Running training on {self.train_data}, and testing on {self.test_data} for fold {i}"
             )
             wandb.init(
                 config=dict(self.task_cfg.model.finetune),
                 project=self.task_cfg.model.logging.wandb_project,
                 name=exp_name,
             )
+            fold_name = fold_key_namer(i)
+            print("-------------------------")
+            print(fold_name)
+            print("-------------------------")
 
             exp_cfg = self.task_cfg.copy()
             exp_cfg.model.finetune.exp_name = exp_name
-            exp_cfg.model.finetune.path.finetune_traindata = train_data_path
+            exp_cfg.model.finetune.path.finetune_traindata = self.train_data
 
-            finetuner = FinetuneModel(exp_cfg, local_rank)
+            finetuner = FinetuneModel(exp_cfg, local_rank,fold=fold_name)
             ckpt = finetuner.finetune()
             print("-------------------------")
             print(ckpt)
@@ -84,13 +97,20 @@ class Matbenchmark:
                 name=test_name,
             )
 
-            exp_cfg.model.inference.path.test_data = test_data_path
+            exp_cfg.model.inference.path.test_data = self.test_data
             exp_cfg.model.inference.path.pretrained_checkpoint = ckpt
 
             try:
-                predict = Inference(exp_cfg)
-                predictions = predict.predict()
-                benchmark.record(i, predictions)
+                predict = Inference(exp_cfg,fold=fold_name)
+                predictions,prediction_ids = predict.predict()
+                print(len(prediction_ids), len(predictions))
+
+                if self.task_type == "matbench":
+                    task.record(i, predictions)
+                else:
+                    task.record_fold(fold=i, prediction_ids=prediction_ids, predictions=predictions)
+
+
             except Exception as e:
                 print(
                     f"Error occurred during inference for finetuned checkpoint '{exp_name}':"
@@ -101,55 +121,9 @@ class Matbenchmark:
             os.makedirs(self.benchmark_save_path)
 
         file_name = os.path.join(
-            self.benchmark_save_path, f"{self.representation}_{self.benchmark}.json.gz"
+            self.benchmark_save_path, f"mattext_benchmark_{self.representation}_{self.benchmark}.json"
         )
-        benchmark.to_file(file_name)
-
-    def run_qmof(self, local_rank=None) -> None:
-
-        for i, (exp_name, test_name, train_data_path, test_data_path) in enumerate(
-            zip(self.exp_names, self.test_exp_names, self.train_data, self.test_data)
-        ):
-            print(
-                f"Running training on {train_data_path}, and testing on {test_data_path}"
-            )
-            wandb.init(
-                config=dict(self.task_cfg.model.finetune),
-                project=self.task_cfg.model.logging.wandb_project,
-                name=exp_name,
-            )
-
-            exp_cfg = self.task_cfg.copy()
-            exp_cfg.model.finetune.exp_name = exp_name
-            exp_cfg.model.finetune.path.finetune_traindata = train_data_path
-
-            finetuner = FinetuneModel(exp_cfg, local_rank)
-            ckpt = finetuner.finetune()
-            print("-------------------------")
-            print(ckpt)
-            print("-------------------------")
-
-            wandb.init(
-                config=dict(self.task_cfg.model.inference),
-                project=self.task_cfg.model.logging.wandb_project,
-                name=test_name,
-            )
-
-            exp_cfg.model.inference.path.test_data = test_data_path
-            exp_cfg.model.inference.path.pretrained_checkpoint = ckpt
-
-            try:
-                predict = Inference(exp_cfg)
-                predictions = predict.predict()
-
-            except Exception as e:
-                print(
-                    f"Error occurred during inference for finetuned checkpoint '{exp_name}':"
-                )
-                print(traceback.format_exc())
-
-        if not os.path.exists(self.benchmark_save_path):
-            os.makedirs(self.benchmark_save_path)
-        import numpy as np
-
-        np.save(self.benchmark_save_path, predictions.predictions)
+        task.to_file(file_name)
+        # Get final results after recording all folds
+        # final_results = task.get_final_results()
+        # print(final_results)
