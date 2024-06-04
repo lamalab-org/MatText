@@ -3,10 +3,12 @@ from typing import List
 
 import torch
 import wandb
-from datasets import DatasetDict, load_dataset
+from datasets import load_dataset
 from omegaconf import DictConfig
 from peft import (
+    AutoPeftModelForCausalLM,
     LoraConfig,
+    PeftModel,
 )
 from transformers import (
     AutoModelForCausalLM,
@@ -26,31 +28,21 @@ from mattext.models.utils import (
     smart_tokenizer_and_embedding_resize,
 )
 
-IGNORE_INDEX = -100
-MAX_LENGTH = 2048
-use_flash_attention = True
-
-
-def unplace_flash_attn_with_attn():
-    import importlib
-
-    import transformers
-
-    print("Reloading llama model, unpatching flash attention")
-    importlib.reload(transformers.models.llama.modeling_llama)
-
 
 class FinetuneLLamaSFT:
-    """Class to perform supervised finetuning of a language model.
+    """Class to perform finetuning of a language model.
+        Initialize the FinetuneModel.
 
     Args:
         cfg (DictConfig): Configuration for the fine-tuning.
         local_rank (int, optional): Local rank for distributed training. Defaults to None.
     """
 
-    def __init__(self, cfg: DictConfig, local_rank=None) -> None:
+    def __init__(self, cfg: DictConfig, local_rank=None, fold="fold_0") -> None:
+        self.fold = fold
         self.local_rank = local_rank
         self.representation = cfg.model.representation
+        self.data_repository = cfg.model.data_repository
         self.add_special_tokens = cfg.model.add_special_tokens
         self.property_map = cfg.model.PROPERTY_MAP
         self.material_map = cfg.model.MATERIAL_MAP
@@ -62,20 +54,16 @@ class FinetuneLLamaSFT:
         self.model, self.tokenizer, self.peft_config = self._setup_model_tokenizer()
         self.property_ = self.property_map[self.cfg.dataset_name]
         self.material_ = self.material_map[self.cfg.dataset_name]
-        self.trainset, self.evalset = self._prepare_datasets(
-            self.cfg.path.finetune_traindata
-        )
-        self.testset = self._prepare_testset(self.cfg.path.finetune_testdata)
+        self.dataset = self.prepare_data(self.cfg.path.finetune_traindata)
+
+    def prepare_data(self, subset):
+        dataset = load_dataset(self.data_repository, subset)
+        dataset = dataset.shuffle(seed=42)  # .select(range(100))
+        return dataset.train_test_split(test_size=0.1, seed=42)
 
     def _setup_model_tokenizer(self) -> None:
-        tokenizer = AutoTokenizer.from_pretrained(
-            self.ckpt,
-            model_max_length=MAX_LENGTH,
-            padding_side="right",
-            use_fast=False,
-        )
-        tokenizer.pad_token = tokenizer.eos_token
-        # tokenizer.pad_token = tokenizer.eos_token  #seperate pad token required for data - collator
+        # device_string = PartialState().process_index
+        # compute_dtype = getattr(torch, "float16")
 
         if self.bnb_config.use_4bit and self.bnb_config.use_8bit:
             raise ValueError(
@@ -102,125 +90,37 @@ class FinetuneLLamaSFT:
                 print("Your GPU supports bfloat16: accelerate training with bf16=True")
                 print("=" * 80)
 
-        # device_map = "auto"  # {"": 0}
-        # device_map={'':torch.cuda.current_device()}
+        # LoRA config
+        peft_config = LoraConfig(**self.cfg.lora_config)
+
+        tokenizer = AutoTokenizer.from_pretrained(
+            self.ckpt,
+            use_fast=False,
+        )
+        tokenizer.pad_token = tokenizer.eos_token
+        tokenizer.padding_side = "right"
+
         model = AutoModelForCausalLM.from_pretrained(
             self.ckpt,
-            use_cache=False,
-            use_flash_attention_2=use_flash_attention,
             quantization_config=bnb_config,
             device_map="auto",
         )
 
-        peft_config = LoraConfig(**self.cfg.lora_config)
-        # model = prepare_model_for_kbit_training(model)  #confirm this - base model with peft config in SFT trainer equivalent to
-        # model = get_peft_model(model, peft_config)        # peft model passed to SFT
-
-        if self.add_special_tokens:
-            special_tokens_dict = assign_special_tokens(tokenizer)
-            smart_tokenizer_and_embedding_resize(
-                special_tokens_dict=special_tokens_dict,
-                llama_tokenizer=tokenizer,
-                model=model,
-            )
         return model, tokenizer, peft_config
 
-    def formatting_prompts_func(self, sample):
-        return f"### What is the {self.property_} of {sample[self.representation]}\n ### Answer: {round(float(sample['labels']),3)}@@@"
+    def formatting_prompts_func(self, example):
+        output_texts = []
+        for i in range(len(example[self.representation])):
+            text = f"### What is the {self.property_} of {example[self.representation][i]}\n ### Answer: {example['labels'][i]:.3f}@@@"
+            output_texts.append(text)
+        return output_texts
 
-    def formatting_test_func(self, sample):
-        sample["text"] = (
-            f"### What is the {self.property_} of {sample[self.representation]}\n "
-        )
-        return sample
-
-    def template_dataset(self, sample):
-        sample["text"] = self.formatting_prompts_func(sample)
-        return sample
-
-    def _prepare_datasets(self, path: str) -> DatasetDict:
-        """
-        Prepare training and validation datasets.
-
-        Args:
-            train_df (pd.DataFrame): DataFrame containing training data.
-
-        Returns:
-            DatasetDict: Dictionary containing training and validation datasets.
-        """
-
-        dataset = load_dataset("json", data_files=path, split="train")
-        dataset = dataset.train_test_split(shuffle=True, test_size=0.2, seed=42)
-        trainset = dataset["train"].map(
-            self.template_dataset, remove_columns=list(dataset["train"].features)
-        )
-        testset = dataset["test"].map(
-            self.template_dataset, remove_columns=list(dataset["test"].features)
-        )
-        print(trainset[0]["text"])
-        print(testset[0]["text"])
-        return trainset, testset
-
-    def _prepare_testset(self, path: str) -> DatasetDict:
-        """
-        Prepare testsets.
-        """
-        dataset = load_dataset("json", data_files=path, split="train")
-        testset = dataset.map(
-            self.formatting_test_func, remove_columns=list(dataset.features)
-        )
-        print(testset[0]["text"])
-        return testset
-
-    def generate_and_save(self, trainer):
-        if use_flash_attention:
-            # unpatch flash attention
-            unplace_flash_attn_with_attn()
-        pipe = pipeline(
-            "text-generation",
-            model=trainer.model,
-            tokenizer=self.tokenizer,
-            return_full_text=False,
-            do_sample=False,
-            temperature=None,
-            max_new_tokens=10,
-            batch_size=16,
-            max_length=2048,
-        )
-
-        responses_dict = {}
-        with torch.cuda.amp.autocast():
-            resp = pipe(self.testset["text"])
-            for j, (prompt, responses) in enumerate(zip(self.testset["text"], resp)):
-                # print(prompt)
-                generated_text = responses[0]["generated_text"]
-                # Extract the response part by removing the prompt part
-                complete_response = generated_text.replace(prompt, "").strip()
-                parsed_answer = complete_response.replace("Answer:", "").strip()
-                responses_dict[j] = {
-                    "prompt": prompt,
-                    "response": responses[0]["generated_text"],
-                    "parsed_answer": parsed_answer,
-                }
-                print(parsed_answer)
-
-            with open(
-                f"{self.cfg.path.finetuned_modelname}/llama_evals_{self.representation}.json",
-                "w",
-            ) as f:
-                json.dump(responses_dict, f, indent=4)
-
-            # Merge LoRA and base model
-            merged_model = trainer.model.merge_and_unload()
-            # Save the merged model
-            merged_model.save_pretrained(
-                f"{self.cfg.path.finetuned_modelname}/llamav3-8b-lora-save-pretrained",
-                save_config=True,
-                safe_serialization=True,
-            )
-            self.tokenizer.save_pretrained(
-                f"{self.cfg.path.finetuned_modelname}/llamav3-8b-lora-save-pretrained"
-            )
+    def formatting_tests_func(self, example):
+        output_texts = []
+        for i in range(len(example[self.representation])):
+            text = f"### What is the {self.property_} of {example[self.representation][i]}\n "
+            output_texts.append(text)
+        return output_texts
 
     def _callbacks(self) -> List[TrainerCallback]:
         """Returns a list of callbacks for early stopping, and custom logging."""
@@ -252,15 +152,18 @@ class FinetuneLLamaSFT:
             response_template, tokenizer=self.tokenizer
         )
 
-        max_seq_length = MAX_LENGTH
         packing = False
+        max_seq_length = None
+        if self.representation == "cif_p1":
+            max_seq_length = 2048
+
         trainer = SFTTrainer(
             model=self.model,
             peft_config=self.peft_config,
-            train_dataset=self.trainset,
-            eval_dataset=self.evalset,
+            train_dataset=self.dataset["train"],
+            eval_dataset=self.dataset["test"],
+            formatting_func=self.formatting_prompts_func,
             data_collator=collator,
-            dataset_text_field="text",
             max_seq_length=max_seq_length,
             tokenizer=self.tokenizer,
             args=training_args,
@@ -271,18 +174,61 @@ class FinetuneLLamaSFT:
         wandb.log({"Training Arguments": str(config_train_args)})
         wandb.log({"model_summary": str(self.model)})
 
-        wandb_callback = LLMSampleCB(
-            trainer, self.testset, num_samples=10, max_new_tokens=10
-        )
-        trainer.add_callback(wandb_callback)
+        # wandb_callback = LLMSampleCB(
+        #     trainer, self.dataset['test'], num_samples=10, max_new_tokens=10
+        # )
+        # trainer.add_callback(wandb_callback)
 
         self.output_dir_ = (
             f"{self.cfg.path.finetuned_modelname}/llamav3-8b-lora-fine-tune"
         )
         trainer.train()
+
+        testset = load_dataset(
+            "json", data_files=self.cfg.path.finetune_testdata, split="train"
+        )
+
+        pipe = pipeline(
+            "text-generation",
+            model=trainer.model,
+            tokenizer=self.tokenizer,
+            return_full_text=False,
+            do_sample=False,
+            max_new_tokens=4,
+        )
+        with torch.cuda.amp.autocast():
+            pred = pipe(self.formatting_tests_func(testset))
+        print(pred)
+
+        with open(
+            f"{self.cfg.path.finetuned_modelname}_{self.fold}_predictions.json", "w"
+        ) as json_file:
+            json.dump(pred, json_file)
+
         trainer.save_state()
         trainer.save_model(self.output_dir_)
 
-        self.generate_once_and_save(trainer)
+        # Merge LoRA and base model
+        merged_model = trainer.model.merge_and_unload()
+        # Save the merged model
+        merged_model.save_pretrained(
+            f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained",
+            save_config=True,
+            safe_serialization=True,
+        )
+        self.tokenizer.save_pretrained(
+            f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained"
+        )
+
+        with torch.cuda.amp.autocast():
+            merge_pred = pipe(self.formatting_tests_func(testset))
+        print(merge_pred)
+
+        with open(
+            f"{self.cfg.path.finetuned_modelname}__{self.fold}_predictions_merged.json",
+            "w",
+        ) as json_file:
+            json.dump(merge_pred, json_file)
+
         wandb.finish()
         return self.cfg.path.finetuned_modelname
