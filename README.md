@@ -49,6 +49,11 @@ cd mattext
 pip install -e .
 ```
 
+If you want to use the Local Env representation, you will also need to install OpenBabel, e.g. using 
+
+```bash 
+conda install openbabel -c conda-forge
+```
 
 ## Getting started
 
@@ -57,7 +62,6 @@ pip install -e .
 ```python
 from mattext.representations import TextRep
 from pymatgen.core import Structure
-
 
 # Load structure from a CIF file
 from_file = "InCuS2_p1.cif"
@@ -68,9 +72,10 @@ text_rep = TextRep.from_input(structure)
 
 requested_reps = [
     "cif_p1",
-    "slice",
-    "atoms_params",
-    "crystal_llm_rep",
+    "slices",
+    "atom_sequences",
+    "atom_sequences_plusplus",
+    "crystal_text_llm",
     "zmatrix"
 ]
 
@@ -93,7 +98,21 @@ python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtere
 ```
 
 The `+` symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.
-To override the existing default configuration, use `++`, for eg, `++model.pretrain.training_arguments.per_device_train_batch_size=32`. Refer [docs](https://lamalab-org.github.io/MatText/) for more examples and advanced ways to use the configs with config groups.
+
+To override the existing default configuration, use `++`, for e.g., `++model.pretrain.training_arguments.per_device_train_batch_size=32`. Refer [docs](https://lamalab-org.github.io/MatText/) for more examples and advanced ways to use the configs with config groups.
 
 
+## 👐 Contributing
 
+Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See
+[CONTRIBUTING.md](https://github.com/lamalab-org/xtal2txt/blob/master/.github/CONTRIBUTING.md) for more information on getting involved.
+
+## 👋 Attribution
+
+### ⚖️ License
+
+The code in this package is licensed under the MIT License.
+
+### 💰 Funding
+
+This project has been supported by the [Carl Zeiss Foundation](https://www.carl-zeiss-stiftung.de/en/) as well as Intel and Merck.
