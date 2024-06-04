@@ -30,8 +30,7 @@ class FinetuneModel(TokenizerMixin):
         local_rank (int, optional): Local rank for distributed training. Defaults to None.
     """
 
-    def __init__(self, cfg: DictConfig, local_rank=None,fold="fold_0") -> None:
-
+    def __init__(self, cfg: DictConfig, local_rank=None, fold="fold_0") -> None:
         super().__init__(
             cfg=cfg.model.representation,
             special_tokens=cfg.model.special_tokens,
@@ -65,7 +64,7 @@ class FinetuneModel(TokenizerMixin):
                     example[key] = replacement
             return example
 
-        ds = load_dataset(self.data_repository, subset )
+        ds = load_dataset(self.data_repository, subset)
         dataset = ds[self.fold].train_test_split(shuffle=True, test_size=0.2, seed=42)
         dataset = dataset.filter(
             lambda example: example[self.representation] is not None

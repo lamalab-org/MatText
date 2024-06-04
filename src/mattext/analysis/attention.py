@@ -101,7 +101,6 @@ def get_tokenizer_from_rep(representation):
 
 
 def get_dataset(path: str, representation: str):
-
     _wrapped_tokenizer = get_tokenizer_from_rep(representation)
     context_length = _REPRESENTATION_CONTEXT[representation]
 

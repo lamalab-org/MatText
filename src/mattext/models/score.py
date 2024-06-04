@@ -117,7 +117,9 @@ class MatTextTask:
     @staticmethod
     def _prepare_for_serialization(obj):
         if isinstance(obj, dict):
-            return {k: MatTextTask._prepare_for_serialization(v) for k, v in obj.items()}
+            return {
+                k: MatTextTask._prepare_for_serialization(v) for k, v in obj.items()
+            }
         elif (
             isinstance(obj, list)
             or isinstance(obj, pd.Series)

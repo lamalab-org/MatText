@@ -18,9 +18,6 @@
     <a href="https://pypi.org/project/mattext">
         <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/mattext" />
     </a>
-    <a href="https://github.com/lamalab-org/mattext/blob/main/LICENSE">
-        <img alt="PyPI - License" src="https://img.shields.io/pypi/l/mattext" />
-    </a>
 </p>
 
 

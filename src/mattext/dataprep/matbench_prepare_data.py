@@ -1,8 +1,8 @@
 """
 matbench_prepare_data.py
 
-This module provides functions for processing and preparing data for the Matbench benchmark for materials science. 
-It includes functionality for reading JSON data, processing entries with a timeout, and processing batches of entries in parallel using multiprocessing. 
+This module provides functions for processing and preparing data for the Matbench benchmark for materials science.
+It includes functionality for reading JSON data, processing entries with a timeout, and processing batches of entries in parallel using multiprocessing.
 The main function, `process_json_to_json`, processes a JSON file and writes the processed data to an output JSON file, logging progress along the way.
 """
 

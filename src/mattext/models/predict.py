@@ -13,8 +13,7 @@ from mattext.models.utils import CustomWandbCallback_Inference, TokenizerMixin
 class Inference(TokenizerMixin):
     """Class to perform inference on a language model with a sequence classification head."""
 
-    def __init__(self, cfg: DictConfig,fold="fold_0"):
-
+    def __init__(self, cfg: DictConfig, fold="fold_0"):
         super().__init__(
             cfg=cfg.model.representation,
             special_tokens=cfg.model.special_tokens,
@@ -39,7 +38,7 @@ class Inference(TokenizerMixin):
         Returns:
             DatasetDict: Dictionary containing training and validation datasets.
         """
-        dataset = load_dataset(self.data_repository, path )
+        dataset = load_dataset(self.data_repository, path)
         filtered_dataset = dataset[self.fold].filter(
             lambda example: example[self.representation] is not None
         )
@@ -81,4 +80,4 @@ class Inference(TokenizerMixin):
         prediction_ids = self.tokenized_test_datasets["mbid"]
         self.prediction_ids = preidction_ids
 
-        return pd.Series(predictions.predictions.flatten()),prediction_ids
+        return pd.Series(predictions.predictions.flatten()), prediction_ids
