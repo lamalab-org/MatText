@@ -102,6 +102,17 @@ The `+` symbol before a configuration key indicates that you are adding a new ke
 To override the existing default configuration, use `++`, for e.g., `++model.pretrain.training_arguments.per_device_train_batch_size=32`. Refer [docs](https://lamalab-org.github.io/MatText/) for more examples and advanced ways to use the configs with config groups.
 
 
+### Using data 
+
+The MatText datasets can be easily obtained from [HuggingFace](https://huggingface.co/datasets/n0w0f/MatText), for example
+
+```
+from datasets import load_dataset
+
+dataset = load_dataset("n0w0f/MatText", "pretrain300k")
+```
+
+
 ## 👐 Contributing
 
 Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See
