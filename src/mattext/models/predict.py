@@ -78,6 +78,6 @@ class Inference(TokenizerMixin):
         # predictions_path = os.path.join(self.cfg.path.predictions, 'predictions.npy')
         # np.save(predictions_path, predictions.predictions)
         prediction_ids = self.tokenized_test_datasets["mbid"]
-        self.prediction_ids = preidction_ids
+        self.prediction_ids = prediction_ids
 
         return pd.Series(predictions.predictions.flatten()), prediction_ids

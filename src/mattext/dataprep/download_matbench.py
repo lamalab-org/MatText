@@ -30,7 +30,6 @@ def main(cfg: DictConfig) -> None:
     mb = MatbenchBenchmark(autoload=False)
     benchmarks = cfg.matbench.benchmarks.dataset
     path = cfg.matbench.path.save_path
-    print(path)
     if not os.path.exists(path):
         os.mkdir(path)
     else:
