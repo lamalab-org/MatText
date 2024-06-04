@@ -81,10 +81,8 @@ class TaskRunner:
             wandb.finish()
 
     def run_llama_sft(self, task_cfg: DictConfig, local_rank=None) -> None:
-        for exp_name, train_data_path in zip(
-            task_cfg.model.finetune.exp_name,
-            task_cfg.model.finetune.path.finetune_traindata,
-        ):
+        for fold in range(task_cfg.model.fold):
+            exp_name = f"{task_cfg.model.finetune.exp_name}_fold_{fold}"
             wandb.init(
                 config=dict(task_cfg.model.finetune),
                 project=task_cfg.model.logging.wandb_project,
@@ -93,12 +91,12 @@ class TaskRunner:
 
             exp_cfg = task_cfg.copy()
             exp_cfg.model.finetune.exp_name = exp_name
-            exp_cfg.model.finetune.path.finetune_traindata = train_data_path
 
-            finetuner = FinetuneLLamaSFT(exp_cfg, local_rank)
+            finetuner = FinetuneLLamaSFT(exp_cfg, local_rank, fold=f"fold_{fold}")
             f = finetuner.finetune()
             print(f)
             wandb.finish()
+
 
     def run_finetuning(self, task_cfg: DictConfig, local_rank=None) -> None:
         for exp_name, train_data_path in zip(
