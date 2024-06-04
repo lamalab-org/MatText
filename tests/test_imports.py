@@ -11,5 +11,5 @@ def test_textrep():
 
     textrep = TextRep.from_input(struct)
 
-    slices = test_textrep.get_slices()
+    slices = textrep.get_slices()
     assert isinstance(slices, str)
