@@ -408,13 +408,25 @@ The `+` symbol before a configuration key indicates that you are adding a new ke
 
 To override the existing default configuration, use `++`, for e.g., `++model.pretrain.training_arguments.per_device_train_batch_size=32`. Refer [docs](https://lamalab-org.github.io/MatText/) for more examples and advanced ways to use the configs with config groups.
 
+>Define the number of folds for n-fold cross validation in the config or through cli. For Matbench benchmarks however number of folds  should be 5. Default value for all experiments are set to 5.
 
 ## Using data 
 
 The MatText datasets can be easily obtained from [HuggingFace](https://huggingface.co/datasets/n0w0f/MatText), for example
 
-```
+```python
 from datasets import load_dataset
 
 dataset = load_dataset("n0w0f/MatText", "pretrain300k")
 ```
+
+## Using Pretrained MatText Models 
+
+The Pretrained MatText models can be easily loaded from [HuggingFace](https://huggingface.co/collections/n0w0f/mattext-665fe18e5eec38c2148ccf7a), for example
+
+```python
+from transformers import AutoModel
+
+model = AutoModel.from_pretrained ("n0w0f/MatText−cifp1−2m")
+```
+>This would need the code to pull the model from HF HUB and require internet.
