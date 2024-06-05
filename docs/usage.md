@@ -398,6 +398,12 @@ python main.py --multirun model=pretrain_template ++hydra.launcher.gres=gpu:1 +<
 python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=perovskites +model.checkpoint=path/to/checkpoint  
 ```
 
+## Finetuning LLM 
+
+```bash
+python main.py -cn=llm_sft model=llama_example +model.representation=composition +model.dataset_type=filtered +model.dataset=perovskites  
+```
+
 The `+` symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.
 
 To override the existing default configuration, use `++`, for e.g., `++model.pretrain.training_arguments.per_device_train_batch_size=32`. Refer [docs](https://lamalab-org.github.io/MatText/) for more examples and advanced ways to use the configs with config groups.
