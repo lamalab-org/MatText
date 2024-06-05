@@ -44,7 +44,8 @@ dependencies = [
   "wandb",
   "fire",
   "peft",
-  "trl"
+  "trl",
+  "bitsandbytes",
 ]
 
 [project.optional-dependencies]

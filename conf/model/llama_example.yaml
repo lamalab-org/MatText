@@ -21,16 +21,16 @@ REPRESENTATION_MAP : {
     }
 
 PROPERTY_MAP : {
-    "matbench_log_gvrh" : "shear modulus (in GPa)",
-    "matbench_log_kvrh" : "bulk modulus (in GPa)",
-    "matbench_dielectric" : "refractive index",
-    "matbench_perovskites" : "formation energy (in eV)",}
+    "gvrh" : "shear modulus (in GPa)",
+    "kvrh" : "bulk modulus (in GPa)",
+    "dielectric" : "refractive index",
+    "perovskites" : "formation energy (in eV)",}
 
 MATERIAL_MAP : {
-    "matbench_log_gvrh" : "material",
-    "matbench_log_kvrh" : "material",
-    "matbench_dielectric" : "dielectric material",
-    "matbench_perovskites" : "perovskite material",   }
+    "gvrh" : "material",
+    "kvrh" : "material",
+    "dielectric" : "dielectric material",
+    "perovskites" : "perovskite material",   }
 
 
 logging:
@@ -40,7 +40,8 @@ logging:
 finetune:
   model_name: test-llama
   freeze_base_model: False
-  dataset_name: "matbench_log_gvrh"
+  dataset_name: "${model.dataset}-train-${model.dataset_type}" 
+  benchmark_dataset: "${model.dataset}-test-${model.dataset_type}"  
   exp_name: [
     "train_${model.representation}_${model.finetune.dataset_name}",
     ]
@@ -96,7 +97,7 @@ finetune:
     fp16: False
     overwrite_output_dir: True
     dataloader_num_workers: 2
-    num_train_epochs: 5
+    num_train_epochs: 1
     per_device_train_batch_size: 8
     per_device_eval_batch_size: 8
     save_strategy: "steps"
