@@ -307,14 +307,14 @@ The easiest way to model multiple representation in one run would be by using `c
 
 ```bash
 python main.py --multirun -cn=benchmark model=benchmark_example +model.dataset_type=matbench +group-test=slices,composition
-
 ```
+
 Here we create a config group (directory with config files for different representations) at `/conf/<config group name>`
 
 In the above example we have two config files (`slices.yaml, composition.yaml`) inside config group `group-test`.
 with `--multirun` enabled we can launch the pipeline parallely or sequentially (by default) for the representations, Here two but representations, but once can add more.
 
-The `child config` (config inside the `config group` ) would over ride or add the key value pair ontop of the  `base config` (here `benchmark_example`).
+The `child config` (config inside the `config group` ) would override or add the key value pair on top of the  `base config` (here `benchmark_example`).
 
 >configs inside __group-test__ extends the `benchmark_example` and override the   `representation name`, `batch size`, `etc` in the `base config`.
 
@@ -366,7 +366,7 @@ The main configuration for the run is in config.yaml and other configs are group
 
 
 
-We use HF Trainer and hence by default it support DP but for DDP support 
+We use HF Trainer and hence by default it supports DP but for DDP support 
 ```bash
 python -m torch.distributed.run --nproc_per_node=4  /path/to/main.py --multirun model=pretrain_template +pretrain30k=cifp1,cifsym,composition,crystal_llm,slice
 
@@ -390,4 +390,25 @@ New experiments can be easily added with the following step.
 ```bash
 python main.py --multirun model=pretrain_template ++hydra.launcher.gres=gpu:1 +<new_exp_group>=<new_exp_template_1>,<new_exp_template_2>, ..
 
+```
+
+## Running a benchmark 
+
+```bash
+python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=perovskites +model.checkpoint=path/to/checkpoint  
+```
+
+The `+` symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.
+
+To override the existing default configuration, use `++`, for e.g., `++model.pretrain.training_arguments.per_device_train_batch_size=32`. Refer [docs](https://lamalab-org.github.io/MatText/) for more examples and advanced ways to use the configs with config groups.
+
+
+## Using data 
+
+The MatText datasets can be easily obtained from [HuggingFace](https://huggingface.co/datasets/n0w0f/MatText), for example
+
+```
+from datasets import load_dataset
+
+dataset = load_dataset("n0w0f/MatText", "pretrain300k")
 ```

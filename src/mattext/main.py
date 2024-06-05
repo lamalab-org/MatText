@@ -20,7 +20,6 @@ class TaskRunner:
         self.wandb_api_key = os.environ.get("WANDB_API_KEY")
 
     def run_task(self, run: list, task_cfg: DictConfig, local_rank=None) -> None:
-
         if "benchmark" in run:
             self.run_benchmarking(task_cfg)
 
@@ -97,7 +96,6 @@ class TaskRunner:
             print(f)
             wandb.finish()
 
-
     def run_finetuning(self, task_cfg: DictConfig, local_rank=None) -> None:
         for exp_name, train_data_path in zip(
             task_cfg.model.finetune.exp_name,
@@ -137,7 +135,6 @@ class TaskRunner:
             wandb.finish()
 
     def run_pretraining(self, task_cfg: DictConfig, local_rank=None) -> None:
-
         wandb.init(
             config=dict(task_cfg.model.pretrain),
             project=task_cfg.model.logging.wandb_project,

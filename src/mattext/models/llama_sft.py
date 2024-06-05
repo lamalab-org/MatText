@@ -6,9 +6,7 @@ import wandb
 from datasets import load_dataset
 from omegaconf import DictConfig
 from peft import (
-    AutoPeftModelForCausalLM,
     LoraConfig,
-    PeftModel,
 )
 from transformers import (
     AutoModelForCausalLM,
@@ -23,9 +21,6 @@ from trl import DataCollatorForCompletionOnlyLM, SFTTrainer
 
 from mattext.models.utils import (
     EvaluateFirstStepCallback,
-    LLMSampleCB,
-    assign_special_tokens,
-    smart_tokenizer_and_embedding_resize,
 )
 
 

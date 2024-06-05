@@ -101,7 +101,6 @@ class MatTextTask:
         )
         data_to_save = asdict(self)
         data_to_save["final_results"] = final_results
-        print(final_results)
         with open(file_path, "w") as f:
             json.dump(data_to_save, f, default=self._json_serializable)
 
@@ -117,11 +116,11 @@ class MatTextTask:
     @staticmethod
     def _prepare_for_serialization(obj):
         if isinstance(obj, dict):
-            return {k: MatTextTask._prepare_for_serialization(v) for k, v in obj.items()}
+            return {
+                k: MatTextTask._prepare_for_serialization(v) for k, v in obj.items()
+            }
         elif (
-            isinstance(obj, list)
-            or isinstance(obj, pd.Series)
-            or isinstance(obj, np.ndarray)
+            isinstance(obj, (list, pd.Series, np.ndarray))
         ):
             return MatTextTask._prepare_for_serialization(obj.tolist())
         else:

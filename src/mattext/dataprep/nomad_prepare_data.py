@@ -28,9 +28,6 @@ def process_entry(entry: dict) -> dict:
         text_reps = TextRep.from_input(entry["cif_p1"]).get_requested_text_reps(
             ["zmatrix", "atoms", "atoms_params"]
         )
-        # print(text_reps)
-        # text_reps['mbid'] = entry["mbid"] # Use get_all_text_reps to get various text representations # Add chemical formula to the dictionary
-        # text_reps['crystal_system'] = entry['structural_info']['crystal_system']  # Add crystal system to the dictionary
         text_reps["material_id"] = entry[
             "material_id"
         ]  # Add material id to the dictionary

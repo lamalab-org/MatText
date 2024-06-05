@@ -22,7 +22,6 @@ class PretrainModel(TokenizerMixin):
     """Class to perform pretraining of a language model."""
 
     def __init__(self, cfg: DictConfig, local_rank=None):
-
         super().__init__(
             cfg=cfg.model.representation,
             special_tokens=cfg.model.special_tokens,
@@ -35,10 +34,9 @@ class PretrainModel(TokenizerMixin):
         self.context_length: int = self.cfg.context_length
         self.callbacks = self.cfg.callbacks
         self.model_name_or_path: str = self.cfg.model_name_or_path
-        self.tokenized_train_datasets,self.tokenized_eval_datasets = self._prepare_datasets(
-            subset=self.cfg.dataset_name
+        self.tokenized_train_datasets, self.tokenized_eval_datasets = (
+            self._prepare_datasets(subset=self.cfg.dataset_name)
         )
-
 
     def _prepare_datasets(self, subset: str) -> DatasetDict:
         """
@@ -55,12 +53,12 @@ class PretrainModel(TokenizerMixin):
             lambda example: example[self.representation] is not None
         )
 
-        return filtered_dataset['train'].map(
+        return filtered_dataset["train"].map(
             partial(
                 self._tokenize_pad_and_truncate, context_length=self.context_length
             ),
             batched=True,
-        ), filtered_dataset['test'].map(
+        ), filtered_dataset["test"].map(
             partial(
                 self._tokenize_pad_and_truncate, context_length=self.context_length
             ),

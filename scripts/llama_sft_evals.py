@@ -114,9 +114,9 @@ def get_model_for_eval(adapter, batch_size, max_length=2048):
     return pipe
 
 
-def _prepare_datasets(path: str,
-                      matbench_dataset:str,
-                      representation:str) -> DatasetDict:
+def _prepare_datasets(
+    path: str, matbench_dataset: str, representation: str
+) -> DatasetDict:
     """
     Prepare training and validation datasets.
 
@@ -142,7 +142,6 @@ def _prepare_datasets(path: str,
     return ds.map(template_dataset, remove_columns=list(ds.features))
 
 
-
 def main(
     batch_size=8,
     max_length=2048,
@@ -151,11 +150,12 @@ def main(
     testset_path=None,
     adapter_path=None,
 ):
-
     if testset_path is None:
         testset_path = f"/work/so87pot/material_db/all_1/test_{matbench_dataset}_0.json"
     testset = _prepare_datasets(testset_path, matbench_dataset, representation)
-    pipe = get_model_for_eval(adapter_path, batch_size=batch_size, max_length=max_length)
+    pipe = get_model_for_eval(
+        adapter_path, batch_size=batch_size, max_length=max_length
+    )
     responses_dict = {}
     resp = pipe(testset["text"])
     for j, (prompt, responses) in enumerate(zip(testset["text"], resp)):

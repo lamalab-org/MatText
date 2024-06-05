@@ -23,6 +23,7 @@ class ContribScreeningCallbacks:
     def pld_greater_than(value):
         return lambda d: d["data"]["pld"]["value"] > value
 
+
 class MOFContributions:
     def __init__(
         self, api_key, project="qmof", host="contribs-api.materialsproject.org"
@@ -51,7 +52,9 @@ class MOFContributions:
             _id = d["structures"][0]["id"]
             structure = self.client.get_structure(_id)
             structure_data = structure.as_dict()
-            json_data.append({"id": _id, "structure": structure_data, "data": d["data"]})
+            json_data.append(
+                {"id": _id, "structure": structure_data, "data": d["data"]}
+            )
         self.save_data_as_json(json_data, "screened_mofs.json")
 
 

@@ -7,7 +7,7 @@ from omegaconf import DictConfig
 
 from mattext.models.finetune import FinetuneModel
 from mattext.models.predict import Inference
-from mattext.models.score import MatTextTask, MATTEXT_MATBENCH
+from mattext.models.score import MATTEXT_MATBENCH, MatTextTask
 from mattext.models.utils import fold_key_namer
 
 
@@ -42,7 +42,6 @@ class Matbenchmark:
 
         # override wandb project name & tokenizer
         self.wandb_project = self.task_cfg.model.logging.wandb_project
-
 
     def run_benchmarking(self, local_rank=None) -> None:
         """
@@ -85,7 +84,7 @@ class Matbenchmark:
             exp_cfg.model.finetune.exp_name = exp_name
             exp_cfg.model.finetune.path.finetune_traindata = self.train_data
 
-            finetuner = FinetuneModel(exp_cfg, local_rank,fold=fold_name)
+            finetuner = FinetuneModel(exp_cfg, local_rank, fold=fold_name)
             ckpt = finetuner.finetune()
             print("-------------------------")
             print(ckpt)
@@ -101,15 +100,16 @@ class Matbenchmark:
             exp_cfg.model.inference.path.pretrained_checkpoint = ckpt
 
             try:
-                predict = Inference(exp_cfg,fold=fold_name)
-                predictions,prediction_ids = predict.predict()
+                predict = Inference(exp_cfg, fold=fold_name)
+                predictions, prediction_ids = predict.predict()
                 print(len(prediction_ids), len(predictions))
 
                 if self.task_type == "matbench":
                     task.record(i, predictions)
                 else:
-                    task.record_fold(fold=i, prediction_ids=prediction_ids, predictions=predictions)
-
+                    task.record_fold(
+                        fold=i, prediction_ids=prediction_ids, predictions=predictions
+                    )
 
             except Exception as e:
                 print(
@@ -121,7 +121,8 @@ class Matbenchmark:
             os.makedirs(self.benchmark_save_path)
 
         file_name = os.path.join(
-            self.benchmark_save_path, f"mattext_benchmark_{self.representation}_{self.benchmark}.json"
+            self.benchmark_save_path,
+            f"mattext_benchmark_{self.representation}_{self.benchmark}.json",
         )
         task.to_file(file_name)
         # Get final results after recording all folds

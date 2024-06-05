@@ -1,11 +1,11 @@
 # Installation
 
-The most recent release can be installed from
+<!-- The most recent release can be installed from
 [PyPI](https://pypi.org/project/mattext) with:
 
 ```shell
 $ pip install mattext
-```
+``` -->
 
 The most recent code and data can be installed directly from GitHub with:
 
@@ -22,3 +22,8 @@ $ pip install -e .
 ```
 
 
+If you want to use the Local Env representation, you will also need to install OpenBabel, e.g. using 
+
+```bash 
+conda install openbabel -c conda-forge
+```
