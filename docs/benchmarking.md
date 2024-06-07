@@ -34,7 +34,7 @@ For advanced usage (changing architecture, training arguments, or modeling param
 
 
 
-### Running benchmark on single MatText Representation
+### Running Benchmark on Single MatText Representation
 
 ```bash
 python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=perovskites +model.checkpoint=path/to/checkpoint  
