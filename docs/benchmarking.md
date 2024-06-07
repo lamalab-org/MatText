@@ -173,7 +173,7 @@ dataset = load_dataset("n0w0f/MatText", "pretrain300k")
 
 ## Using Pretrained MatText Models 
 
-The Pretrained MatText models can be easily loaded from [HuggingFace](https://huggingface.co/collections/n0w0f/mattext-665fe18e5eec38c2148ccf7a), for example
+The pretrained MatText models can be easily loaded from [HuggingFace](https://huggingface.co/collections/n0w0f/mattext-665fe18e5eec38c2148ccf7a), for example
 
 ```python
 from transformers import AutoModel
