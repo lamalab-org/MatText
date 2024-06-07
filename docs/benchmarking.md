@@ -123,7 +123,7 @@ python -m torch.distributed.run --nproc_per_node=4  /path/to/main.py --multirun 
 
 ```
 
-Here `model=pretrain_template` select pretrain_template as the base config and override/extend it with `+pretrain30k=cifp1`. This would essentially start pretraining with cifp1 representation for the dataset-30K
+Here `model=pretrain_template` selects `pretrain_template` as the base config and override/extend it with `+pretrain30k=cifp1`. This would essentially start pretraining with cifp1 representation for the dataset-30K
 
 
 Note `+pretrain30k=cifp1,cifsym,composition,crystal_llm,slice` will launch 5 jobs parallely each of them with pretrain_template as the base config and corresponding experiment template extending them.
