@@ -84,7 +84,6 @@ model:
       per_device_train_batch_size: 32
     path:
       data_root_path: </path/to/dataset>
-      
 ```
 Read more about extending configs [here](https://hydra.cc/docs/patterns/extending_configs/).
 
