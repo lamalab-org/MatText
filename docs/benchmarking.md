@@ -85,6 +85,7 @@ model:
     path:
       data_root_path: </path/to/dataset>
 ```
+
 Read more about extending configs [here](https://hydra.cc/docs/patterns/extending_configs/).
 
 ### Configuring experiments and model
