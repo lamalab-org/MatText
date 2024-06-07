@@ -60,7 +60,7 @@ The easiest way to model multiple representation in one run would be by using `c
 python main.py --multirun -cn=benchmark model=benchmark_example +model.dataset_type=matbench +group-test=slices,composition
 ```
 
-Here we create a config group (directory with config files for different representations) at `/conf/<config group name>`
+Here, we create a config group (directory with config files for different representations) at `/conf/<config group name>`
 
 In the above example we have two config files (`slices.yaml, composition.yaml`) inside config group `group-test`.
 with `--multirun` enabled we can launch the pipeline parallely or sequentially (by default) for the representations, Here two but representations, but once can add more.
