@@ -8,7 +8,6 @@ MatText have  pipelines for seamless pretraining([`pretrain`](api.md#mattext.mod
 
 ```bash
 python main.py -cn=pretrain model=pretrain_example +model.representation=composition +model.dataset_type=pretrain30k +model.context_length=32
-
 ```
 
 Here, `model=pretrain_example` would select `pretrain_example` as the base config for pretrain run `-cn=pretrain`.
