@@ -146,7 +146,7 @@ The following transformations are available for transforming structures:
 
 [`perturb_structure`](api.md#mattext.representations.transformations.TransformationCallback.perturb_structure) randomly perturbs atoms in a structure.
 
-#### Randomly translate structure
+#### Randomly Translate Structure
 
 [`translate_structure`](api.md#mattext.representations.transformations.TransformationCallback.translate_structure) randomly translates the atoms in a structure.
 
