@@ -160,7 +160,7 @@ To override the existing default configuration, use `++`, for e.g., `++model.pre
 
 >Define the number of folds for k-fold cross-validation in the config or through the CLI. For Matbench benchmarks, however, the number of folds should be 5. The default value for all experiments is set to 5.
 
-## Using data 
+## Using Data 
 
 The MatText datasets can be easily obtained from [HuggingFace](https://huggingface.co/datasets/n0w0f/MatText), for example
 
