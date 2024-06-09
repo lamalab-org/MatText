@@ -49,6 +49,7 @@ finetune:
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
 
   context_length: 32
+  dataprep_seed: 42
   callbacks:
     early_stopping: True
     custom_logger: True

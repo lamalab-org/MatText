@@ -40,6 +40,7 @@ logging:
 finetune:
   model_name: test-llama
   freeze_base_model: False
+  dataprep_seed: 42
   dataset_name: "${model.dataset}-train-${model.dataset_type}" 
   benchmark_dataset: "${model.dataset}-test-${model.dataset_type}"  
   exp_name: [
