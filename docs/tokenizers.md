@@ -38,7 +38,7 @@ tokenizer.decode(token_ids, skip_special_tokens=True)
 ```
 
 
-## Initializing tokenizers with custom special tokens
+## Initializing Tokenizers with Custom Special Tokens
 
 In scenarios where the `\[CLS\]` token is not required, you can initialize
 the tokenizer with an empty special_tokens dictionary.
