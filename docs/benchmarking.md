@@ -127,7 +127,7 @@ Here `model=pretrain_template` selects `pretrain_template` as the base config an
 
 Note `+pretrain30k=cifp1,cifsym,composition,crystal_llm,slice` will launch 5 jobs parallelly, each of them with `pretrain_template` as the base config and corresponding experiment template extending them.
 
->For launching runs parallely checkout [hydra submitit slurm launcher](https://hydra.cc/docs/plugins/submitit_launcher/). you can override it from cli / or change it in the main config file. For kubernetes based infrastructures [hydra submitit local launcher](https://hydra.cc/docs/plugins/submitit_launcher/) is ideal for parallel jobs. Or you can use the default hydra multirun launcher, which will run jobs sequentially.
+>For launching runs parallely check out the [hydra submitit slurm launcher](https://hydra.cc/docs/plugins/submitit_launcher/). you can override it from the CLI or change it in the main config file. For Kubernetes-based infrastructures [hydra submitit local launcher](https://hydra.cc/docs/plugins/submitit_launcher/) is ideal for parallel jobs. Or you can use the default hydra multirun launcher, which will run jobs sequentially.
 You can configure the launcher configurations in the main config file.
 
 ### Adding New Experiments
