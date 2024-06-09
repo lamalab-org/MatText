@@ -119,18 +119,23 @@ for vector in translation_vectors:
     print(text_rep.get_requested_text_reps(text_representations_requested))
 
 ```
-this would output 
 
-```bash
-Translated Text Representations:
-{'crystal_llm_rep': '3.9 3.9 3.9\n90 90 90\nO2-\n0.76 0.98 0.41\nTi4+\n0.77 0.98 0.89\nO2-\n0.76 0.49 0.89\nO2-\n0.26 0.97 0.88\nSr2+\n0.25 0.47 0.38'}
-Translated Text Representations:
-{'crystal_llm_rep': '3.9 3.9 3.9\n90 90 90\nO2-\n0.85 0.66 0.18\nTi4+\n0.86 0.66 0.66\nO2-\n0.85 0.17 0.66\nO2-\n0.35 0.65 0.65\nSr2+\n0.34 0.15 0.15'}
-Translated Text Representations:
-{'crystal_llm_rep': '3.9 3.9 3.9\n90 90 90\nO2-\n0.63 0.94 0.35\nTi4+\n0.64 0.94 0.84\nO2-\n0.64 0.45 0.84\nO2-\n0.13 0.94 0.83\nSr2+\n0.12 0.43 0.33'}
-```
+??? success "output"
 
-> more examples are available as notebooks in the repository
+    ```bash
+    Translated Text Representations:{'crystal_llm_rep': '3.9 3.9 3.9\n90 90 90\nO2-\n0.76 0.98 0.41\nTi4+\n0.77 0.98 0.89\nO2-\n0.76 0.49 0.89\nO2-\n0.26 0.97 0.88\nSr2+\n0.25 0.47 0.38'}
+
+    Translated Text Representations:{'crystal_llm_rep': '3.9 3.9 3.9\n90 90 90\nO2-\n0.85 0.66 0.18\nTi4+\n0.86 0.66 0.66\nO2-\n0.85 0.17 0.66\nO2-\n0.35 0.65 0.65\nSr2+\n0.34 0.15 0.15'}
+
+    Translated Text Representations:{'crystal_llm_rep': '3.9 3.9 3.9\n90 90 90\nO2-\n0.63 0.94 0.35\nTi4+\n0.64 0.94 0.84\nO2-\n0.64 0.45 0.84\nO2-\n0.13 0.94 0.83\nSr2+\n0.12 0.43 0.33'}
+
+    ```
+
+???+ example 
+
+    More examples are available as notebook in the repository.
+
+
 
 The following transformations are available for transforming structures:
 
