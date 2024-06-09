@@ -1,6 +1,6 @@
 # MatText Representations
 
-## Creating text representations for crystal structures
+## Creating Text Representations for Crystal Structures
 
 Converting structures into text representations can be done using our [`TextRep`](api.md#mattext.representations.TextRep) class
 
