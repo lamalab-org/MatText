@@ -86,7 +86,7 @@ tokenizer.tokenize("H2SO4")
 
 ## Updating Vocabulary in the Tokenizers
 
-The MatText Tokenizers allows one to update the vocabulary or load a custom vocabulary file.
+The MatText tokenizers allow one to update the vocabulary or load a custom vocabulary file.
 
 Default vocabulary can be determined by calling the `vocab` attribute.
 
