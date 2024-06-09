@@ -40,7 +40,7 @@ python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtere
 ```
 
 
-Here for the benchmarking pipeline(`-cn=benchmark`) base config is `benchmark_example.yaml`. 
+Here, for the benchmarking pipeline(`-cn=benchmark`) the base config is `benchmark_example.yaml`. 
 You can define the parameters for the experiment hence at `\conf\model\benchmark_example.yaml`.
 
 > Here +model.dataset_type=filtered would select the type of benchmark. It can be `filtered` (avoid having truncated structure in train and test set, Only relatively small structures are present here, but this would also mean having less number of sampels to train on ) or `matbench` (complete dataset, there are few big structures , which would be trunated if the context length for modelling is less than `2048`).
