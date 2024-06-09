@@ -138,7 +138,7 @@ The following transformations are available for transforming structures:
 
 [`permute_structure`](api.md#mattext.representations.transformations.TransformationCallback.permute_structure) randomly permutes the order of atoms in a structure.
 
-#### Randomly translate single atom
+#### Randomly Translate Single Atom
 [`translate_single_atom`](api.md#mattext.representations.transformations.TransformationCallback.translate_single_atom) randomly translates one or more atoms in a structure.
 
 
