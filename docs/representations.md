@@ -37,7 +37,15 @@ requested_reps = [
 
 # Get the requested text representations
 requested_text_reps = text_rep.get_requested_text_reps(requested_reps)
+print(requested_text_reps)
 ```
+
+??? success "output"
+
+    ```bash
+    {'cif_p1': "data_InCuS2\n_symmetry_space_group_name_H-M   'P 1'\n_cell_length_a   5.52\n_cell_length_b   5.52\n_cell_length_c   6.8\n_cell_angle_alpha   113.96\n_cell_angle_beta   113.96\n_cell_angle_gamma   90.0\n_symmetry_Int_Tables_number   1\n_chemical_formula_structural   InCuS2\n_chemical_formula_sum   'In2 Cu2 S4'\n_cell_volume   169.53\n_cell_formula_units_Z   2\nloop_\n _symmetry_equiv_pos_site_id\n _symmetry_equiv_pos_as_xyz\n  1  'x, y, z'\nloop_\n _atom_type_symbol\n _atom_type_oxidation_number\n  In3+  3.0\n  Cu+  1.0\n  S2-  -2.0\nloop_\n _atom_site_type_symbol\n _atom_site_label\n _atom_site_symmetry_multiplicity\n _atom_site_fract_x\n _atom_site_fract_y\n _atom_site_fract_z\n _atom_site_occupancy\n  Cu+  Cu4  1  0.25  0.75  0.5  1.0\n  Cu+  Cu5  1  0.0  0.0  0.0  1.0\n  In3+  In0  1  0.5  0.5  0.0  1.0\n  In3+  In1  1  0.75  0.25  0.5  1.0\n  S2-  S8  1  0.9  0.88  0.25  1.0\n  S2-  S9  1  0.62  0.1  0.75  1.0\n  S2-  S10  1  0.35  0.38  0.25  1.0\n  S2-  S11  1  0.12  0.65  0.75  1.0\n", 'slice': 'Cu Cu In In S S S S 0 7 o o o 0 4 - o o 0 6 o o o 0 5 o + o 1 4 - - o 1 5 - o - 1 7 o - - 1 6 o o o 2 6 o o o 2 7 o o - 2 5 o o - 2 4 o o o 3 5 o o o 3 6 o o o 3 4 o - o 3 7 + o o ', 'atoms_params': 'Cu Cu In In S S S S 5.52 5.52 6.8 113 113 90', 'crystal_llm_rep': '5.5 5.5 6.8\n113 113 90\nCu+\n0.25 0.75 0.50\nCu+\n0.00 0.00 0.00\nIn3+\n0.50 0.50 0.00\nIn3+\n0.75 0.25 0.50\nS2-\n0.90 0.87 0.25\nS2-\n0.62 0.10 0.75\nS2-\n0.35 0.37 0.25\nS2-\n0.12 0.65 0.75', 'zmatrix': 'Cu\nCu 1 3.9\nIn 2 3.9 1 60\nIn 1 3.9 2 60 3 -71\nS 3 2.5 4 90 1 93\nS 4 2.5 2 90 1 93\nS 1 2.3 2 32 3 -35\nS 1 2.3 7 111 6 -32'}
+
+    ```
 
 ### Supported Text Representations
 
@@ -85,6 +93,27 @@ print("Permuted Text Representations:")
 print(text_rep.get_requested_text_reps(text_representations_requested))
 ```
 
+??? success "output"
+
+    ```bash
+    Permuted Pymatgen Structure:
+    Full Formula (N4)
+    Reduced Formula: N2
+    abc   :   5.605409   5.605409   5.605409
+    angles:  90.000000  90.000000  90.000000
+    pbc   :       True       True       True
+    Sites (4)
+    #  SP          a        b        c
+    ---  ----  -------  -------  -------
+    0  N0+   0.02321  0.02321  0.02321
+    1  N0+   0.97679  0.52321  0.47679
+    2  N0+   0.52321  0.47679  0.97679
+    3  N0+   0.47679  0.97679  0.52321
+    Permuted Text Representations:
+    {'atoms': 'N N N N', 'crystal_llm_rep': '5.6 5.6 5.6\n90 90 90\nN0+\n0.02 0.02 0.02\nN0+\n0.98 0.52 0.48\nN0+\n0.52 0.48 0.98\nN0+\n0.48 0.98 0.52'}
+
+    ```
+
 ### Translate Structure 
 
 The `translate_structure` transformation randomly translates all atoms in a structure by a specified vector. This can simulate small displacements in the structure.
@@ -97,6 +126,12 @@ text_representations_requested = ["crystal_llm_rep"]
 print("Translated Crystal-text-LLM Representations:")
 print(text_rep.get_requested_text_reps(text_representations_requested))
 ```
+??? success "output"
+
+    ```bash
+    Translated Crystal-text-LLM Representations:
+    {'crystal_llm_rep': '5.6 5.6 5.6\n90 90 90\nN0+\n0.58 0.08 0.62\nN0+\n0.08 0.62 0.58\nN0+\n0.12 0.12 0.12\nN0+\n0.62 0.58 0.08'}
+    ```
 
 ### Augmenting Data
 
@@ -155,7 +190,11 @@ The following transformations are available for transforming structures:
 
 [`translate_structure`](api.md#mattext.representations.transformations.TransformationCallback.translate_structure) randomly translates the atoms in a structure.
 
- >This transformation supports additional keyword arguments for fine-tuning the translation.
+???+ tip
+
+    This transformation supports additional keyword arguments for fine-tuning the translation.
+
+
 
 MatText leverages methods from pymatgen and support all the keyword arguments in `Structure.translate_sites` method.
 
