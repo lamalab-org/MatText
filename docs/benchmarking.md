@@ -1,6 +1,6 @@
 # Modeling and Benchmarking 
 
-MatText have  pipelines for seamless pretraining([`pretrain`](api.md#mattext.models.pretrain)) and benchmarking ([`benchmark`](api.md#mattext.models.benchmark)) with finetuning ([`finetune`](api.md#mattext.models.finetune)) on multiple MatText representations. We use the Hydra framework to dynamically create hierarchical configurations based on the pipeline and representations that we want to use.
+MatText provides pipelines for seamless pretraining([`pretrain`](api.md#mattext.models.pretrain)) and benchmarking ([`benchmark`](api.md#mattext.models.benchmark)) with finetuning ([`finetune`](api.md#mattext.models.finetune)) on multiple MatText representations. We use the Hydra framework to dynamically create hierarchical configurations based on the pipeline and representations that we want to use.
 
 
 ### Pretraining on Single MatText Representation
