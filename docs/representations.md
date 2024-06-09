@@ -17,7 +17,7 @@ structure = Structure.from_file(from_file, "cif")
 text_rep = TextRep.from_input(structure)
 ```
 
-### `get_requested_text_reps` method
+### `get_requested_text_reps` Method
 
 The [`get_requested_text_reps`](api.md#mattext.representations.TextRep.get_requested_text_reps) method retrieves the requested text representations of the crystal structure and returns them in a dictionary.
 
