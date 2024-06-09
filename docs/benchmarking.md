@@ -51,7 +51,7 @@ You can define the parameters for the experiment hence at `\conf\model\benchmark
 
 Benchmark report is saved to the path defined in the base config. By default to `"${hydra:runtime.cwd}/../../results/${now:%Y-%m-%d}/${now:%H-%M-%S}/$`
 
-### Pretraining or Benchmarking Multiple MatText Representation
+### Pretraining or Benchmarking Multiple MatText Representations
 
 The easiest way to model multiple representation in one run would be by using `config-groups` and multirun
 
