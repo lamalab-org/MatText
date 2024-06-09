@@ -39,7 +39,7 @@ requested_reps = [
 requested_text_reps = text_rep.get_requested_text_reps(requested_reps)
 ```
 
-### Supported text representations
+### Supported Text Representations
 
 The [`TextRep`](api.md#mattext.representations.TextRep) class currently supports the following text representations:
 
