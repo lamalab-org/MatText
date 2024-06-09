@@ -58,7 +58,7 @@ tokenizer = SliceTokenizer(
 All `MatText Tokenizer` instances inherit from
 [PreTrainedTokenizer](https://huggingface.co/docs/transformers/v4.40.1/en/main_classes/tokenizer#transformers.PreTrainedTokenizer) and accept arguments compatible with the Hugging Face tokenizer.
 
-## Tokenizers with special number tokenization
+## Tokenizers with Special Number Tokenization
 
 The `special_num_token` argument (by default `False`) can be
 set to true to tokenize numbers in a special way as designed and
