@@ -116,7 +116,7 @@ The main configuration for the run is in `config.yaml` and other configs are gro
 
 
 
-We use HF Trainer and hence by default it supports DP but for DDP support 
+We use the HF Trainer, and hence, by default, it supports DP. For DDP support you can run
 ```bash
 python -m torch.distributed.run --nproc_per_node=4  /path/to/main.py --multirun model=pretrain_template +pretrain30k=cifp1,cifsym,composition,crystal_llm,slice
 
