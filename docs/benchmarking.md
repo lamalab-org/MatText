@@ -133,9 +133,9 @@ You can configure the launcher configurations in the main config file.
 ### Adding new experiments
 New experiments can be easily added with the following step. 
 
-1. Create an experiment config group inside `conf/` . Make a new directory and add experiment template inside it. 
-2. Add / Edit the configs that you want for the new experiments. eg: override the pretrain checkpoints to new pretrained checkpoint
-3. Launch runs similarly but now with new experiment group 
+1. Create an experiment config group inside `conf/` . Make a new directory and add an experiment template inside it. 
+2. Add / Edit the configs you want for the new experiments. e.g, override the pretrain checkpoints to new pretrained checkpoint
+3. Launch runs similarly but now with the new experiment group 
 
 ```bash
 python main.py --multirun model=pretrain_template ++hydra.launcher.gres=gpu:1 +<new_exp_group>=<new_exp_template_1>,<new_exp_template_2>, ..
