@@ -142,7 +142,7 @@ python main.py --multirun model=pretrain_template ++hydra.launcher.gres=gpu:1 +<
 
 ```
 
-## Running a benchmark 
+## Running a Benchmark 
 
 ```bash
 python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=perovskites +model.checkpoint=path/to/checkpoint  
