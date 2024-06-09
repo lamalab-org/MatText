@@ -61,7 +61,7 @@ All `MatText Tokenizer` instances inherit from
 ## Tokenizers with Special Number Tokenization
 
 The `special_num_token` argument (by default `False`) can be
-set to true to tokenize numbers in a special way as designed and
+set to `True`  to tokenize numbers in a special way as designed and
 implemented by
 [RegressionTransformer](https://www.nature.com/articles/s42256-023-00639-z).
 
