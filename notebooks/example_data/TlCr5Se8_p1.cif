@@ -1,0 +1,60 @@
+# generated using pymatgen
+data_TlCr5Se8
+_symmetry_space_group_name_H-M   'P 1'
+_cell_length_a   18.93136664
+_cell_length_b   3.66920035
+_cell_length_c   9.06356560
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   105.05007008
+_cell_angle_gamma   90.00000000
+_symmetry_Int_Tables_number   1
+_chemical_formula_structural   TlCr5Se8
+_chemical_formula_sum   'Tl2 Cr10 Se16'
+_cell_volume   607.98712414
+_cell_formula_units_Z   2
+loop_
+ _symmetry_equiv_pos_site_id
+ _symmetry_equiv_pos_as_xyz
+  1  'x, y, z'
+loop_
+ _atom_type_symbol
+ _atom_type_oxidation_number
+  Tl+  1.0
+  Cr3+  3.0
+  Se2-  -2.0
+loop_
+ _atom_site_type_symbol
+ _atom_site_label
+ _atom_site_symmetry_multiplicity
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Tl+  Tl0  1  0.50000000  0.50000000  0.50000000  1
+  Tl+  Tl1  1  0.00000000  0.00000000  0.50000000  1
+  Cr3+  Cr2  1  0.00000000  0.50000000  0.00000000  1
+  Cr3+  Cr3  1  0.34216432  0.50000000  0.02533940  1
+  Cr3+  Cr4  1  0.29590921  0.50000000  0.66553098  1
+  Cr3+  Cr5  1  0.20409079  0.00000000  0.33446902  1
+  Cr3+  Cr6  1  0.15783568  0.00000000  0.97466060  1
+  Cr3+  Cr7  1  0.50000000  0.00000000  0.00000000  1
+  Cr3+  Cr8  1  0.84216432  0.00000000  0.02533940  1
+  Cr3+  Cr9  1  0.79590921  0.00000000  0.66553098  1
+  Cr3+  Cr10  1  0.70409079  0.50000000  0.33446902  1
+  Cr3+  Cr11  1  0.65783568  0.50000000  0.97466060  1
+  Se2-  Se12  1  0.07550985  0.00000000  0.15285267  1
+  Se2-  Se13  1  0.17017681  0.50000000  0.49045804  1
+  Se2-  Se14  1  0.32982319  0.00000000  0.50954196  1
+  Se2-  Se15  1  0.08416992  0.50000000  0.82246925  1
+  Se2-  Se16  1  0.41583008  0.00000000  0.17753075  1
+  Se2-  Se17  1  0.26223190  0.00000000  0.84407736  1
+  Se2-  Se18  1  0.23776810  0.50000000  0.15592264  1
+  Se2-  Se19  1  0.42449015  0.50000000  0.84714733  1
+  Se2-  Se20  1  0.57550985  0.50000000  0.15285267  1
+  Se2-  Se21  1  0.67017682  0.00000000  0.49045804  1
+  Se2-  Se22  1  0.82982318  0.50000000  0.50954196  1
+  Se2-  Se23  1  0.58416992  0.00000000  0.82246925  1
+  Se2-  Se24  1  0.91583008  0.50000000  0.17753075  1
+  Se2-  Se25  1  0.76223190  0.50000000  0.84407736  1
+  Se2-  Se26  1  0.73776810  0.00000000  0.15592264  1
+  Se2-  Se27  1  0.92449015  0.00000000  0.84714733  1
