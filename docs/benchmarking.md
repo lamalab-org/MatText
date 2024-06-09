@@ -1,4 +1,3 @@
-
 # Modeling and Benchmarking 
 
 MatText have  pipelines for seamless pretraining([`pretrain`](api.md#mattext.models.pretrain)) and benchmarking ([`benchmark`](api.md#mattext.models.benchmark)) with finetuning ([`finetune`](api.md#mattext.models.finetune)) on multiple MatText representations. We use the Hydra framework to dynamically create hierarchical configurations based on the pipeline and representations that we want to use.
@@ -181,3 +180,31 @@ from transformers import AutoModel
 model = AutoModel.from_pretrained ("n0w0f/MatText−cifp1−2m")
 ```
 >This would need the code to pull the model from HF HUB and require internet.
+
+
+## Training Other Language Models Using Mattext Pipeline
+
+You can pretrain models that are compatible with AutoModelForMaskedLM from Hugging Face using our framework. The path to the model or the model name (model name in Hugging Face) can be defined using the +model.pretrain.model_name_or_path argument. Here’s an example:
+
+```
+python main.py -cn=pretrain model=pretrain_other_models +model.representation=slices +model.dataset_type=pretrain30k +model.context_length=32 +model.pretrain.model_name_or_path="FacebookAI/roberta-base"
+```
+
+For better manageability, you can define the model name and configuration in the base config file. This way, you don't need to specify the model and model configs in the CLI.
+
+```yaml
+pretrain:
+  name: test-pretrain
+  exp_name: "${model.representation}_${model.pretrain.name}"
+  model_name_or_path: "FacebookAI/roberta-base" 
+  dataset_name: "${model.dataset_type}"
+  context_length: "${model.context_length}"
+
+  model_config:
+    hidden_size: 768
+    num_hidden_layers: 4
+    num_attention_heads: 8
+    is_decoder: False
+    add_cross_attention: False
+    max_position_embeddings: 768
+```
