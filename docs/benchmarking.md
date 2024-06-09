@@ -158,7 +158,7 @@ The `+` symbol before a configuration key indicates that you are adding a new ke
 
 To override the existing default configuration, use `++`, for e.g., `++model.pretrain.training_arguments.per_device_train_batch_size=32`. Refer to the [docs](https://lamalab-org.github.io/MatText/) for more examples and advanced ways to use the configs with config groups.
 
->Define the number of folds for n-fold cross validation in the config or through cli. For Matbench benchmarks however number of folds  should be 5. Default value for all experiments are set to 5.
+>Define the number of folds for k-fold cross-validation in the config or through the CLI. For Matbench benchmarks, however, the number of folds should be 5. The default value for all experiments is set to 5.
 
 ## Using data 
 
