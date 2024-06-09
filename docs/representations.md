@@ -98,7 +98,7 @@ print("Translated Crystal-text-LLM Representations:")
 print(text_rep.get_requested_text_reps(text_representations_requested))
 ```
 
-### Augmenting data
+### Augmenting Data
 
 In principle, we can generate valid text representations with random transformations with physically meaningful parameters. Dummy example is shown below
 
