@@ -21,7 +21,9 @@ Base configs can be found at `/conf/model`
 `+model.dataset_type` can be one of the MatText pretraining datasets.
 `+model.context_length` would define the context length.
 
->Note: Use meaningful context length according to the representation to avoid truncation.
+!!! tip
+	
+	Use meaningful context length according to the representation to avoid truncation.
 
 The `+` symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.
 
