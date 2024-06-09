@@ -38,7 +38,7 @@ tokenizer.decode(token_ids, skip_special_tokens=True)
 ```
 
 
-## Initializing Tokenizers with Custom Special Tokens
+## Initializing Tokenizers With Custom Special Tokens
 
 In scenarios where the `\[CLS\]` token is not required, you can initialize
 the tokenizer with an empty special_tokens dictionary.
@@ -58,7 +58,7 @@ tokenizer = SliceTokenizer(
 All `MatText Tokenizer` instances inherit from
 [PreTrainedTokenizer](https://huggingface.co/docs/transformers/v4.40.1/en/main_classes/tokenizer#transformers.PreTrainedTokenizer) and accept arguments compatible with the Hugging Face tokenizer.
 
-## Tokenizers with Special Number Tokenization
+## Tokenizers With Special Number Tokenization
 
 The `special_num_token` argument (by default `False`) can be
 set to `True`  to tokenize numbers in a special way as designed and

@@ -87,7 +87,7 @@ model:
 
 Read more about extending configs [here](https://hydra.cc/docs/patterns/extending_configs/).
 
-### Configuring experiments and model
+### Configuring Experiments and Model
 
 
 The main configuration for the run is in `config.yaml` and other configs are grouped in respective folders. An example directory structure of configs is below.
