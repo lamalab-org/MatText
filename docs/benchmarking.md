@@ -90,7 +90,7 @@ Read more about extending configs [here](https://hydra.cc/docs/patterns/extendin
 ### Configuring experiments and model
 
 
-The main configuration for the run is in config.yaml and other configs are grouped in respective folders. An example directory structure of configs is below.
+The main configuration for the run is in `config.yaml` and other configs are grouped in respective folders. An example directory structure of configs is below.
 ```bash
 ├── conf
 │   ├── pretrain.yaml
