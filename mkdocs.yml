@@ -18,6 +18,7 @@ theme:
   logo: static/logo.png
   favicon: static/logo.png
   features:
+    - content.code.annotate
     - content.tabs.link
     - content.code.annotation
     - content.code.copy
