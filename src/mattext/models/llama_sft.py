@@ -46,6 +46,7 @@ class FinetuneLLamaSFT:
         self.train_data = self.cfg.dataset_name
         self.test_data = self.cfg.benchmark_dataset
         self.context_length: int = self.cfg.context_length
+        self.dataprep_seed: int = self.cfg.dataprep_seed
         self.callbacks = self.cfg.callbacks
         self.ckpt = self.cfg.path.pretrained_checkpoint
         self.bnb_config = self.cfg.bnb_config
@@ -57,15 +58,15 @@ class FinetuneLLamaSFT:
 
 
     def prepare_test_data(self,subset):
-        dataset = load_dataset(self.data_repository, subset)[self.fold]
+        dataset = load_dataset(self.data_repository, subset)[self.fold].select(range(100))
         print(dataset)
-        #dataset = dataset.shuffle(seed=42)[self.fold].select(range(100))
+        #dataset = dataset.shuffle(seed=self.dataprep_seed)[self.fold].select(range(100))
         return dataset
     
     def prepare_data(self, subset):
         dataset = load_dataset(self.data_repository, subset)
-        dataset = dataset.shuffle(seed=42)[self.fold].select(range(100))
-        return dataset.train_test_split(test_size=0.1, seed=42)
+        dataset = dataset.shuffle(seed=self.dataprep_seed)[self.fold].select(range(100))
+        return dataset.train_test_split(test_size=0.1, seed=self.dataprep_seed)
 
     def _setup_model_tokenizer(self) -> None:
         # device_string = PartialState().process_index
