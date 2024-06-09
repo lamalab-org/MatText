@@ -21,7 +21,11 @@ Base configs can be found at `/conf/model`
 `+model.dataset_type` can be one of the MatText pretraining datasets.
 `+model.context_length` would define the context length.
 
->Note: Use meaningful context length according to the representation to avoid truncation.
+
+??? warning "`context_length`"
+
+    Use meaningful context length according to the representation to avoid truncation of structures.
+
 
 The `+` symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.
 
@@ -43,13 +47,19 @@ python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtere
 Here, for the benchmarking pipeline(`-cn=benchmark`) the base config is `benchmark_example.yaml`. 
 You can define the parameters for the experiment hence at `\conf\model\benchmark_example.yaml`.
 
-> Here +model.dataset_type=filtered would select the type of benchmark. It can be `filtered` (avoid having truncated structure in train and test set, Only relatively small structures are present here, but this would also mean having less number of sampels to train on ) or `matbench` (complete dataset, there are few big structures , which would be trunated if the context length for modelling is less than `2048`).
 
 
-> `+model.dataset_type=filtered` would produce the report compatible with matbench leaderboard.
+???+ info "`dataset_type`"
 
+    Here `+model.dataset_type=filtered` would select the type of benchmark. It can be `filtered` (avoid having truncated structure in train and test set, Only relatively small structures are present here, but this would also mean having less number of sampels to train on ) or `matbench` (complete dataset, there are few big structures , which would be trunated if the context length for modelling is less than `2048`).
 
-Benchmark report is saved to the path defined in the base config. By default to `"${hydra:runtime.cwd}/../../results/${now:%Y-%m-%d}/${now:%H-%M-%S}/$`
+???+ info 
+
+    `+model.dataset_type=filtered` would produce the report compatible with matbench leaderboard.
+
+??? info "Reports path"
+
+    Benchmark report is saved to the path defined in the base config. By default to `"${hydra:runtime.cwd}/../../results/${now:%Y-%m-%d}/${now:%H-%M-%S}/$`
 
 ### Pretraining or Benchmarking Multiple MatText Representations
 
@@ -66,7 +76,12 @@ with `--multirun` enabled we can launch the pipeline parallely or sequentially (
 
 The `child config` (config inside the `config group` ) would override or add the key value pair on top of the  `base config` (here `benchmark_example`).
 
->configs inside __group-test__ extends the `benchmark_example` and override the   `representation name`, `batch size`, `etc` in the `base config`.
+??? tips "Configs"
+
+    configs inside __group-test__ extends the `benchmark_example` and override the   `representation name`, `batch size`, `etc` in the `base config`.
+
+
+
 
 example `child config`
 ```yaml
@@ -85,7 +100,10 @@ model:
       data_root_path: </path/to/dataset>
 ```
 
-Read more about extending configs [here](https://hydra.cc/docs/patterns/extending_configs/).
+???+ tip "Reference"
+
+    Read more about extending configs [here](https://hydra.cc/docs/patterns/extending_configs/).
+
 
 ### Configuring Experiments and Model
 
@@ -127,8 +145,11 @@ Here `model=pretrain_template` selects `pretrain_template` as the base config an
 
 Note `+pretrain30k=cifp1,cifsym,composition,crystal_llm,slice` will launch 5 jobs parallelly, each of them with `pretrain_template` as the base config and corresponding experiment template extending them.
 
->For launching runs parallely checkout [hydra submitit slurm launcher](https://hydra.cc/docs/plugins/submitit_launcher/). you can override it from cli / or change it in the main config file. For kubernetes based infrastructures [hydra submitit local launcher](https://hydra.cc/docs/plugins/submitit_launcher/) is ideal for parallel jobs. Or you can use the default hydra multirun launcher, which will run jobs sequentially.
-You can configure the launcher configurations in the main config file.
+???+ tips "Launcher - Tips"
+
+    For launching runs parallely checkout [hydra submitit slurm launcher](https://hydra.cc/docs/plugins/submitit_launcher/). you can override it from cli / or change it in the main config file. For kubernetes based infrastructures [hydra submitit local launcher](https://hydra.cc/docs/plugins/submitit_launcher/) is ideal for parallel jobs. Or you can use the default hydra multirun launcher, which will run jobs sequentially.
+
+
 
 ### Adding New Experiments
 New experiments can be easily added with the following step. 
@@ -158,7 +179,10 @@ The `+` symbol before a configuration key indicates that you are adding a new ke
 
 To override the existing default configuration, use `++`, for e.g., `++model.pretrain.training_arguments.per_device_train_batch_size=32`. Refer to the [docs](https://lamalab-org.github.io/MatText/) for more examples and advanced ways to use the configs with config groups.
 
->Define the number of folds for k-fold cross-validation in the config or through the CLI. For Matbench benchmarks, however, the number of folds should be 5. The default value for all experiments is set to 5.
+???+ info "Cross-validation"
+
+    Define the number of folds for k-fold cross-validation in the config or through the CLI. For Matbench benchmarks, however, the number of folds should be 5. The default value for all experiments is set to 5.
+
 
 ## Using Data 
 
@@ -179,7 +203,11 @@ from transformers import AutoModel
 
 model = AutoModel.from_pretrained ("n0w0f/MatText−cifp1−2m")
 ```
->This would need the code to pull the model from HF HUB and require internet.
+
+??? info "Checkpoint"
+
+    Here the pretrained model checkpoint is downloaded form Hugging Face hub, this step require internet for the first time.
+
 
 
 ## Training Other Language Models Using Mattext Pipeline

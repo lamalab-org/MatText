@@ -60,7 +60,7 @@ The [`TextRep`](api.md#mattext.representations.TextRep) class currently supports
 - **Atom Sequences** (`atom_sequences`): List of atoms inside the unit cell.
 - **Atoms Squences++** (`atom_sequences_plusplus`): List of atoms with lattice parameters.
 - **Z-Matrix** (`zmatrix`): Z-Matrix representation of the crystal structure.
-- **Local Env** (`local_env`):  List of Wyckoff label and SMILES separated by line breaks for each local environment.
+- **Local-Env** (`local_env`):  List of Wyckoff label and SMILES separated by line breaks for each local environment.
 
 For more details on each representation and how to obtain them, refer to the respective method documentation in the `TextRep` class.
 
