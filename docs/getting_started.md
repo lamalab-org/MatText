@@ -7,7 +7,10 @@
 $ pip install mattext
 ``` -->
 
+
+
 The most recent code and data can be installed directly from GitHub with:
+
 
 ```shell
 $ pip install git+https://github.com/lamalab-org/mattext.git

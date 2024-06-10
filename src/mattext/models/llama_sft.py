@@ -38,23 +38,35 @@ class FinetuneLLamaSFT:
         self.local_rank = local_rank
         self.representation = cfg.model.representation
         self.data_repository = cfg.model.data_repository
+        self.dataset_ = cfg.model.dataset
         self.add_special_tokens = cfg.model.add_special_tokens
         self.property_map = cfg.model.PROPERTY_MAP
         self.material_map = cfg.model.MATERIAL_MAP
         self.cfg = cfg.model.finetune
+        self.train_data = self.cfg.dataset_name
+        self.test_data = self.cfg.benchmark_dataset
         self.context_length: int = self.cfg.context_length
+        self.dataprep_seed: int = self.cfg.dataprep_seed
         self.callbacks = self.cfg.callbacks
         self.ckpt = self.cfg.path.pretrained_checkpoint
         self.bnb_config = self.cfg.bnb_config
+        self.dataset = self.prepare_data(self.train_data)
+        self.testdata = self.prepare_test_data(self.test_data)
         self.model, self.tokenizer, self.peft_config = self._setup_model_tokenizer()
-        self.property_ = self.property_map[self.cfg.dataset_name]
-        self.material_ = self.material_map[self.cfg.dataset_name]
-        self.dataset = self.prepare_data(self.cfg.path.finetune_traindata)
+        self.property_ = self.property_map[self.dataset_]
+        self.material_ = self.material_map[self.dataset_]
 
+
+    def prepare_test_data(self,subset):
+        dataset = load_dataset(self.data_repository, subset)[self.fold].select(range(100))
+        print(dataset)
+        #dataset = dataset.shuffle(seed=self.dataprep_seed)[self.fold].select(range(100))
+        return dataset
+    
     def prepare_data(self, subset):
         dataset = load_dataset(self.data_repository, subset)
-        dataset = dataset.shuffle(seed=42)  # .select(range(100))
-        return dataset.train_test_split(test_size=0.1, seed=42)
+        dataset = dataset.shuffle(seed=self.dataprep_seed)[self.fold].select(range(100))
+        return dataset.train_test_split(test_size=0.1, seed=self.dataprep_seed)
 
     def _setup_model_tokenizer(self) -> None:
         # device_string = PartialState().process_index
@@ -179,10 +191,6 @@ class FinetuneLLamaSFT:
         )
         trainer.train()
 
-        testset = load_dataset(
-            "json", data_files=self.cfg.path.finetune_testdata, split="train"
-        )
-
         pipe = pipeline(
             "text-generation",
             model=trainer.model,
@@ -192,7 +200,7 @@ class FinetuneLLamaSFT:
             max_new_tokens=4,
         )
         with torch.cuda.amp.autocast():
-            pred = pipe(self.formatting_tests_func(testset))
+            pred = pipe(self.formatting_tests_func(self.testdata))
         print(pred)
 
         with open(
@@ -216,7 +224,7 @@ class FinetuneLLamaSFT:
         )
 
         with torch.cuda.amp.autocast():
-            merge_pred = pipe(self.formatting_tests_func(testset))
+            merge_pred = pipe(self.formatting_tests_func(self.testdata))
         print(merge_pred)
 
         with open(
