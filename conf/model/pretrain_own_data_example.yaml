@@ -1,9 +1,9 @@
 representation: ???
 special_num_token: False
 dataset: pretrain
-dataset_type: ???
+dataset_type: None
 data_repository: "n0w0f/MatText"
-dataset_local_path: False
+dataset_local_path: /work/so87pot/material_db/structllm_dataset/30k
 context_length: ???
 special_tokens:
   {
@@ -13,7 +13,7 @@ special_tokens:
     "sep_token": "[SEP]",
     "mask_token": "[MASK]",
     "eos_token": "[EOS]",
-    "bos_token": "[BOS]",
+    "bos_token": "[BOS]"
   }
 
 logging:

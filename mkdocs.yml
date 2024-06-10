@@ -18,6 +18,7 @@ theme:
   logo: static/logo.png
   favicon: static/logo.png
   features:
+    - content.code.annotate
     - content.tabs.link
     - content.code.annotation
     - content.code.copy
@@ -30,6 +31,22 @@ theme:
     - search.highlight
     - search.share
     - navigation.tabs.sticky
+  icon:
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
+
+
 
   palette:
     - scheme: default
@@ -64,6 +81,7 @@ plugins:
             preload_modules:
               - xtal2txt
 
+
 markdown_extensions:
   - meta
   - tables
@@ -71,7 +89,6 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - admonition
   - pymdownx.arithmatex:
       generic: true
   - footnotes
@@ -111,5 +128,7 @@ extra:
 nav:
   - Home: index.md
   - Getting Started: getting_started.md
-  - Usage: usage.md
+  - Representations: representations.md
+  - Tokenizers: tokenizers.md
+  - Modeling & Benchmarking: benchmarking.md
   - API Reference: api.md

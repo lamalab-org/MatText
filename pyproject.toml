@@ -45,6 +45,7 @@ dependencies = [
   "fire",
   "peft",
   "trl",
+  "bitsandbytes",
 ]
 
 [project.optional-dependencies]

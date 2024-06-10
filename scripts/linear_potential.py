@@ -103,11 +103,6 @@ def process_entry_test_matbench(entry: dict, timeout: int, alphas=None) -> dict:
     try:
         signal.alarm(timeout)  # Start the timer
         structure = Structure.from_str(str(entry["structure"]), "cif")
-        # text_reps = linearpotential.get_total_energy(structure, alphas=alphas)
-        # text_reps = {}
-        # text_reps["crystal_llm_rep"] = TextRep.from_input(
-        #     entry["structure"]
-        # ).get_crystal_llm_rep()
         list_of_rep = [
             "zmatrix",
             "atoms_params",
