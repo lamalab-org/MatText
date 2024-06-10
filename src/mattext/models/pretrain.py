@@ -1,5 +1,5 @@
 from functools import partial
-from typing import List
+from typing import List, Optional
 
 import wandb
 from datasets import DatasetDict, load_dataset
@@ -34,11 +34,12 @@ class PretrainModel(TokenizerMixin):
         self.context_length: int = self.cfg.context_length
         self.callbacks = self.cfg.callbacks
         self.model_name_or_path: str = self.cfg.model_name_or_path
-        self.tokenized_train_datasets, self.tokenized_eval_datasets = (
-            self._prepare_datasets(subset=self.cfg.dataset_name)
+        self.local_file_path = cfg.model.dataset_local_path if cfg.model.dataset_local_path else None
+        self.tokenized_train_datasets, self.tokenized_eval_datasets =  self._prepare_datasets(
+            subset=self.cfg.dataset_name,local_file_path=self.local_file_path
         )
 
-    def _prepare_datasets(self, subset: str) -> DatasetDict:
+    def _prepare_datasets(self, subset: str, local_file_path: Optional[str] = None) -> DatasetDict:
         """
         Prepare training and validation datasets.
 
@@ -48,17 +49,29 @@ class PretrainModel(TokenizerMixin):
         Returns:
             DatasetDict: Dictionary containing training and validation datasets.
         """
-        dataset = load_dataset(self.data_repository, subset)
-        filtered_dataset = dataset.filter(
+        if local_file_path:
+            # Load data from a local JSON file
+            train_dataset = load_dataset("json", data_files=f"{local_file_path}/train.json", split="train")
+            eval_dataset = load_dataset("json", data_files=f"{local_file_path}/test.json", split="train")
+        else:
+            # Load data from the repository
+            dataset = load_dataset(self.data_repository, subset)
+            train_dataset = dataset["train"]
+            eval_dataset = dataset["test"]
+
+        filtered_train_dataset = train_dataset.filter(
+            lambda example: example[self.representation] is not None
+        )
+        filtered_eval_dataset = eval_dataset.filter(
             lambda example: example[self.representation] is not None
         )
 
-        return filtered_dataset["train"].map(
+        return filtered_train_dataset.map(
             partial(
                 self._tokenize_pad_and_truncate, context_length=self.context_length
             ),
             batched=True,
-        ), filtered_dataset["test"].map(
+        ), filtered_eval_dataset.map(
             partial(
                 self._tokenize_pad_and_truncate, context_length=self.context_length
             ),

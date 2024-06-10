@@ -3,6 +3,7 @@ special_num_token: False
 dataset: pretrain
 dataset_type: ???
 data_repository: "n0w0f/MatText"
+dataset_local_path: False
 context_length: ???
 special_tokens:
   {

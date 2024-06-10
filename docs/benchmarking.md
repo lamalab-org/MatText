@@ -236,3 +236,25 @@ pretrain:
     add_cross_attention: False
     max_position_embeddings: 768
 ```
+
+
+## Pretraining on Your Custom Dataset
+
+You can use your own     datasets stored locally on your machine or hosted on the Hugging Face Hub.
+
+For using dataset in a local path,  Define the dataset_local_path variable in your base configuration file.
+By default, this value is set to False, indicating no local dataset is used.
+Refer to the example configuration file `/conf/model/pretrain_own_data_example`, execute the following command to run the pretraining script with your local dataset:
+
+```bash
+python main.py -cn=pretrain model=pretrain_own_data_example +model.representation=composition +model.context_length=32 ++model.dataset_local_path=path/to/local
+```
+
+For Hugging Face datasets, specify the repository (`data_repository`) and dataset type (`dataset_type`) in the configuration. 
+
+
+??? warning "`key names`"
+
+    Ensure your dataset has a key for the specific representation used for training
+    
+

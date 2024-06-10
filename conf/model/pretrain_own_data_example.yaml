@@ -1,9 +1,9 @@
 representation: ???
 special_num_token: False
 dataset: pretrain
-dataset_type: ???
+dataset_type: None
 data_repository: "n0w0f/MatText"
-dataset_local_path: False
+dataset_local_path: /work/so87pot/material_db/structllm_dataset/30k
 context_length: ???
 special_tokens:
   {
@@ -13,7 +13,7 @@ special_tokens:
     "sep_token": "[SEP]",
     "mask_token": "[MASK]",
     "eos_token": "[EOS]",
-    "bos_token": "[BOS]",
+    "bos_token": "[BOS]"
   }
 
 logging:
@@ -23,17 +23,17 @@ logging:
 pretrain:
   name: test-pretrain
   exp_name: "${model.representation}_${model.pretrain.name}"
-  model_name_or_path:            # "bert-base-uncased"
+  model_name_or_path: "bert-base-uncased"
   dataset_name: "${model.dataset_type}"
   context_length: "${model.context_length}"
 
   model_config:
-    hidden_size: 768
-    # num_hidden_layers: 4
-    # num_attention_heads: 8
-    # is_decoder: False
-    # add_cross_attention: False
-    max_position_embeddings: 768
+    hidden_size: 512
+    num_hidden_layers: 4
+    num_attention_heads: 8
+    is_decoder: False
+    add_cross_attention: False
+    max_position_embeddings: 1024
 
   path:
     pretrained_checkpoint:
@@ -73,4 +73,3 @@ pretrain:
   mlm:
     is_mlm: True
     mlm_probability: 0.15
-

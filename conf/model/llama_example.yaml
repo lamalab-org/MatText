@@ -98,7 +98,7 @@ finetune:
     fp16: False
     overwrite_output_dir: True
     dataloader_num_workers: 2
-    num_train_epochs: 1
+    num_train_epochs: 4
     per_device_train_batch_size: 8
     per_device_eval_batch_size: 8
     save_strategy: "steps"
