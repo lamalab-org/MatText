@@ -1,13 +1,5 @@
 # Installation
 
-<!-- The most recent release can be installed from
-[PyPI](https://pypi.org/project/mattext) with:
-
-```shell
-$ pip install mattext
-``` -->
-
-
 
 The most recent code and data can be installed directly from GitHub with:
 
