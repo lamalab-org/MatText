@@ -10,7 +10,7 @@
 
 <p align="center">
     <a href="https://github.com/lamalab-org/mattext/actions/workflows/tests.yml">
-        <img alt="Tests" src="https://github.com/lamalab-org/mattext/workflows/Tests/badge.svg" />
+        <img alt="Tests" src="https://github.com/lamalab-org/mattext/workflows/Tests/badge.svg?branch=main" />
     </a>
     <a href="https://lamalab-org.github.io/MatText/">
         <img alt="Docs"src="https://img.shields.io/badge/docs-GitHub_Pages-blue" / >
