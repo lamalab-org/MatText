@@ -122,6 +122,23 @@ Contributions, whether filing an issue, making a pull request, or forking, are a
 
 ## 👋 Attribution
 
+### Citation 
+
+If you use MatText in your work, please cite 
+
+```
+@misc{alampara2024mattextlanguagemodelsneed,
+      title={MatText: Do Language Models Need More than Text & Scale for Materials Modeling?}, 
+      author={Nawaf Alampara and Santiago Miret and Kevin Maik Jablonka},
+      year={2024},
+      eprint={2406.17295},
+      archivePrefix={arXiv},
+      primaryClass={cond-mat.mtrl-sci}
+      url={https://arxiv.org/abs/2406.17295}, 
+}
+```
+
+
 ### ⚖️ License
 
 The code in this package is licensed under the MIT License.
