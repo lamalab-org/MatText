@@ -10,7 +10,7 @@
 
 <p align="center">
     <a href="https://github.com/lamalab-org/mattext/actions/workflows/tests.yml">
-        <img alt="Tests" src="https://github.com/lamalab-org/mattext/workflows/Tests/badge.svg" />
+        <img alt="Tests" src="https://github.com/lamalab-org/mattext/workflows/Tests/badge.svg?branch=main" />
     </a>
     <a href="https://lamalab-org.github.io/MatText/">
         <img alt="Docs"src="https://img.shields.io/badge/docs-GitHub_Pages-blue" / >
@@ -121,6 +121,23 @@ Contributions, whether filing an issue, making a pull request, or forking, are a
 [CONTRIBUTING.md](https://github.com/lamalab-org/xtal2txt/blob/master/.github/CONTRIBUTING.md) for more information on getting involved.
 
 ## 👋 Attribution
+
+### Citation 
+
+If you use MatText in your work, please cite 
+
+```
+@misc{alampara2024mattextlanguagemodelsneed,
+      title={MatText: Do Language Models Need More than Text & Scale for Materials Modeling?}, 
+      author={Nawaf Alampara and Santiago Miret and Kevin Maik Jablonka},
+      year={2024},
+      eprint={2406.17295},
+      archivePrefix={arXiv},
+      primaryClass={cond-mat.mtrl-sci}
+      url={https://arxiv.org/abs/2406.17295}, 
+}
+```
+
 
 ### ⚖️ License
 
