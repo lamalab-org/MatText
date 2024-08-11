@@ -1,0 +1,17 @@
+# @package _global_
+model:
+  representation: composition
+  dataset: "bandgap"
+  dataset_type: matbench
+  special_num_token: False
+  checkpoint: n0w0f/MatText-composition-2m
+  logging:
+    wandb_project: revision-bg
+
+  finetune:
+    model_name: revision-bg
+    context_length: 32
+    training_arguments:
+      per_device_train_batch_size: 1024
+
+    
