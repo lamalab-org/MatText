@@ -15,6 +15,8 @@ MATTEXT_MATBENCH = {
     "kvrh": "matbench_log_kvrh",
     "gvrh": "matbench_log_gvrh",
     "perovskites": "matbench_perovskites",
+    "bandgap" : "matbench_mp_gap",
+    "form_energy": "matbench_mp_e_form"
 }
 
 MATMINER_COLUMNS = {
