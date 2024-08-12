@@ -1,0 +1,7 @@
+# @package _global_
+model:
+  representation: crystal_text_llm
+  dataset: "bandgap"
+  dataset_type: matbench
+  logging:
+    wandb_project: llama-7B-ft
