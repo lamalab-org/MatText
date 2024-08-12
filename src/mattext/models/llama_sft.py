@@ -58,14 +58,12 @@ class FinetuneLLamaSFT:
 
 
     def prepare_test_data(self,subset):
-        dataset = load_dataset(self.data_repository, subset)[self.fold].select(range(100))
-        print(dataset)
-        #dataset = dataset.shuffle(seed=self.dataprep_seed)[self.fold].select(range(100))
+        dataset = load_dataset(self.data_repository, subset)[self.fold]
         return dataset
     
     def prepare_data(self, subset):
         dataset = load_dataset(self.data_repository, subset)
-        dataset = dataset.shuffle(seed=self.dataprep_seed)[self.fold].select(range(100))
+        dataset = dataset.shuffle(seed=self.dataprep_seed)[self.fold]
         return dataset.train_test_split(test_size=0.1, seed=self.dataprep_seed)
 
     def _setup_model_tokenizer(self) -> None:
