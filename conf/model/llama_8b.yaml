@@ -1,0 +1,137 @@
+representation: ???
+add_special_tokens: False
+dataset: ???
+dataset_type: ???
+fold : 5
+data_repository: "n0w0f/MatText"
+checkpoint: "meta-llama/Meta-Llama-3-8B-Instruct"
+special_tokens: {
+    "unk_token": "[UNK]",
+    "pad_token": "[PAD]",
+    "cls_token": "[CLS]",
+    "sep_token": "[SEP]",
+    "mask_token": "[MASK]",
+    "eos_token": "[EOS]",
+    "bos_token": "[BOS]",
+}
+
+REPRESENTATION_MAP : {
+    "cif_p1" : "cif_p1",
+    "Slice"  : "slice",
+    }
+
+PROPERTY_MAP : {
+    "gvrh" : "shear modulus (in GPa)",
+    "kvrh" : "bulk modulus (in GPa)",
+    "dielectric" : "refractive index",
+    "perovskites" : "formation energy (in eV)",
+    "bandgap" : "bandgap (in eV)",
+    "form_energy" : "formation energy (in eV)",}
+
+MATERIAL_MAP : {
+    "gvrh" : "material",
+    "kvrh" : "material",
+    "dielectric" : "dielectric material",
+    "perovskites" : "perovskite material",
+    "bandgap" : "material ",
+    "form_energy" : "material",   }
+
+
+logging:
+  wandb_project : test-llama
+  wandb_log_model : "checkpoint"
+
+finetune:
+  model_name: test-llama
+  freeze_base_model: False
+  dataprep_seed: 42
+  dataset_name: "${model.dataset}-train-${model.dataset_type}" 
+  benchmark_dataset: "${model.dataset}-test-${model.dataset_type}"  
+  exp_name: [
+    "train_${model.representation}_${model.finetune.dataset_name}",
+    ]
+
+
+  path:
+    pretrained_checkpoint: "${model.checkpoint}" 
+
+
+    finetune_data_rootpath: "/work/so87pot/material_db/all_1"                     # <--- Change this to the path of the finetune data
+    finetune_traindata: [
+      "${model.finetune.path.finetune_data_rootpath}/train_${model.finetune.dataset_name}_2.json",
+       ]
+
+    finetune_testdata: [
+      "${model.finetune.path.finetune_data_rootpath}/test_${model.finetune.dataset_name}_2.json",
+       ]
+
+    root_path: "${hydra:runtime.cwd}/../../results/${now:%Y-%m-%d}/${now:%H-%M-%S}/${model.finetune.model_name}" 
+    output_dir:          "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
+    logging_dir:         "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
+    finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
+
+  context_length: 1024
+  callbacks:
+    early_stopping: False
+    custom_logger: False
+    early_stopping_patience: 5
+    early_stopping_threshold: 0.001
+    generation:
+      n_epochs: 1
+      output_dir: "${model.finetune.path.output_dir}"
+
+  bnb_config:
+    use_4bit: True
+    use_8bit: False
+    bnb_4bit_compute_dtype: "float16"
+    bnb_4bit_quant_type: "nf4"
+    use_nested_quant: False
+
+  lora_config:
+    r: 32
+    lora_alpha: 64
+    lora_dropout: 0.05
+    bias: "none"
+    task_type: "CAUSAL_LM"
+    #target_modules: ['q_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj', 'k_proj', 'v_proj'] # Choose all linear layers from the model
+
+
+  training_arguments:
+    output_dir: "${model.finetune.path.output_dir}"
+    bf16: True
+    fp16: False
+    overwrite_output_dir: True
+    dataloader_num_workers: 2
+    num_train_epochs: 5
+    per_device_train_batch_size: 8
+    per_device_eval_batch_size: 8
+    save_strategy: "steps"
+    do_eval: True
+    evaluation_strategy: 'steps'   
+    logging_strategy: 'steps'
+    logging_first_step: True
+    save_steps: 20 # Number of epochs before saving
+    report_to: "wandb"
+    save_total_limit: 2
+    logging_steps: 10
+    eval_steps: 10
+    seed: 42
+    load_best_model_at_end: True
+    # Number of update steps to accumulate the gradients for
+    gradient_accumulation_steps : 4
+    # Enable gradient checkpointing
+    gradient_checkpointing : True
+    # Maximum gradient normal (gradient clipping)
+    max_grad_norm : 0.3
+    # Initial learning rate (AdamW optimizer)
+    learning_rate : 3e-4  # 0.0005 crystal-llm
+    # Weight decay to apply to all layers except bias/LayerNorm weights
+    weight_decay : 0.001
+    # Optimizer to use
+    optim : "paged_adamw_32bit"
+    # Learning rate schedule
+    lr_scheduler_type : "cosine"
+    # Ratio of steps for a linear warmup (from 0 to learning rate)
+    warmup_ratio : 0.03
+    warmup_steps : 10
+    eval_accumulation_steps : 4
