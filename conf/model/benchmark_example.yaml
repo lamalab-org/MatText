@@ -43,7 +43,7 @@ finetune:
       ]
 
     finetune_testdata:
-    root_path: "${hydra:runtime.cwd}/../../results/${now:%Y-%m-%d}/${now:%H-%M-%S}/${model.finetune.model_name}" # <--- Change this to the path where chkpoints and logs will be saved
+    root_path: "/root/n0w0f/data_results/${now:%Y-%m-%d}/${now:%H-%M-%S}/${model.finetune.model_name}" # <--- Change this to the path where chkpoints and logs will be saved
     output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
     logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
     finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
@@ -65,9 +65,9 @@ finetune:
     evaluation_strategy: "epoch"
     logging_strategy: "epoch"
     logging_first_step: True
-    save_steps: 3 # Number of epochs before saving
+    save_steps: 5 # Number of epochs before saving
     report_to: "wandb"
-    save_total_limit: 5
+    save_total_limit: 1
     learning_rate: 2e-4
     logging_steps: 1
     eval_steps: 1
