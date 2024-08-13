@@ -6,7 +6,7 @@ from hydra import main as hydra_main
 from hydra import utils
 from omegaconf import DictConfig
 
-from mattext.models.benchmark import Matbenchmark
+from mattext.models.benchmark import Matbenchmark, MatbenchmarkClassification
 from mattext.models.finetune import FinetuneModel
 from mattext.models.inference import Benchmark
 from mattext.models.llama import FinetuneLLama
@@ -22,6 +22,9 @@ class TaskRunner:
     def run_task(self, run: list, task_cfg: DictConfig, local_rank=None) -> None:
         if "benchmark" in run:
             self.run_benchmarking(task_cfg)
+ 
+        if "classification" in run:
+            self.run_classification(task_cfg)
 
         if "inference" in run:
             self.run_inference(task_cfg)
@@ -44,9 +47,15 @@ class TaskRunner:
         if "potential" in run:
             self.run_potential(task_cfg)
 
+
     def run_benchmarking(self, task_cfg: DictConfig, local_rank=None) -> None:
         print("Finetuning and testing on matbench dataset")
         matbench_predictor = Matbenchmark(task_cfg)
+        matbench_predictor.run_benchmarking(local_rank=local_rank)
+
+    def run_classification(self, task_cfg: DictConfig, local_rank=None) -> None:
+        print(f"Finetuning and testing on classification task")
+        matbench_predictor = MatbenchmarkClassification(task_cfg)
         matbench_predictor.run_benchmarking(local_rank=local_rank)
 
     def run_qmof(self, task_cfg: DictConfig, local_rank=None) -> None:
