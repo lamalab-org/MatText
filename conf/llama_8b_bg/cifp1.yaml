@@ -2,7 +2,7 @@
 model:
   representation: cif_p1
   dataset: "bandgap"
-  dataset_type: matbench
+  dataset_type: filtered
   logging:
     wandb_project: llama-7B-ft
 
