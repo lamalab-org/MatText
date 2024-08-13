@@ -8,7 +8,7 @@ from omegaconf import DictConfig
 from mattext.models.classification import FinetuneClassificationModel
 from mattext.models.finetune import FinetuneModel
 from mattext.models.predict import Inference, InferenceClassification
-from mattext.models.score import MATTEXT_MATBENCH, MatTextTask
+from mattext.models.score import MATTEXT_MATBENCH, MatTextTask, MatTextClassificationTask
 from mattext.models.utils import fold_key_namer
 
 
@@ -103,7 +103,6 @@ class Matbenchmark:
             try:
                 predict = Inference(exp_cfg, fold=fold_name)
                 predictions, prediction_ids = predict.predict()
-                print(len(prediction_ids), len(predictions))
 
                 if self.task_type == "matbench" or self.task_type == "classification":
                     task.record(i, predictions)
@@ -178,7 +177,7 @@ class MatbenchmarkClassification:
 
         """
 
-        task = MatTextTask(task_name=self.task)
+        task = MatTextClassificationTask(task_name=self.task)
 
         for i, (exp_name, test_name) in enumerate(
             zip(self.exp_names, self.test_exp_names)
@@ -219,7 +218,9 @@ class MatbenchmarkClassification:
                 inference = InferenceClassification(exp_cfg, fold=fold_name)
                 predictions, prediction_ids = inference.predict()
                 # task.record_fold(fold=i, prediction_ids=prediction_ids, predictions=predictions.values)
+                print("--------------------")
                 print(len(prediction_ids), len(predictions))
+                print("---------------------")
                 task.record_fold(
                     fold=i, prediction_ids=prediction_ids, predictions=predictions.values
                 )

@@ -105,7 +105,8 @@ class InferenceClassification(TokenizerMixin):
         self.dataset_name = cfg.model.finetune.dataset_name
         self.cfg = cfg.model.inference
         self.context_length: int = self.cfg.context_length
-        self.num_labels = cfg.model.num_labels
+        #self.num_labels = cfg.model.num_labels
+        self.num_labels = 2
         self.tokenized_test_datasets = self._prepare_datasets(self.cfg.path.test_data)
         self.prediction_ids = None
 
@@ -169,7 +170,7 @@ class InferenceClassification(TokenizerMixin):
             torch.from_numpy(predictions.predictions), dim=-1
         ).numpy()
 
-        # Create a DataFrame with prediction probabilities
+        #Create a DataFrame with prediction probabilities
         prediction_df = pd.DataFrame(
             probabilities, columns=[f"class_{i}" for i in range(self.num_labels)]
         )

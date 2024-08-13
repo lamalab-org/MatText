@@ -160,19 +160,12 @@ class MatTextClassificationTask:
         if fold in self.recorded_folds:
             raise ValueError(f"Fold {fold} has already been recorded.")
 
-        true_labels = self.load_true_labels(self.task_name, prediction_ids)
+        true_labels = load_true_scores(self.task_name, prediction_ids)
         pred_labels = np.argmax(predictions, axis=1)
 
         accuracy = accuracy_score(true_labels, pred_labels)
         precision, recall, f1, _ = precision_recall_fscore_support(true_labels, pred_labels, average='weighted')
         roc_auc = roc_auc_score(true_labels, predictions[:, 1])
-
-        # Compute ROC AUC
-        # if self.num_classes == 2:
-        #     roc_auc = roc_auc_score(true_labels, predictions[:, 1])
-        # else:
-        #     true_labels_binarized = label_binarize(true_labels, classes=range(self.num_classes))
-        #     roc_auc = roc_auc_score(true_labels_binarized, predictions, average='weighted', multi_class='ovr')
 
         self.folds_results[fold] = {
             "prediction_ids": prediction_ids,
@@ -225,22 +218,13 @@ class MatTextClassificationTask:
         return task
 
     @staticmethod
-    def _prepare_for_serialization(obj):
-        if isinstance(obj, dict):
-            return {
-                k: MatTextClassificationTask._prepare_for_serialization(v) for k, v in obj.items()
-            }
-        elif isinstance(obj, (list, pd.Series, np.ndarray)):
-            return MatTextClassificationTask._prepare_for_serialization(obj.tolist())
-        else:
-            return obj
-
-    @staticmethod
     def _json_serializable(obj):
         if isinstance(obj, (np.ndarray, pd.Series)):
             return obj.tolist()
+        elif isinstance(obj, np.bool_):
+            return bool(obj)
+        elif isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
         raise TypeError(f"Type {type(obj)} not serializable")
-
-    # @staticmethod
-    # def load_true_labels(dataset, mbids):
-    #     raise NotImplementedError("load_true_labels method needs to be implemented")
