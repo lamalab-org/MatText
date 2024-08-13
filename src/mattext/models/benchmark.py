@@ -7,7 +7,7 @@ from omegaconf import DictConfig
 
 from mattext.models.classification import FinetuneClassificationModel
 from mattext.models.finetune import FinetuneModel
-from mattext.models.predict import Inference
+from mattext.models.predict import Inference, InferenceClassification
 from mattext.models.score import MATTEXT_MATBENCH, MatTextTask
 from mattext.models.utils import fold_key_namer
 
@@ -216,11 +216,12 @@ class MatbenchmarkClassification:
             exp_cfg.model.inference.path.pretrained_checkpoint = ckpt
 
             try:
-                predict = Inference(exp_cfg, fold=fold_name)
-                predictions, prediction_ids = predict.predict()
+                inference = InferenceClassification(exp_cfg, fold=fold_name)
+                predictions, prediction_ids = inference.predict()
+                # task.record_fold(fold=i, prediction_ids=prediction_ids, predictions=predictions.values)
                 print(len(prediction_ids), len(predictions))
                 task.record_fold(
-                    fold=i, prediction_ids=prediction_ids, predictions=predictions
+                    fold=i, prediction_ids=prediction_ids, predictions=predictions.values
                 )
 
             except Exception as e:
