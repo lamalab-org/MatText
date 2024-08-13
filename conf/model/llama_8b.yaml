@@ -24,13 +24,17 @@ PROPERTY_MAP : {
     "gvrh" : "shear modulus (in GPa)",
     "kvrh" : "bulk modulus (in GPa)",
     "dielectric" : "refractive index",
-    "perovskites" : "formation energy (in eV)",}
+    "perovskites" : "formation energy (in eV)",
+    "bandgap" : "bandgap (in eV)",
+    "form_energy" : "formation energy (in eV)",}
 
 MATERIAL_MAP : {
     "gvrh" : "material",
     "kvrh" : "material",
     "dielectric" : "dielectric material",
-    "perovskites" : "perovskite material",   }
+    "perovskites" : "perovskite material",
+    "bandgap" : "material ",
+    "form_energy" : "material",   }
 
 
 logging:
