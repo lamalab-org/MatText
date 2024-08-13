@@ -22,6 +22,7 @@ from trl import DataCollatorForCompletionOnlyLM, SFTTrainer
 from mattext.models.utils import (
     EvaluateFirstStepCallback,
 )
+from loguru import logger
 
 
 class FinetuneLLamaSFT:
@@ -33,7 +34,9 @@ class FinetuneLLamaSFT:
         local_rank (int, optional): Local rank for distributed training. Defaults to None.
     """
 
-    def __init__(self, cfg: DictConfig, local_rank=None, fold="fold_0") -> None:
+    def __init__(
+        self, cfg: DictConfig, local_rank=None, fold="fold_0", test_sample_size=None
+    ) -> None:
         self.fold = fold
         self.local_rank = local_rank
         self.representation = cfg.model.representation
@@ -55,17 +58,17 @@ class FinetuneLLamaSFT:
         self.model, self.tokenizer, self.peft_config = self._setup_model_tokenizer()
         self.property_ = self.property_map[self.dataset_]
         self.material_ = self.material_map[self.dataset_]
+        self.test_sample_size = test_sample_size
 
-
-    def prepare_test_data(self,subset):
-        dataset = load_dataset(self.data_repository, subset)[self.fold].select(range(100))
-        print(dataset)
-        #dataset = dataset.shuffle(seed=self.dataprep_seed)[self.fold].select(range(100))
+    def prepare_test_data(self, subset):
+        dataset = load_dataset(self.data_repository, subset)[self.fold]
+        if self.test_sample_size:
+            dataset = dataset.select(range(self.test_sample_size))
         return dataset
-    
+
     def prepare_data(self, subset):
         dataset = load_dataset(self.data_repository, subset)
-        dataset = dataset.shuffle(seed=self.dataprep_seed)[self.fold].select(range(100))
+        dataset = dataset.shuffle(seed=self.dataprep_seed)[self.fold]
         return dataset.train_test_split(test_size=0.1, seed=self.dataprep_seed)
 
     def _setup_model_tokenizer(self) -> None:
@@ -93,9 +96,9 @@ class FinetuneLLamaSFT:
         if compute_dtype == torch.float16:
             major, _ = torch.cuda.get_device_capability()
             if major >= 8:
-                print("=" * 80)
-                print("Your GPU supports bfloat16: accelerate training with bf16=True")
-                print("=" * 80)
+                logger.info(
+                    "Your GPU supports bfloat16: accelerate training with bf16=True!"
+                )
 
         # LoRA config
         peft_config = LoraConfig(**self.cfg.lora_config)
@@ -181,11 +184,6 @@ class FinetuneLLamaSFT:
         wandb.log({"Training Arguments": str(config_train_args)})
         wandb.log({"model_summary": str(self.model)})
 
-        # wandb_callback = LLMSampleCB(
-        #     trainer, self.dataset['test'], num_samples=10, max_new_tokens=10
-        # )
-        # trainer.add_callback(wandb_callback)
-
         self.output_dir_ = (
             f"{self.cfg.path.finetuned_modelname}/llamav3-8b-lora-fine-tune"
         )
@@ -201,7 +199,7 @@ class FinetuneLLamaSFT:
         )
         with torch.cuda.amp.autocast():
             pred = pipe(self.formatting_tests_func(self.testdata))
-        print(pred)
+        logger.debug("Prediction: %s", pred)
 
         with open(
             f"{self.cfg.path.finetuned_modelname}_{self.fold}_predictions.json", "w"
@@ -225,7 +223,7 @@ class FinetuneLLamaSFT:
 
         with torch.cuda.amp.autocast():
             merge_pred = pipe(self.formatting_tests_func(self.testdata))
-        print(merge_pred)
+        logger.debug("Prediction: %s", merge_pred)
 
         with open(
             f"{self.cfg.path.finetuned_modelname}__{self.fold}_predictions_merged.json",
