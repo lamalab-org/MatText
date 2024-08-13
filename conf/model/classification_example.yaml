@@ -1,0 +1,100 @@
+representation: ???
+special_num_token: False
+dataset: ???
+dataset_type: ???
+fold : 5
+data_repository: "n0w0f/MatText"
+checkpoint: ???
+special_tokens:
+  {
+    "unk_token": "[UNK]",
+    "pad_token": "[PAD]",
+    "cls_token": "[CLS]",
+    "sep_token": "[SEP]",
+    "mask_token": "[MASK]",
+    "eos_token": "[EOS]",
+    "bos_token": "[BOS]",
+  }
+
+logging:
+  wandb_project: classification
+  wandb_log_model: "checkpoint"
+
+finetune:
+  model_name: classification
+  freeze_base_model: False
+  dataset_name: "${model.dataset}-train-${model.dataset_type}"  
+  exp_name:
+    [
+      "train_${model.representation}_${model.finetune.dataset_name}_0",
+      "train_${model.representation}_${model.finetune.dataset_name}_1",
+      "train_${model.representation}_${model.finetune.dataset_name}_2",
+      "train_${model.representation}_${model.finetune.dataset_name}_3",
+      "train_${model.representation}_${model.finetune.dataset_name}_4",
+    ]
+
+  path:
+    pretrained_checkpoint: "${model.checkpoint}"
+
+    finetune_data_rootpath: results # <--- Change this to the path of the finetune data
+    finetune_traindata:
+      [
+        # "kvrh-train-filtered",
+      ]
+
+    finetune_testdata:
+    root_path: "${hydra:runtime.cwd}/../../results/${now:%Y-%m-%d}/${now:%H-%M-%S}/${model.finetune.model_name}" # <--- Change this to the path where chkpoints and logs will be saved
+    output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
+    logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
+    finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
+
+  context_length: 32
+  dataprep_seed: 42
+  callbacks:
+    early_stopping: True
+    custom_logger: True
+    early_stopping_patience: 10
+    early_stopping_threshold: 0.001
+
+  training_arguments:
+    output_dir: "${model.finetune.path.output_dir}"
+    overwrite_output_dir: True
+    num_train_epochs: 2
+    per_device_train_batch_size: 1024
+    save_strategy: "epoch"
+    evaluation_strategy: "epoch"
+    logging_strategy: "epoch"
+    logging_first_step: True
+    save_steps: 3 # Number of epochs before saving
+    report_to: "wandb"
+    save_total_limit: 5
+    learning_rate: 2e-4
+    logging_steps: 1
+    eval_steps: 1
+    seed: 42
+    load_best_model_at_end: True
+
+inference:
+  benchmark_dataset: "${model.dataset}-test-${model.dataset_type}"  
+  context_length: "${model.finetune.context_length}"
+  exp_name:
+    [
+      "test_${model.representation}_${model.finetune.dataset_name}_0",
+      "test_${model.representation}_${model.finetune.dataset_name}_1",
+      "test_${model.representation}_${model.finetune.dataset_name}_2",
+      "test_${model.representation}_${model.finetune.dataset_name}_3",
+      "test_${model.representation}_${model.finetune.dataset_name}_4",
+    ]
+  path:
+    pretrained_checkpoint: []
+    test_data_rootpath: # <--- Change this to the path of the finetune data
+    test_data:
+      [
+        # "kvrh-train-filtered",
+      ]
+    root_path: "/home/so87pot/n0w0f/mattext/src/mattext/models/predictions" # <--- Change this to the path where predictions will be saved
+    output_dir: "${model.inference.path.root_path}/checkpoints/${model.inference.exp_name}"
+    logging_dir: "${model.inference.path.root_path}/logs/${model.inference.exp_name}"
+    predictions: "${model.inference.path.root_path}/checkpoints/inference${model.inference.exp_name}"
+
+  benchmark_save_file: "${model.finetune.path.root_path}"
