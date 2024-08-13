@@ -1,0 +1,7 @@
+# @package _global_
+model:
+  representation: zmatrix
+  dataset: "bandgap"
+  dataset_type: filtered
+  logging:
+    wandb_project: llama-7B-ft
