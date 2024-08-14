@@ -20,9 +20,7 @@ available_benchmarks = [
 
 
 def convert_structure_to_serializable(pymatgen_structure):
-    # Assuming Structure has 'data' and 'metadata' attributes
-    cif_content = pymatgen_structure.to(fmt="cif")
-    return cif_content
+    return pymatgen_structure.to(fmt="cif")
 
 
 @hydra.main(version_base=None, config_path="../conf", config_name="config")
