@@ -21,8 +21,7 @@ class Dataset:
 
     def get(self, index):
         id = f"{index}".encode("ascii")
-        datapoint = pickle.loads(self.txn.get(id))
-        return datapoint
+        return pickle.loads(self.txn.get(id))
 
 def create_json_from_lmdb(lmdb_path, output_dir):
     dataset = Dataset(lmdb_path)
