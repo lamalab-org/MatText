@@ -54,7 +54,7 @@ class TaskRunner:
         matbench_predictor.run_benchmarking(local_rank=local_rank)
 
     def run_classification(self, task_cfg: DictConfig, local_rank=None) -> None:
-        print(f"Finetuning and testing on classification task")
+        print("Finetuning and testing on classification task")
         matbench_predictor = MatbenchmarkClassification(task_cfg)
         matbench_predictor.run_benchmarking(local_rank=local_rank)
 
