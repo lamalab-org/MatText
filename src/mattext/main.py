@@ -10,6 +10,7 @@ from mattext.models.benchmark import Matbenchmark
 from mattext.models.finetune import FinetuneModel
 from mattext.models.inference import Benchmark
 from mattext.models.llama import FinetuneLLama
+from mattext.models.llama_classify import FinetuneLLamaClassifierSFT
 from mattext.models.llama_sft import FinetuneLLamaSFT
 from mattext.models.potential import PotentialModel
 from mattext.models.pretrain import PretrainModel
@@ -40,6 +41,9 @@ class TaskRunner:
 
         if "llama_sft" in run:
             self.run_llama_sft(task_cfg, local_rank=local_rank)
+
+        if "llama_classify" in run:
+            self.run_llama_classify(task_cfg, local_rank=local_rank)
 
         if "potential" in run:
             self.run_potential(task_cfg)
@@ -91,7 +95,26 @@ class TaskRunner:
             exp_cfg = task_cfg.copy()
             exp_cfg.model.finetune.exp_name = exp_name
 
-            finetuner = FinetuneLLamaSFT(exp_cfg, local_rank, fold=f"fold_{fold}")
+            finetuner = FinetuneLLamaSFT(
+                exp_cfg, local_rank, fold=f"fold_{fold}"
+            )
+            f = finetuner.finetune()
+            print(f)
+            wandb.finish()
+
+    def run_llama_classify(self, task_cfg: DictConfig, local_rank=None) -> None:
+        for fold in range(task_cfg.model.fold):
+            exp_name = f"{task_cfg.model.finetune.exp_name}_fold_{fold}"
+            wandb.init(
+                config=dict(task_cfg.model.finetune),
+                project=task_cfg.model.logging.wandb_project,
+                name=exp_name,
+            )
+
+            exp_cfg = task_cfg.copy()
+            exp_cfg.model.finetune.exp_name = exp_name
+
+            finetuner = FinetuneLLamaClassifierSFT(exp_cfg, local_rank, fold=f"fold_{fold}")
             f = finetuner.finetune()
             print(f)
             wandb.finish()

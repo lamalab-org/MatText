@@ -1,0 +1,8 @@
+# @package _global_
+model:
+  representation: cif_p1
+  dataset: "is-metal"
+  dataset_type: filtered
+  logging:
+    wandb_project: llama-classification
+

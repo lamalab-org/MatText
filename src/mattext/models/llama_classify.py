@@ -5,6 +5,7 @@ from typing import List
 import torch
 import wandb
 from datasets import load_dataset
+from loguru import logger
 from omegaconf import DictConfig
 from peft import LoraConfig
 from transformers import (
@@ -19,9 +20,9 @@ from transformers import (
 from trl import DataCollatorForCompletionOnlyLM, SFTTrainer
 
 from mattext.models.utils import EvaluateFirstStepCallback
-from loguru import logger
 
-class FinetuneLLamaSFT:
+
+class FinetuneLLamaClassifierSFT:
     def __init__(
         self, cfg: DictConfig, local_rank=None, fold="fold_0", test_sample_size=None
     ) -> None:
@@ -61,7 +62,9 @@ class FinetuneLLamaSFT:
 
     def _setup_model_tokenizer(self):
         if self.bnb_config.use_4bit and self.bnb_config.use_8bit:
-            raise ValueError("You can't load the model in 8 bits and 4 bits at the same time")
+            raise ValueError(
+                "You can't load the model in 8 bits and 4 bits at the same time"
+            )
 
         compute_dtype = getattr(torch, self.bnb_config.bnb_4bit_compute_dtype)
         bnb_config = None
@@ -77,7 +80,9 @@ class FinetuneLLamaSFT:
         if compute_dtype == torch.float16:
             major, _ = torch.cuda.get_device_capability()
             if major >= 8:
-                logger.info("Your GPU supports bfloat16: accelerate training with bf16=True!")
+                logger.info(
+                    "Your GPU supports bfloat16: accelerate training with bf16=True!"
+                )
 
         peft_config = LoraConfig(**self.cfg.lora_config)
 
@@ -93,15 +98,17 @@ class FinetuneLLamaSFT:
 
         return model, tokenizer, peft_config
 
+
     def formatting_prompts_func(self, example):
         return [
-            f"### What is the {self.property_} of {rep}\n ### Answer: {label:.3f}@@@"
-            for rep, label in zip(example[self.representation], example['labels'])
+            f"### Is {rep} a metal\n ### Answer: {label}@@@"
+            for rep, label in zip(example[self.representation], example["labels"])
         ]
+
 
     def formatting_tests_func(self, example):
         return [
-            f"### What is the {self.property_} of {rep}\n "
+            f"### Is {rep} a metal\n "
             for rep in example[self.representation]
         ]
 
@@ -121,7 +128,9 @@ class FinetuneLLamaSFT:
         training_args = TrainingArguments(**self.cfg.training_arguments)
         callbacks = self._callbacks()
 
-        collator = DataCollatorForCompletionOnlyLM(" ### Answer:", tokenizer=self.tokenizer)
+        collator = DataCollatorForCompletionOnlyLM(
+            " ### Answer:", tokenizer=self.tokenizer
+        )
 
         max_seq_length = 2048 if self.representation == "cif_p1" else None
 
@@ -142,7 +151,9 @@ class FinetuneLLamaSFT:
         wandb.log({"Training Arguments": str(self.cfg.training_arguments)})
         wandb.log({"model_summary": str(self.model)})
 
-        output_dir = os.path.join(self.cfg.path.output_dir, f"finetuned_{self.dataset_name}_{self.fold}")
+        output_dir = os.path.join(
+            self.cfg.path.output_dir, f"finetuned_{self.dataset_name}_{self.fold}"
+        )
         trainer.train()
 
         pipe = pipeline(
@@ -179,6 +190,9 @@ class FinetuneLLamaSFT:
             pred = pipe(self.formatting_tests_func(self.testdata))
         logger.debug("Prediction: %s", pred)
 
-        output_file = os.path.join(self.cfg.path.output_dir, f"finetuned_{self.dataset_name}_{self.fold}_{filename}")
+        output_file = os.path.join(
+            self.cfg.path.output_dir,
+            f"finetuned_{self.dataset_name}_{self.fold}_{filename}",
+        )
         with open(output_file, "w") as json_file:
             json.dump(pred, json_file)

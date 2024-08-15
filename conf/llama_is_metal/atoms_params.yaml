@@ -1,0 +1,11 @@
+# @package _global_
+model:
+  representation: atom_sequences_plusplus
+  dataset: "is-metal"
+  dataset_type: filtered
+  logging:
+    wandb_project: llama-classification
+
+
+
+    
