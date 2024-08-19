@@ -106,16 +106,16 @@ finetune:
     num_train_epochs: 5
     per_device_train_batch_size: 8
     per_device_eval_batch_size: 8
-    save_strategy: "epochs"
+    save_strategy: "epoch"
     do_eval: True
-    evaluation_strategy: 'steps'   
+    evaluation_strategy: 'epoch'   
     logging_strategy: 'steps'
     logging_first_step: True
     save_steps: 1 # Number of epochs before saving
     report_to: "wandb"
     save_total_limit: 1
-    logging_steps: 50
-    eval_steps: 200
+    logging_steps: 100
+    eval_steps: 1
     seed: 42
     load_best_model_at_end: True
     # Number of update steps to accumulate the gradients for
