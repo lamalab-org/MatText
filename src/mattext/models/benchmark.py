@@ -77,8 +77,10 @@ class BaseBenchmark(ABC):
             self._record_predictions(task, i, predictions, prediction_ids)
         except Exception as e:
             print(
-                f"Error occurred during inference for finetuned checkpoint '{exp_name}':"
+                f"Error occurred during inference for finetuned checkpoint '{exp_name}': {str(e)}"
             )
+            if isinstance(e, (ValueError, TypeError)):
+                    raise
             print(traceback.format_exc())
 
     @abstractmethod
