@@ -6,8 +6,7 @@ import wandb
 from matbench.bench import MatbenchBenchmark
 from omegaconf import DictConfig
 
-from mattext.models.classification import FinetuneClassificationModel
-from mattext.models.finetune import FinetuneModel
+from mattext.models.finetune import FinetuneModel, FinetuneClassificationModel
 from mattext.models.predict import Inference, InferenceClassification
 from mattext.models.score import (
     MATTEXT_MATBENCH,
