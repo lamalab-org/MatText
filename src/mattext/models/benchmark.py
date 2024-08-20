@@ -10,7 +10,6 @@ from mattext.models.finetune import FinetuneModel, FinetuneClassificationModel
 from mattext.models.predict import Inference, InferenceClassification
 from mattext.models.score import (
     MATTEXT_MATBENCH,
-    MatTextClassificationTask,
     MatTextTask,
 )
 from mattext.models.utils import fold_key_namer
@@ -139,7 +138,7 @@ class Matbenchmark(BaseBenchmark):
 
 class MatbenchmarkClassification(BaseBenchmark):
     def run_benchmarking(self, local_rank=None) -> None:
-        task = MatTextClassificationTask(task_name=self.task)
+        task = MatTextTask(task_name=self.task, is_classification=True)
 
         for i, (exp_name, test_name) in enumerate(
             zip(self.exp_names, self.test_exp_names)
