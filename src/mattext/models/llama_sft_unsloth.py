@@ -174,10 +174,15 @@ class FinetuneLLamaSFT:
         with torch.cuda.amp.autocast():
             pred = pipe(self.formatting_tests_func(self.testdata))
         logger.debug("Prediction: %s", pred)
+        mbid = self.testdata["mbid"]
+        data = {
+            "predictions" : pred,
+            "mbid": mbid
+        }
 
         output_file = os.path.join(
             self.cfg.path.output_dir,
             f"finetuned_{self.dataset_name}_{self.fold}_{filename}",
         )
         with open(output_file, "w") as json_file:
-            json.dump(pred, json_file)
+            json.dump(data, json_file)
