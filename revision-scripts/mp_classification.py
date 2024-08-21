@@ -20,8 +20,8 @@ class Dataset:
         return self.txn.stat()['entries']
 
     def get(self, index):
-        id = f"{index}".encode("ascii")
-        return pickle.loads(self.txn.get(id))
+        id_ = f"{index}".encode("ascii")
+        return pickle.loads(self.txn.get(id_))
 
 def create_json_from_lmdb(lmdb_path, output_dir):
     dataset = Dataset(lmdb_path)
