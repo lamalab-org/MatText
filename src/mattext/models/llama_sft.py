@@ -51,8 +51,8 @@ class FinetuneLLamaSFT:
 
     def prepare_test_data(self, subset):
         dataset = load_dataset(self.data_repository, subset)[self.fold]
-        if self.test_sample_size:
-            dataset = dataset.select(range(self.test_sample_size))
+        # if self.test_sample_size:
+        #     dataset = dataset.select(range(self.test_sample_size))
         return dataset
 
     def prepare_data(self, subset):
@@ -100,13 +100,13 @@ class FinetuneLLamaSFT:
 
     def formatting_prompts_func(self, example):
         return [
-            f"### What is the {self.property_} of {rep}\n ### Answer: {label:.3f}@@@"
+            f"### What is the property of {rep}\n ### Answer: {label:.3f}@@@"
             for rep, label in zip(example[self.representation], example["labels"])
         ]
 
     def formatting_tests_func(self, example):
         return [
-            f"### What is the {self.property_} of {rep}\n "
+            f"### What is the property of {rep}\n "
             for rep in example[self.representation]
         ]
 
@@ -167,18 +167,17 @@ class FinetuneLLamaSFT:
 
         trainer.save_state()
         trainer.save_model(output_dir)
-
-        merged_model = trainer.model.merge_and_unload()
-        merged_model.save_pretrained(
-            os.path.join(output_dir, "llamav3-8b-lora-save-pretrained"),
-            save_config=True,
-            safe_serialization=True,
-        )
         self.tokenizer.save_pretrained(
             os.path.join(output_dir, "llamav3-8b-lora-save-pretrained")
         )
 
-        self._save_predictions(pipe, "predictions_merged.json")
+        # merged_model = trainer.model.merge_and_unload()
+        # merged_model.save_pretrained(
+        #     os.path.join(output_dir, "llamav3-8b-lora-save-pretrained"),
+        #     save_config=True,
+        #     safe_serialization=True,
+        # )
+        #self._save_predictions(pipe, "predictions_merged.json")
 
         wandb.finish()
         return output_dir

@@ -113,7 +113,7 @@ finetune:
     save_steps: 1 # Number of epochs before saving
     report_to: "wandb"
     save_total_limit: 1
-    logging_steps: 100
+    logging_steps: 200
     eval_steps: 2
     seed: 42
     load_best_model_at_end: True

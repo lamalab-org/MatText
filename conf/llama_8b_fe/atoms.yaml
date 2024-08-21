@@ -1,0 +1,8 @@
+# @package _global_
+model:
+  representation: atom_sequences
+  dataset: "form_energy"
+  dataset_type: filtered
+  logging:
+    wandb_project: llama3-8B-fe
+
