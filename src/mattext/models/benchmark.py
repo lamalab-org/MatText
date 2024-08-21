@@ -138,7 +138,7 @@ class Matbenchmark(BaseBenchmark):
 
 class MatbenchmarkClassification(BaseBenchmark):
     def run_benchmarking(self, local_rank=None) -> None:
-        task = MatTextTask(task_name=self.task, is_classification=True)
+        task = self._initialize_task()
 
         for i, (exp_name, test_name) in enumerate(
             zip(self.exp_names, self.test_exp_names)
@@ -151,6 +151,9 @@ class MatbenchmarkClassification(BaseBenchmark):
             self._run_experiment(task, i, exp_name, test_name, local_rank)
 
         self._save_results(task)
+
+    def _initialize_task(self):
+        return MatTextTask(task_name=self.task, is_classification=True)
 
     def _get_finetuner(self, exp_cfg, local_rank, fold_name):
         return FinetuneClassificationModel(exp_cfg, local_rank, fold=fold_name)
