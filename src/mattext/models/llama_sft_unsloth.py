@@ -9,15 +9,13 @@ from loguru import logger
 from omegaconf import DictConfig
 from peft import LoraConfig
 from transformers import (
-    AutoModelForCausalLM,
-    AutoTokenizer,
-    BitsAndBytesConfig,
     EarlyStoppingCallback,
     TrainerCallback,
     TrainingArguments,
     pipeline,
 )
 from trl import DataCollatorForCompletionOnlyLM, SFTTrainer
+from unsloth import FastLanguageModel
 
 from mattext.models.utils import EvaluateFirstStepCallback
 
@@ -51,8 +49,8 @@ class FinetuneLLamaSFT:
 
     def prepare_test_data(self, subset):
         dataset = load_dataset(self.data_repository, subset)[self.fold]
-        if self.test_sample_size:
-            dataset = dataset.select(range(self.test_sample_size))
+        # if self.test_sample_size:
+        #     dataset = dataset.select(range(self.test_sample_size))
         return dataset
 
     def prepare_data(self, subset):
@@ -61,42 +59,32 @@ class FinetuneLLamaSFT:
         return dataset.train_test_split(test_size=0.1, seed=self.dataprep_seed)
 
     def _setup_model_tokenizer(self):
-        if self.bnb_config.use_4bit and self.bnb_config.use_8bit:
-            raise ValueError(
-                "You can't load the model in 8 bits and 4 bits at the same time"
-            )
+        max_seq_length = 2048 if self.representation == "cif_p1" else None
+        dtype = getattr(torch, self.bnb_config.bnb_4bit_compute_dtype) 
+        load_in_4bit = self.bnb_config.use_4bit  # Use 4bit quantization
 
-        compute_dtype = getattr(torch, self.bnb_config.bnb_4bit_compute_dtype)
-        bnb_config = None
-        if self.bnb_config.use_4bit or self.bnb_config.use_8bit:
-            bnb_config = BitsAndBytesConfig(
-                load_in_4bit=self.bnb_config.use_4bit,
-                load_in_8bit=self.bnb_config.use_8bit,
-                bnb_4bit_quant_type=self.bnb_config.bnb_4bit_quant_type,
-                bnb_4bit_compute_dtype=compute_dtype,
-                bnb_4bit_use_double_quant=self.bnb_config.use_nested_quant,
-            )
+        model, tokenizer = FastLanguageModel.from_pretrained(
+            model_name=self.ckpt,
+            max_seq_length=max_seq_length,
+            dtype=dtype,
+            load_in_4bit=load_in_4bit,
+        )
 
-        if compute_dtype == torch.float16:
-            major, _ = torch.cuda.get_device_capability()
-            if major >= 8:
-                logger.info(
-                    "Your GPU supports bfloat16: accelerate training with bf16=True!"
-                )
+        model = FastLanguageModel.get_peft_model(
+            model,
+            r=self.cfg.lora_config.r,
+            #target_modules=self.cfg.lora_config.target_modules,
+            lora_alpha=self.cfg.lora_config.lora_alpha,
+            lora_dropout=self.cfg.lora_config.lora_dropout,
+            bias=self.cfg.lora_config.bias,
+            use_gradient_checkpointing="unsloth",  # "unsloth" for faster training
+            random_state=self.cfg.training_arguments.seed,
+        )
 
-        peft_config = LoraConfig(**self.cfg.lora_config)
-
-        tokenizer = AutoTokenizer.from_pretrained(self.ckpt, use_fast=False)
         tokenizer.pad_token = tokenizer.eos_token
         tokenizer.padding_side = "right"
 
-        model = AutoModelForCausalLM.from_pretrained(
-            self.ckpt,
-            quantization_config=bnb_config,
-            device_map="auto",
-        )
-
-        return model, tokenizer, peft_config
+        return model, tokenizer, None
 
     def formatting_prompts_func(self, example):
         return [
@@ -167,18 +155,17 @@ class FinetuneLLamaSFT:
 
         trainer.save_state()
         trainer.save_model(output_dir)
-
-        merged_model = trainer.model.merge_and_unload()
-        merged_model.save_pretrained(
-            os.path.join(output_dir, "llamav3-8b-lora-save-pretrained"),
-            save_config=True,
-            safe_serialization=True,
-        )
         self.tokenizer.save_pretrained(
             os.path.join(output_dir, "llamav3-8b-lora-save-pretrained")
         )
 
-        self._save_predictions(pipe, "predictions_merged.json")
+        # merged_model = trainer.model.merge_and_unload()
+        # merged_model.save_pretrained(
+        #     os.path.join(output_dir, "llamav3-8b-lora-save-pretrained"),
+        #     save_config=True,
+        #     safe_serialization=True,
+        # )
+        # self._save_predictions(pipe, "predictions_merged.json")
 
         wandb.finish()
         return output_dir
