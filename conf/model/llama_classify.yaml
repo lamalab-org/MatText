@@ -35,8 +35,8 @@ MATERIAL_MAP : {
     "dielectric" : "dielectric material",
     "perovskites" : "perovskite material",
     "bandgap" : "material ",
-    "form_energy" : "material",   }
-
+    "form_energy" : "material",  
+    "is-metal" : "is-metal", }
 
 logging:
   wandb_project : test-llama

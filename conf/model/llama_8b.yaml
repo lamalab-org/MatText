@@ -26,7 +26,8 @@ PROPERTY_MAP : {
     "dielectric" : "refractive index",
     "perovskites" : "formation energy (in eV)",
     "bandgap" : "bandgap (in eV)",
-    "form_energy" : "formation energy (in eV)",}
+    "form_energy" : "formation energy (in eV)",
+    "is-metal" : "is-metal",}
 
 MATERIAL_MAP : {
     "gvrh" : "material",
@@ -34,7 +35,8 @@ MATERIAL_MAP : {
     "dielectric" : "dielectric material",
     "perovskites" : "perovskite material",
     "bandgap" : "material ",
-    "form_energy" : "material",   }
+    "form_energy" : "material",  
+    "is-metal" : "is-metal", }
 
 
 logging:
