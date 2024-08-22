@@ -56,8 +56,8 @@ class FinetuneLLamaSFT:
         return dataset
 
     def prepare_data(self, subset):
-        dataset = load_dataset(self.data_repository, subset)
-        dataset = dataset.shuffle(seed=self.dataprep_seed)[self.fold]
+        dataset = load_dataset(self.data_repository, subset)[self.fold]
+        dataset = dataset.shuffle(seed=self.dataprep_seed)
         return dataset.train_test_split(test_size=0.1, seed=self.dataprep_seed)
 
     def _setup_model_tokenizer(self):
@@ -106,7 +106,7 @@ class FinetuneLLamaSFT:
 
     def formatting_tests_func(self, example):
         return [
-            f"### What is the property of {rep}\n "
+            f"### What is the property of {rep}\n ### Answer:"
             for rep in example[self.representation]
         ]
 
@@ -167,9 +167,6 @@ class FinetuneLLamaSFT:
 
         trainer.save_state()
         trainer.save_model(output_dir)
-        self.tokenizer.save_pretrained(
-            os.path.join(output_dir, "llamav3-8b-lora-save-pretrained")
-        )
 
         # merged_model = trainer.model.merge_and_unload()
         # merged_model.save_pretrained(
@@ -177,7 +174,11 @@ class FinetuneLLamaSFT:
         #     save_config=True,
         #     safe_serialization=True,
         # )
-        #self._save_predictions(pipe, "predictions_merged.json")
+        self.tokenizer.save_pretrained(
+            os.path.join(output_dir, "llamav3-8b-lora-save-pretrained")
+        )
+
+        # self._save_predictions(pipe, "predictions_merged.json")
 
         wandb.finish()
         return output_dir
