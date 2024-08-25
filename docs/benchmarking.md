@@ -37,7 +37,7 @@ Base configs can be found at `/conf/model`
 The `+` symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.
 
 
-In order to override the existing default configuration from CLI, use `++`, for e.g, `++model.pretrain.training_arguments.per_device_train_batch_size=32`.
+In order to override the existing default configuration from CLI, use `++`, e.g., `++model.pretrain.training_arguments.per_device_train_batch_size=32`.
 
 
 For advanced usage (changing architecture, training arguments, or modeling parameters), it would be easier to make the changes in the base config file which is `/conf/model/pretrain_example`, than having to override parameters with lengthy CLI commands!
