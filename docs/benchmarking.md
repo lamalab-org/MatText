@@ -5,9 +5,9 @@ MatText provides pipelines for seamless pretraining([`pretrain`](api.md#mattext.
 
 ### Pretraining on Single MatText Representation
 
-!!! warning Deduplication
+???+ warning Deduplication
 
-    The pretraining datasets we provide in MatText are only deduplicated based on the CIF string. That means that structures with slightly translated positions (e.g. conformers) might ocurr multiple times in the training set.
+    The pretraining datasets we provide in MatText are only deduplicated based on the CIF string. That means that structures with slightly translated positions (e.g. conformers) might occur multiple times in the training set.
 
     Depending on the use case, this can lead to problems including data leakage. Hence, you might need to use, for example, one of the other representations for deduplications.
 
