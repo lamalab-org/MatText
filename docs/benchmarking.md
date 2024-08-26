@@ -1,9 +1,16 @@
-# Modeling and Benchmarking 
+# Modeling and Benchmarking
 
 MatText provides pipelines for seamless pretraining([`pretrain`](api.md#mattext.models.pretrain)) and benchmarking ([`benchmark`](api.md#mattext.models.benchmark)) with finetuning ([`finetune`](api.md#mattext.models.finetune)) on multiple MatText representations. We use the Hydra framework to dynamically create hierarchical configurations based on the pipeline and representations that we want to use.
 
 
 ### Pretraining on Single MatText Representation
+
+???+ warning Deduplication
+
+    The pretraining datasets we provide in MatText are only deduplicated based on the CIF string. That means that structures with slightly translated positions (e.g. conformers) might occur multiple times in the training set.
+
+    Depending on the use case, this can lead to problems including data leakage. Hence, you might need to use, for example, one of the other representations for deduplications.
+
 
 ```bash
 python main.py -cn=pretrain model=pretrain_example +model.representation=composition +model.dataset_type=pretrain30k +model.context_length=32
@@ -30,7 +37,7 @@ Base configs can be found at `/conf/model`
 The `+` symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.
 
 
-In order to override the existing default configuration from CLI, use `++`, for e.g, `++model.pretrain.training_arguments.per_device_train_batch_size=32`. 
+In order to override the existing default configuration from CLI, use `++`, e.g., `++model.pretrain.training_arguments.per_device_train_batch_size=32`.
 
 
 For advanced usage (changing architecture, training arguments, or modeling parameters), it would be easier to make the changes in the base config file which is `/conf/model/pretrain_example`, than having to override parameters with lengthy CLI commands!
@@ -40,11 +47,11 @@ For advanced usage (changing architecture, training arguments, or modeling param
 ### Running Benchmark on a Single MatText Representation
 
 ```bash
-python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=perovskites +model.checkpoint=path/to/checkpoint  
+python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=perovskites +model.checkpoint=path/to/checkpoint
 ```
 
 
-Here, for the benchmarking pipeline(`-cn=benchmark`) the base config is `benchmark_example.yaml`. 
+Here, for the benchmarking pipeline(`-cn=benchmark`) the base config is `benchmark_example.yaml`.
 You can define the parameters for the experiment hence at `\conf\model\benchmark_example.yaml`.
 
 
@@ -53,7 +60,7 @@ You can define the parameters for the experiment hence at `\conf\model\benchmark
 
     Here `+model.dataset_type=filtered` would select the type of benchmark. It can be `filtered` (avoid having truncated structure in train and test set, Only relatively small structures are present here, but this would also mean having less number of sampels to train on ) or `matbench` (complete dataset, there are few big structures , which would be trunated if the context length for modelling is less than `2048`).
 
-???+ info 
+???+ info
 
     `+model.dataset_type=filtered` would produce the report compatible with matbench leaderboard.
 
@@ -89,7 +96,7 @@ example `child config`
 model:
   logging:
     wandb_project: pt_30k_test
-  
+
   representation: cif_p1
   pretrain:
     name: pt_30k_test
@@ -152,27 +159,27 @@ Note `+pretrain30k=cifp1,cifsym,composition,crystal_llm,slice` will launch 5 job
 
 
 ### Adding New Experiments
-New experiments can be easily added with the following step. 
+New experiments can be easily added with the following step.
 
-1. Create an experiment config group inside `conf/` . Make a new directory and add an experiment template inside it. 
+1. Create an experiment config group inside `conf/` . Make a new directory and add an experiment template inside it.
 2. Add / Edit the configs you want for the new experiments. e.g, override the pretrain checkpoints to new pretrained checkpoint
-3. Launch runs similarly but now with the new experiment group 
+3. Launch runs similarly but now with the new experiment group
 
 ```bash
 python main.py --multirun model=pretrain_template ++hydra.launcher.gres=gpu:1 +<new_exp_group>=<new_exp_template_1>,<new_exp_template_2>, ..
 
 ```
 
-## Running a Benchmark 
+## Running a Benchmark
 
 ```bash
-python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=perovskites +model.checkpoint=path/to/checkpoint  
+python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=perovskites +model.checkpoint=path/to/checkpoint
 ```
 
-## Finetuning LLM 
+## Finetuning LLM
 
 ```bash
-python main.py -cn=llm_sft model=llama_example +model.representation=composition +model.dataset_type=filtered +model.dataset=perovskites  
+python main.py -cn=llm_sft model=llama_example +model.representation=composition +model.dataset_type=filtered +model.dataset=perovskites
 ```
 
 The `+` symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.
@@ -184,7 +191,7 @@ To override the existing default configuration, use `++`, for e.g., `++model.pre
     Define the number of folds for k-fold cross-validation in the config or through the CLI. For Matbench benchmarks, however, the number of folds should be 5. The default value for all experiments is set to 5.
 
 
-## Using Data 
+## Using Data
 
 The MatText datasets can be easily obtained from [HuggingFace](https://huggingface.co/datasets/n0w0f/MatText), for example
 
@@ -194,7 +201,7 @@ from datasets import load_dataset
 dataset = load_dataset("n0w0f/MatText", "pretrain300k")
 ```
 
-## Using Pretrained MatText Models 
+## Using Pretrained MatText Models
 
 The pretrained MatText models can be easily loaded from [HuggingFace](https://huggingface.co/collections/n0w0f/mattext-665fe18e5eec38c2148ccf7a), for example
 
@@ -224,7 +231,7 @@ For better manageability, you can define the model name and configuration in the
 pretrain:
   name: test-pretrain
   exp_name: "${model.representation}_${model.pretrain.name}"
-  model_name_or_path: "FacebookAI/roberta-base" 
+  model_name_or_path: "FacebookAI/roberta-base"
   dataset_name: "${model.dataset_type}"
   context_length: "${model.context_length}"
 
@@ -250,11 +257,9 @@ Refer to the example configuration file `/conf/model/pretrain_own_data_example`,
 python main.py -cn=pretrain model=pretrain_own_data_example +model.representation=composition +model.context_length=32 ++model.dataset_local_path=path/to/local
 ```
 
-For Hugging Face datasets, specify the repository (`data_repository`) and dataset type (`dataset_type`) in the configuration. 
+For Hugging Face datasets, specify the repository (`data_repository`) and dataset type (`dataset_type`) in the configuration.
 
 
 ??? warning "`key names`"
 
     Ensure your dataset has a key for the specific representation used for training
-    
-
