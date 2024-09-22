@@ -1,0 +1,17 @@
+# @package _global_
+model:
+  representation: slices
+  dataset: "bandgap"
+  dataset_type: matbench
+  special_num_token: False
+  checkpoint: n0w0f/MatText-slices-2m
+  logging:
+    wandb_project: revision-bg
+
+  finetune:
+    model_name: revision-bg
+    context_length: 512
+    training_arguments:
+      per_device_train_batch_size: 256
+    path:
+      pretrained_checkpoint: n0w0f/MatText-slices-2m

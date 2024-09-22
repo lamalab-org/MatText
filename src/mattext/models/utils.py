@@ -2,6 +2,7 @@ from typing import Any, Dict, Union
 
 import torch
 import wandb
+from loguru import logger
 from tqdm import tqdm
 from transformers import GenerationConfig, TrainerCallback
 from transformers.integrations import WandbCallback
@@ -117,8 +118,8 @@ class TokenizerMixin:
             truncation=False,
             padding=False,
         )
-        print(f"special_tokens: {special_tokens}")
-        print(self._wrapped_tokenizer.tokenize("Se2Se3"))
+        logger.info(f"special_tokens: {special_tokens}")
+        logger.info(self._wrapped_tokenizer.tokenize("Se2Se3"))
 
         # self._wrapped_tokenizer.add_special_tokens(special_tokens=special_tokens)
 
@@ -188,7 +189,7 @@ class CustomWandbCallback_FineTune(TrainerCallback):
         if state.is_world_process_zero:
             step = state.global_step  # Retrieve the current step
             epoch = state.epoch  # Retrieve the current epoch
-            print(f"Step: {step}, Epoch: {round(epoch,5)}")
+            logger.info(f"Step: {step}, Epoch: {round(epoch,5)}")
 
             if (
                 "loss" in logs and "eval_loss" in logs
