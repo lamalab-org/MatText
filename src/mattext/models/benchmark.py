@@ -13,6 +13,7 @@ from mattext.models.score import (
     MatTextTask,
 )
 from mattext.models.utils import fold_key_namer
+from loguru import logger
 
 
 class BaseBenchmark(ABC):
@@ -44,12 +45,10 @@ class BaseBenchmark(ABC):
 
     def _run_experiment(self, task, i, exp_name, test_name, local_rank):
         fold_name = fold_key_namer(i)
-        print(
+        logger.info(
             f"Running training on {self.train_data}, and testing on {self.test_data} for fold {i}"
         )
-        print("-------------------------")
-        print(fold_name)
-        print("-------------------------")
+        logger.info("Fold Name: ",fold_name)
 
         exp_cfg = self.task_cfg.copy()
         exp_cfg.model.finetune.exp_name = exp_name
@@ -57,9 +56,7 @@ class BaseBenchmark(ABC):
 
         finetuner = self._get_finetuner(exp_cfg, local_rank, fold_name)
         ckpt = finetuner.finetune()
-        print("-------------------------")
-        print(ckpt)
-        print("-------------------------")
+        logger.info("Checkpoint: ",ckpt)
 
         wandb.init(
             config=dict(self.task_cfg.model.inference),
@@ -75,12 +72,12 @@ class BaseBenchmark(ABC):
             predictions, prediction_ids = predict.predict()
             self._record_predictions(task, i, predictions, prediction_ids)
         except Exception as e:
-            print(
+            logger.error(
                 f"Error occurred during inference for finetuned checkpoint '{exp_name}': {str(e)}"
             )
             if isinstance(e, (ValueError, TypeError)):
                     raise
-            print(traceback.format_exc())
+            logger.error(traceback.format_exc())
 
     @abstractmethod
     def _get_finetuner(self, exp_cfg, local_rank, fold_name):

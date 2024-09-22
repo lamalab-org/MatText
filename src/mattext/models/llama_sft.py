@@ -4,6 +4,7 @@ from typing import List
 import torch
 import wandb
 from datasets import load_dataset
+from loguru import logger
 from omegaconf import DictConfig
 from peft import (
     LoraConfig,
@@ -22,7 +23,6 @@ from trl import DataCollatorForCompletionOnlyLM, SFTTrainer
 from mattext.models.utils import (
     EvaluateFirstStepCallback,
 )
-from loguru import logger
 
 
 class FinetuneLLamaSFT:
