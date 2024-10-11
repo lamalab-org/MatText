@@ -209,14 +209,14 @@ class FinetuneLLamaSFT:
         trainer.save_state()
         trainer.save_model(self.output_dir_)
 
-        # Merge LoRA and base model
-        merged_model = trainer.model.merge_and_unload()
-        # Save the merged model
-        merged_model.save_pretrained(
-            f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained",
-            save_config=True,
-            safe_serialization=True,
-        )
+        # # Merge LoRA and base model
+        # merged_model = trainer.model.merge_and_unload()
+        # # Save the merged model
+        # merged_model.save_pretrained(
+        #     f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained",
+        #     save_config=True,
+        #     safe_serialization=True,
+        # )
         self.tokenizer.save_pretrained(
             f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained"
         )
@@ -231,5 +231,15 @@ class FinetuneLLamaSFT:
         ) as json_file:
             json.dump(merge_pred, json_file)
 
+        # Empty VRAM
+        del trainer
+        del collator
+        del pipe
+        del self.model
+        del self.tokenizer
+        import gc
+
+        gc.collect()
+        gc.collect()
         wandb.finish()
         return self.cfg.path.finetuned_modelname
