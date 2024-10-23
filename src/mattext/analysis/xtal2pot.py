@@ -113,6 +113,64 @@ def lennard_jones(r: float, epsilon: float = 1, sigma: float = 1) -> float:
     return 4.0 * epsilon * ((sigma / r) ** 12 - (sigma / r) ** 6)
 
 
+@register("rasp_potential", _GEOMETRY_POTENTIALS)
+def rasp_geometric_potential(x_coords, y_coords, z_coords):
+    """
+    RASP-compatible geometric potential using only attention-like operations.
+
+    """
+    def kqv(k, q, v, pred):
+        # Simulates attention-like mechanism
+        s = len(k)
+        A = np.zeros((s, s), dtype=bool)
+        for i in range(s):
+            for j in range(i + 1):  # Causal attention (like transformers)
+                A[i, j] = pred(k[j], q[i])
+        out = np.dot(A, v)
+        norm = np.dot(A, np.ones(len(A)))
+        return np.divide(out, norm, out=np.zeros_like(v), where=(norm != 0))
+
+    def get_pair_energy(x1, x2, y1, y2, z1, z2):
+        distance_potential = {
+        # bin: energy value
+        0: 8,  # very close - highly repulsive
+        1: 4,  # repulsive
+        2: -2, # attractive (equilibrium)
+        3: -1, # weakly attractive
+        4: 0,  # negligible interaction
+        5: 0
+    }
+        # Manhattan distance - using only addition and comparison
+        dx = abs(x2 - x1)
+        dy = abs(y2 - y1)
+        dz = abs(z2 - z1)
+        dist = dx + dy + dz
+        return distance_potential.get(dist, 0)
+
+    # Compute pairwise energies using attention-like operation
+    energies = kqv(
+        k=x_coords,  # Key sequence
+        q=x_coords,  # Query sequence
+        v=np.ones_like(x_coords),  # Value sequence
+        pred=lambda k, q: get_pair_energy(
+            x_coords[k], x_coords[q],
+            y_coords[k], y_coords[q],
+            z_coords[k], z_coords[q]
+        ) > 0
+    )
+
+    # Aggregate using max-like attention
+    final_energy = kqv(
+        k=energies,
+        q=np.full_like(energies, max(energies)),
+        v=energies,
+        pred=lambda k, q: k > q / 2
+    )
+
+    return final_energy[0]
+
+
+
 def geometry_potential(
     struct, interaction_order: int = 2, potential: callable = lennard_jones
 ) -> float:
@@ -129,6 +187,16 @@ def geometry_potential(
     Returns:
         float: Potential energy of the structure
     """
+    def to_int_coords(coords):
+        return (coords * 9).astype(np.int8)
+
+    if potential == rasp_geometric_potential:
+        fractional_coords = struct.frac_coords
+        x_coords = to_int_coords(fractional_coords[:, 0])
+        y_coords = to_int_coords(fractional_coords[:, 1])
+        z_coords = to_int_coords(fractional_coords[:, 2])
+        return potential(x_coords, y_coords, z_coords)
+
     coords = struct.cart_coords
     potential_energy = 0
     kd_tree = KDTree(coords)
