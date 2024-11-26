@@ -2,6 +2,7 @@ import functools
 import operator
 from itertools import combinations
 from math import sqrt
+from typing import Callable
 
 import numpy as np
 import pandas as pd
@@ -113,28 +114,115 @@ def lennard_jones(r: float, epsilon: float = 1, sigma: float = 1) -> float:
     return 4.0 * epsilon * ((sigma / r) ** 12 - (sigma / r) ** 6)
 
 
-def geometry_potential(
-    struct, interaction_order: int = 2, potential: callable = lennard_jones
+@register("rasp_potential", _GEOMETRY_POTENTIALS)
+def rasp_geometric_potential(
+    x_coords: np.ndarray, y_coords: np.ndarray, z_coords: np.ndarray
 ) -> float:
-    """Calculate the potential energy of a structure based on its geometry
-
-    Args:
-        struct (Structure): pymatgen Structure object
-        interaction_order (int, optional): Interaction order.
-            Interaction order 2 mean that the nearest neighbor interactions are considered.
-            Interaction order 3 means that the nearest and next-nearest neighbor interactions are considered.
-            Defaults to 2.
-        potential (callable, optional): Potential function to use. Defaults to lennard_jones.
-
-    Returns:
-        float: Potential energy of the structure
     """
+    RASP-compatible geometric potential using only attention-like operations.
+    Robust version that handles array indexing safely.
+    """
+
+    def kqv(k: np.ndarray, q: np.ndarray, v: np.ndarray, pred) -> np.ndarray:
+        """
+        Simulates attention-like mechanism with safe indexing.
+        Now passes indices instead of values to pred function.
+        """
+        s = len(k)
+        A = np.zeros((s, s), dtype=bool)
+
+        # Pass indices to pred instead of values
+        for i in range(s):
+            for j in range(s):
+                A[i, j] = pred(j, i)  # passing indices instead of values
+
+        # return np.dot(A, v)
+        out = np.dot(A, v)
+        norm = np.dot(A, np.ones(len(A)))
+        return np.divide(out, norm, out=np.zeros_like(v), where=(norm != 0))
+
+    def get_pair_energy(idx1: int, idx2: int) -> float:
+        """
+        Compute pairwise energy using array indices instead of direct values.
+        """
+        distance_potential = {
+            1: 3.0,  # very close - highly repulsive
+            2: 2.0,  # repulsive
+            3: -4.0,  # attractive (equilibrium)
+            4: -3.0,  # weakly attractive
+            5: -2.0,  # negligible interaction
+            6: -2.0,  # no interaction
+            7: -1.0,
+            8: 0.0,
+            9: 0.0,
+            10: 0.0,
+            11: 0.0,
+        }
+
+        # Safely compute distances using indices
+        dx = abs(x_coords[idx1] - x_coords[idx2])
+        dy = abs(y_coords[idx1] - y_coords[idx2])
+        dz = abs(z_coords[idx1] - z_coords[idx2])
+
+        dist = dx + dy + dz
+        return distance_potential.get(min(dist, 8), 0.0)
+
+    # Ensure inputs are numpy arrays and properly shaped
+    x_coords = np.asarray(x_coords, dtype=np.int32)
+    y_coords = np.asarray(y_coords, dtype=np.int32)
+    z_coords = np.asarray(z_coords, dtype=np.int32)
+
+    if len(x_coords) == 0:
+        return 0.0
+
+    # First attention operation - compute pairwise energies
+    # Now passing indices to get_pair_energy through the pred function
+    energies = kqv(
+        k=np.arange(len(x_coords)),  # use indices instead of coordinates
+        q=np.arange(len(x_coords)),
+        v=np.ones(len(x_coords), dtype=float),
+        pred=lambda idx_k, idx_q: get_pair_energy(
+            idx_k, idx_q
+        ),  # clip between -10 and 10,
+    )
+
+    if len(energies) == 0:
+        return 0.0
+    total_energy = kqv(
+        k=np.arange(len(x_coords)),
+        q=np.ones(len(x_coords)),  # Query all positions
+        v=energies,
+        pred=lambda k, q: True,  # Include all interactions
+    )
+    return float(total_energy[0])
+
+
+def geometry_potential(
+    struct: Structure, interaction_order: int = 2, potential: Callable = lennard_jones
+) -> float:
+    """Calculate the potential energy of a structure based on its geometry."""
+
+    def to_int_coords(coords: np.ndarray) -> np.ndarray:
+        """Safely convert coordinates to integer representation."""
+        return np.clip((coords * 9).astype(np.int32), -127, 127)
+
+    if potential == rasp_geometric_potential:
+        fractional_coords = struct.frac_coords
+        x_coords = to_int_coords(fractional_coords[:, 0])
+        y_coords = to_int_coords(fractional_coords[:, 1])
+        z_coords = to_int_coords(fractional_coords[:, 2])
+        return potential(x_coords, y_coords, z_coords)
+
+    # Original implementation for other potentials
     coords = struct.cart_coords
-    potential_energy = 0
+    potential_energy = 0.0
     kd_tree = KDTree(coords)
+
     for i in range(len(coords)):
         coord = coords[i]
-        dist, ind = kd_tree.query(coord.reshape(1, -1), k=interaction_order)
+        dist, ind = kd_tree.query(
+            coord.reshape(1, -1), k=min(interaction_order, len(coords))
+        )
 
         for dist_ in dist[0]:
             if dist_ > 0:
