@@ -2,6 +2,7 @@ import os
 import traceback
 
 import wandb
+from loguru import logger
 from matbench.bench import MatbenchBenchmark
 from omegaconf import DictConfig
 
@@ -65,21 +66,15 @@ class Benchmark:
         for i, (exp_name, test_name, train_data_path, test_data_path) in enumerate(
             zip(self.exp_names, self.test_exp_names, self.train_data, self.test_data)
         ):
-            print(
+            logger.info(
                 f"Running training on {train_data_path}, and testing on {test_data_path}"
             )
-            # wandb.init(
-            #     config=dict(self.task_cfg.model.finetune),
-            #     project=self.task_cfg.model.logging.wandb_project, name=exp_name)
-
             exp_cfg = self.task_cfg.copy()
             exp_cfg.model.finetune.exp_name = exp_name
             exp_cfg.model.finetune.path.finetune_traindata = train_data_path
 
             ckpt = exp_cfg.model.finetune.path.finetuned_modelname
-            print("-------------------------")
-            print(ckpt)
-            print("-------------------------")
+            logger.info("Checkpoint: ", ckpt)
 
             wandb.init(
                 config=dict(self.task_cfg.model.inference),
@@ -95,10 +90,10 @@ class Benchmark:
                 predictions = predict.predict()
                 benchmark.record(i, predictions)
             except Exception as e:
-                print(
+                logger.error(
                     f"Error occurred during inference for finetuned checkpoint '{exp_name}':"
                 )
-                print(traceback.format_exc())
+                logger.error(traceback.format_exc())
 
         if not os.path.exists(self.benchmark_save_path):
             os.makedirs(self.benchmark_save_path)
