@@ -1,0 +1,965 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A framework for text-based materials modeling">
+      
+      
+      
+        <link rel="canonical" href="https://lamalab-org.github.io/mattext/benchmarking/">
+      
+      
+        <link rel="prev" href="../tokenizers/">
+      
+      
+        <link rel="next" href="../api/">
+      
+      
+      <link rel="icon" href="../static/logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.46">
+    
+    
+      
+        <title>Modeling & Benchmarking - mattext</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+  
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+  
+  <style>:root{--md-admonition-icon--note:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M1 7.775V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 0 1 0 2.474l-5.026 5.026a1.75 1.75 0 0 1-2.474 0l-6.25-6.25A1.75 1.75 0 0 1 1 7.775m1.5 0c0 .066.026.13.073.177l6.25 6.25a.25.25 0 0 0 .354 0l5.025-5.025a.25.25 0 0 0 0-.354l-6.25-6.25a.25.25 0 0 0-.177-.073H2.75a.25.25 0 0 0-.25.25ZM6 5a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/></svg>');--md-admonition-icon--abstract:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M2.5 1.75v11.5c0 .138.112.25.25.25h3.17a.75.75 0 0 1 0 1.5H2.75A1.75 1.75 0 0 1 1 13.25V1.75C1 .784 1.784 0 2.75 0h8.5C12.216 0 13 .784 13 1.75v7.736a.75.75 0 0 1-1.5 0V1.75a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25m13.274 9.537zl-4.557 4.45a.75.75 0 0 1-1.055-.008l-1.943-1.95a.75.75 0 0 1 1.062-1.058l1.419 1.425 4.026-3.932a.75.75 0 1 1 1.048 1.074M4.75 4h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5M4 7.75A.75.75 0 0 1 4.75 7h2a.75.75 0 0 1 0 1.5h-2A.75.75 0 0 1 4 7.75"/></svg>');--md-admonition-icon--info:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13M6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75M8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/></svg>');--md-admonition-icon--tip:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3.499.75a.75.75 0 0 1 1.5 0v.996C5.9 2.903 6.793 3.65 7.662 4.376l.24.202c-.036-.694.055-1.422.426-2.163C9.1.873 10.794-.045 12.622.26 14.408.558 16 1.94 16 4.25c0 1.278-.954 2.575-2.44 2.734l.146.508.065.22c.203.701.412 1.455.476 2.226.142 1.707-.4 3.03-1.487 3.898C11.714 14.671 10.27 15 8.75 15h-6a.75.75 0 0 1 0-1.5h1.376a4.5 4.5 0 0 1-.563-1.191 3.84 3.84 0 0 1-.05-2.063 4.65 4.65 0 0 1-2.025-.293.75.75 0 0 1 .525-1.406c1.357.507 2.376-.006 2.698-.318l.009-.01a.747.747 0 0 1 1.06 0 .75.75 0 0 1-.012 1.074c-.912.92-.992 1.835-.768 2.586.221.74.745 1.337 1.196 1.621H8.75c1.343 0 2.398-.296 3.074-.836.635-.507 1.036-1.31.928-2.602-.05-.603-.216-1.224-.422-1.93l-.064-.221c-.12-.407-.246-.84-.353-1.29a2.4 2.4 0 0 1-.507-.441 3.1 3.1 0 0 1-.633-1.248.75.75 0 0 1 1.455-.364c.046.185.144.436.31.627.146.168.353.305.712.305.738 0 1.25-.615 1.25-1.25 0-1.47-.95-2.315-2.123-2.51-1.172-.196-2.227.387-2.706 1.345-.46.92-.27 1.774.019 3.062l.042.19.01.05c.348.443.666.949.94 1.553a.75.75 0 1 1-1.365.62c-.553-1.217-1.32-1.94-2.3-2.768L6.7 5.527c-.814-.68-1.75-1.462-2.692-2.619a3.7 3.7 0 0 0-1.023.88c-.406.495-.663 1.036-.722 1.508.116.122.306.21.591.239.388.038.797-.06 1.032-.19a.75.75 0 0 1 .728 1.31c-.515.287-1.23.439-1.906.373-.682-.067-1.473-.38-1.879-1.193L.75 5.677V5.5c0-.984.48-1.94 1.077-2.664.46-.559 1.05-1.055 1.673-1.353z"/></svg>');--md-admonition-icon--success:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 .018-1.042.75.75 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0"/></svg>');--md-admonition-icon--question:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13M6.92 6.085h.001a.749.749 0 1 1-1.342-.67c.169-.339.436-.701.849-.977C6.845 4.16 7.369 4 8 4a2.76 2.76 0 0 1 1.637.525c.503.377.863.965.863 1.725 0 .448-.115.83-.329 1.15-.205.307-.47.513-.692.662-.109.072-.22.138-.313.195l-.006.004a6 6 0 0 0-.26.16 1 1 0 0 0-.276.245.75.75 0 0 1-1.248-.832c.184-.264.42-.489.692-.661q.154-.1.313-.195l.007-.004c.1-.061.182-.11.258-.161a1 1 0 0 0 .277-.245C8.96 6.514 9 6.427 9 6.25a.61.61 0 0 0-.262-.525A1.27 1.27 0 0 0 8 5.5c-.369 0-.595.09-.74.187a1 1 0 0 0-.34.398M9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg>');--md-admonition-icon--warning:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0M9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg>');--md-admonition-icon--failure:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M2.344 2.343za8 8 0 0 1 11.314 11.314A8.002 8.002 0 0 1 .234 10.089a8 8 0 0 1 2.11-7.746m1.06 10.253a6.5 6.5 0 1 0 9.108-9.275 6.5 6.5 0 0 0-9.108 9.275M6.03 4.97 8 6.94l1.97-1.97a.749.749 0 0 1 1.275.326.75.75 0 0 1-.215.734L9.06 8l1.97 1.97a.749.749 0 0 1-.326 1.275.75.75 0 0 1-.734-.215L8 9.06l-1.97 1.97a.749.749 0 0 1-1.275-.326.75.75 0 0 1 .215-.734L6.94 8 4.97 6.03a.75.75 0 0 1 .018-1.042.75.75 0 0 1 1.042-.018"/></svg>');--md-admonition-icon--danger:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9.504.43a1.516 1.516 0 0 1 2.437 1.713L10.415 5.5h2.123c1.57 0 2.346 1.909 1.22 3.004l-7.34 7.142a1.25 1.25 0 0 1-.871.354h-.302a1.25 1.25 0 0 1-1.157-1.723L5.633 10.5H3.462c-1.57 0-2.346-1.909-1.22-3.004zm1.047 1.074L3.286 8.571A.25.25 0 0 0 3.462 9H6.75a.75.75 0 0 1 .694 1.034l-1.713 4.188 6.982-6.793A.25.25 0 0 0 12.538 7H9.25a.75.75 0 0 1-.683-1.06l2.008-4.418.003-.006-.004-.009-.006-.006-.008-.001q-.005 0-.009.004"/></svg>');--md-admonition-icon--bug:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M4.72.22a.75.75 0 0 1 1.06 0l1 .999a3.5 3.5 0 0 1 2.441 0l.999-1a.748.748 0 0 1 1.265.332.75.75 0 0 1-.205.729l-.775.776c.616.63.995 1.493.995 2.444v.327q0 .15-.025.292c.408.14.764.392 1.029.722l1.968-.787a.75.75 0 0 1 .556 1.392L13 7.258V9h2.25a.75.75 0 0 1 0 1.5H13v.5q-.002.615-.141 1.186l2.17.868a.75.75 0 0 1-.557 1.392l-2.184-.873A5 5 0 0 1 8 16a5 5 0 0 1-4.288-2.427l-2.183.873a.75.75 0 0 1-.558-1.392l2.17-.868A5 5 0 0 1 3 11v-.5H.75a.75.75 0 0 1 0-1.5H3V7.258L.971 6.446a.75.75 0 0 1 .558-1.392l1.967.787c.265-.33.62-.583 1.03-.722a1.7 1.7 0 0 1-.026-.292V4.5c0-.951.38-1.814.995-2.444L4.72 1.28a.75.75 0 0 1 0-1.06m.53 6.28a.75.75 0 0 0-.75.75V11a3.5 3.5 0 1 0 7 0V7.25a.75.75 0 0 0-.75-.75ZM6.173 5h3.654A.17.17 0 0 0 10 4.827V4.5a2 2 0 1 0-4 0v.327c0 .096.077.173.173.173"/></svg>');--md-admonition-icon--example:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M5 5.782V2.5h-.25a.75.75 0 0 1 0-1.5h6.5a.75.75 0 0 1 0 1.5H11v3.282l3.666 5.76C15.619 13.04 14.543 15 12.767 15H3.233c-1.776 0-2.852-1.96-1.899-3.458Zm-2.4 6.565a.75.75 0 0 0 .633 1.153h9.534a.75.75 0 0 0 .633-1.153L12.225 10.5h-8.45ZM9.5 2.5h-3V6c0 .143-.04.283-.117.403L4.73 9h6.54L9.617 6.403A.75.75 0 0 1 9.5 6Z"/></svg>');--md-admonition-icon--quote:url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M1.75 2.5h10.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5m4 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5m0 5h8.5a.75.75 0 0 1 0 1.5h-8.5a.75.75 0 0 1 0-1.5M2.5 7.75v6a.75.75 0 0 1-1.5 0v-6a.75.75 0 0 1 1.5 0"/></svg>');}</style>
+
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CMonaco:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Monaco"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#modeling-and-benchmarking" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="mattext" class="md-header__button md-logo" aria-label="mattext" data-md-component="logo">
+      
+  <img src="../static/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            mattext
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Modeling & Benchmarking
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="lime"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/lamalab-org/mattext.git" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    lamalab-org/mattext
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting_started/" class="md-tabs__link">
+        
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../representations/" class="md-tabs__link">
+        
+  
+    
+  
+  Representations
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../tokenizers/" class="md-tabs__link">
+        
+  
+    
+  
+  Tokenizers
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+    
+  
+  Modeling & Benchmarking
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../api/" class="md-tabs__link">
+        
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="mattext" class="md-nav__button md-logo" aria-label="mattext" data-md-component="logo">
+      
+  <img src="../static/logo.png" alt="logo">
+
+    </a>
+    mattext
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/lamalab-org/mattext.git" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    lamalab-org/mattext
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../representations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Representations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tokenizers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tokenizers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Modeling & Benchmarking
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Modeling & Benchmarking
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pretraining-on-single-mattext-representation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pretraining on Single MatText Representation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-benchmark-on-a-single-mattext-representation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Benchmark on a Single MatText Representation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pretraining-or-benchmarking-multiple-mattext-representations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pretraining or Benchmarking Multiple MatText Representations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuring-experiments-and-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuring Experiments and Model
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-new-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding New Experiments
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-a-benchmark" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running a Benchmark
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#finetuning-llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Finetuning LLM
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using Data
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-pretrained-mattext-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using Pretrained MatText Models
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-other-language-models-using-mattext-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Training Other Language Models Using Mattext Pipeline
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pretraining-on-your-custom-dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pretraining on Your Custom Dataset
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="modeling-and-benchmarking">Modeling and Benchmarking<a class="headerlink" href="#modeling-and-benchmarking" title="Permanent link">🔗</a></h1>
+<p>MatText provides pipelines for seamless pretraining(<a href="../api/#mattext.models.pretrain"><code>pretrain</code></a>) and benchmarking (<a href="../api/#mattext.models.benchmark"><code>benchmark</code></a>) with finetuning (<a href="../api/#mattext.models.finetune"><code>finetune</code></a>) on multiple MatText representations. We use the Hydra framework to dynamically create hierarchical configurations based on the pipeline and representations that we want to use.</p>
+<h3 id="pretraining-on-single-mattext-representation">Pretraining on Single MatText Representation<a class="headerlink" href="#pretraining-on-single-mattext-representation" title="Permanent link">🔗</a></h3>
+<details class="warning deduplication" open="open">
+<summary>Warning</summary>
+<p>The pretraining datasets we provide in MatText are only deduplicated based on the CIF string. That means that structures with slightly translated positions (e.g. conformers) might occur multiple times in the training set.</p>
+<p>Depending on the use case, this can lead to problems including data leakage. Hence, you might need to use, for example, one of the other representations for deduplications.</p>
+</details>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>main.py<span class="w"> </span>-cn<span class="o">=</span>pretrain<span class="w"> </span><span class="nv">model</span><span class="o">=</span>pretrain_example<span class="w"> </span>+model.representation<span class="o">=</span>composition<span class="w"> </span>+model.dataset_type<span class="o">=</span>pretrain30k<span class="w"> </span>+model.context_length<span class="o">=</span><span class="m">32</span>
+</code></pre></div>
+<p>Here, <code>model=pretrain_example</code> would select <code>pretrain_example</code> as the base config for pretrain run <code>-cn=pretrain</code>.</p>
+<p>All config file can be found here, inside respective directories.
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/conf/
+</code></pre></div>
+Base configs can be found at <code>/conf/model</code></p>
+<p><code>+model.representation</code> can be any MatText representation. The pipeline would use data represented using that particular representation for training.
+<code>+model.dataset_type</code> can be one of the MatText pretraining datasets.
+<code>+model.context_length</code> would define the context length.</p>
+<details class="warning">
+<summary><code>context_length</code></summary>
+<p>Use meaningful context length according to the representation to avoid truncation of structures.</p>
+</details>
+<p>The <code>+</code> symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.</p>
+<p>In order to override the existing default configuration from CLI, use <code>++</code>, e.g., <code>++model.pretrain.training_arguments.per_device_train_batch_size=32</code>.</p>
+<p>For advanced usage (changing architecture, training arguments, or modeling parameters), it would be easier to make the changes in the base config file which is <code>/conf/model/pretrain_example</code>, than having to override parameters with lengthy CLI commands!</p>
+<h3 id="running-benchmark-on-a-single-mattext-representation">Running Benchmark on a Single MatText Representation<a class="headerlink" href="#running-benchmark-on-a-single-mattext-representation" title="Permanent link">🔗</a></h3>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>main.py<span class="w"> </span>-cn<span class="o">=</span>benchmark<span class="w"> </span><span class="nv">model</span><span class="o">=</span>benchmark_example<span class="w"> </span>+model.dataset_type<span class="o">=</span>filtered<span class="w"> </span>+model.representation<span class="o">=</span>composition<span class="w"> </span>+model.dataset<span class="o">=</span>perovskites<span class="w"> </span>+model.checkpoint<span class="o">=</span>path/to/checkpoint
+</code></pre></div>
+<p>Here, for the benchmarking pipeline(<code>-cn=benchmark</code>) the base config is <code>benchmark_example.yaml</code>.
+You can define the parameters for the experiment hence at <code>\conf\model\benchmark_example.yaml</code>.</p>
+<details class="info" open="open">
+<summary><code>dataset_type</code></summary>
+<p>Here <code>+model.dataset_type=filtered</code> would select the type of benchmark. It can be <code>filtered</code> (avoid having truncated structure in train and test set, Only relatively small structures are present here, but this would also mean having less number of sampels to train on ) or <code>matbench</code> (complete dataset, there are few big structures , which would be trunated if the context length for modelling is less than <code>2048</code>).</p>
+</details>
+<details class="info" open="open">
+<summary>Info</summary>
+<p><code>+model.dataset_type=filtered</code> would produce the report compatible with matbench leaderboard.</p>
+</details>
+<details class="info">
+<summary>Reports path</summary>
+<p>Benchmark report is saved to the path defined in the base config. By default to <code>"${hydra:runtime.cwd}/../../results/${now:%Y-%m-%d}/${now:%H-%M-%S}/$</code></p>
+</details>
+<h3 id="pretraining-or-benchmarking-multiple-mattext-representations">Pretraining or Benchmarking Multiple MatText Representations<a class="headerlink" href="#pretraining-or-benchmarking-multiple-mattext-representations" title="Permanent link">🔗</a></h3>
+<p>The easiest way to model multiple representation in one run would be by using <code>config-groups</code> and multirun</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>main.py<span class="w"> </span>--multirun<span class="w"> </span>-cn<span class="o">=</span>benchmark<span class="w"> </span><span class="nv">model</span><span class="o">=</span>benchmark_example<span class="w"> </span>+model.dataset_type<span class="o">=</span>matbench<span class="w"> </span>+group-test<span class="o">=</span>slices,composition
+</code></pre></div>
+<p>Here, we create a config group (directory with config files for different representations) at <code>/conf/&lt;config group name&gt;</code></p>
+<p>In the above example, we have two config files (<code>slices.yaml, composition.yaml</code>) inside the config group <code>group-test.</code>
+with <code>--multirun</code> enabled we can launch the pipeline parallely or sequentially (by default) for the representations, Here two but representations, but once can add more.</p>
+<p>The <code>child config</code> (config inside the <code>config group</code> ) would override or add the key value pair on top of the  <code>base config</code> (here <code>benchmark_example</code>).</p>
+<details class="tips">
+<summary>Configs</summary>
+<p>configs inside <strong>group-test</strong> extends the <code>benchmark_example</code> and override the   <code>representation name</code>, <code>batch size</code>, <code>etc</code> in the <code>base config</code>.</p>
+</details>
+<p>example <code>child config</code>
+<div class="highlight"><pre><span></span><code><span class="c1"># @package _global_</span>
+<span class="nt">model</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">logging</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">wandb_project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pt_30k_test</span>
+
+<span class="w">  </span><span class="nt">representation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cif_p1</span>
+<span class="w">  </span><span class="nt">pretrain</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pt_30k_test</span>
+<span class="w">    </span><span class="nt">context_length</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">1024</span>
+<span class="w">    </span><span class="nt">training_arguments</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">per_device_train_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">data_root_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;/path/to/dataset&gt;</span>
+</code></pre></div></p>
+<details class="tip" open="open">
+<summary>Reference</summary>
+<p>Read more about extending configs <a href="https://hydra.cc/docs/patterns/extending_configs/">here</a>.</p>
+</details>
+<h3 id="configuring-experiments-and-model">Configuring Experiments and Model<a class="headerlink" href="#configuring-experiments-and-model" title="Permanent link">🔗</a></h3>
+<p>The main configuration for the run is in <code>config.yaml</code> and other configs are grouped in respective folders. An example directory structure of configs is below.
+<div class="highlight"><pre><span></span><code>├──<span class="w"> </span>conf
+│<span class="w">   </span>├──<span class="w"> </span>pretrain.yaml
+│<span class="w">   </span>├──<span class="w"> </span>pretrain30k
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>cifp1.yaml
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>cifsymmetrized.yaml
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>composition.yaml
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>crystal_llm.yaml
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>slice.yaml
+│<span class="w">   </span>├──<span class="w"> </span>finetune30k
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>cifp1.yaml
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>cifsymmetrized.yaml
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>composition.yaml
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>crystal_llm.yaml
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>slice.yaml
+│<span class="w">   </span>└──<span class="w"> </span>model
+│<span class="w">       </span>├──<span class="w"> </span>finetune_template.yaml
+│<span class="w">       </span>└──<span class="w"> </span>pretrain_template.yaml
+├──<span class="w"> </span>main.py
+├──<span class="w"> </span>models
+</code></pre></div></p>
+<p>We use the HF Trainer, and hence, by default, it supports DP. For DDP support you can run
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.run<span class="w"> </span>--nproc_per_node<span class="o">=</span><span class="m">4</span><span class="w">  </span>/path/to/main.py<span class="w"> </span>--multirun<span class="w"> </span><span class="nv">model</span><span class="o">=</span>pretrain_template<span class="w"> </span>+pretrain30k<span class="o">=</span>cifp1,cifsym,composition,crystal_llm,slice
+</code></pre></div></p>
+<p>Here <code>model=pretrain_template</code> selects <code>pretrain_template</code> as the base config and override/extend it with <code>+pretrain30k=cifp1</code>. This would essentially start pretraining with cifp1 representation for the dataset-30K</p>
+<p>Note <code>+pretrain30k=cifp1,cifsym,composition,crystal_llm,slice</code> will launch 5 jobs parallelly, each of them with <code>pretrain_template</code> as the base config and corresponding experiment template extending them.</p>
+<details class="tips" open="open">
+<summary>Launcher - Tips</summary>
+<p>For launching runs parallely checkout <a href="https://hydra.cc/docs/plugins/submitit_launcher/">hydra submitit slurm launcher</a>. you can override it from cli / or change it in the main config file. For kubernetes based infrastructures <a href="https://hydra.cc/docs/plugins/submitit_launcher/">hydra submitit local launcher</a> is ideal for parallel jobs. Or you can use the default hydra multirun launcher, which will run jobs sequentially.</p>
+</details>
+<h3 id="adding-new-experiments">Adding New Experiments<a class="headerlink" href="#adding-new-experiments" title="Permanent link">🔗</a></h3>
+<p>New experiments can be easily added with the following step.</p>
+<ol>
+<li>Create an experiment config group inside <code>conf/</code> . Make a new directory and add an experiment template inside it.</li>
+<li>Add / Edit the configs you want for the new experiments. e.g, override the pretrain checkpoints to new pretrained checkpoint</li>
+<li>Launch runs similarly but now with the new experiment group</li>
+</ol>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>main.py<span class="w"> </span>--multirun<span class="w"> </span><span class="nv">model</span><span class="o">=</span>pretrain_template<span class="w"> </span>++hydra.launcher.gres<span class="o">=</span>gpu:1<span class="w"> </span>+&lt;new_exp_group&gt;<span class="o">=</span>&lt;new_exp_template_1&gt;,&lt;new_exp_template_2&gt;,<span class="w"> </span>..
+</code></pre></div>
+<h2 id="running-a-benchmark">Running a Benchmark<a class="headerlink" href="#running-a-benchmark" title="Permanent link">🔗</a></h2>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>main.py<span class="w"> </span>-cn<span class="o">=</span>benchmark<span class="w"> </span><span class="nv">model</span><span class="o">=</span>benchmark_example<span class="w"> </span>+model.dataset_type<span class="o">=</span>filtered<span class="w"> </span>+model.representation<span class="o">=</span>composition<span class="w"> </span>+model.dataset<span class="o">=</span>perovskites<span class="w"> </span>+model.checkpoint<span class="o">=</span>path/to/checkpoint
+</code></pre></div>
+<h2 id="finetuning-llm">Finetuning LLM<a class="headerlink" href="#finetuning-llm" title="Permanent link">🔗</a></h2>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>main.py<span class="w"> </span>-cn<span class="o">=</span>llm_sft<span class="w"> </span><span class="nv">model</span><span class="o">=</span>llama_example<span class="w"> </span>+model.representation<span class="o">=</span>composition<span class="w"> </span>+model.dataset_type<span class="o">=</span>filtered<span class="w"> </span>+model.dataset<span class="o">=</span>perovskites
+</code></pre></div>
+<p>The <code>+</code> symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.</p>
+<p>To override the existing default configuration, use <code>++</code>, for e.g., <code>++model.pretrain.training_arguments.per_device_train_batch_size=32</code>. Refer to the <a href="https://lamalab-org.github.io/MatText/">docs</a> for more examples and advanced ways to use the configs with config groups.</p>
+<details class="info" open="open">
+<summary>Cross-validation</summary>
+<p>Define the number of folds for k-fold cross-validation in the config or through the CLI. For Matbench benchmarks, however, the number of folds should be 5. The default value for all experiments is set to 5.</p>
+</details>
+<h2 id="using-data">Using Data<a class="headerlink" href="#using-data" title="Permanent link">🔗</a></h2>
+<p>The MatText datasets can be easily obtained from <a href="https://huggingface.co/datasets/n0w0f/MatText">HuggingFace</a>, for example</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;n0w0f/MatText&quot;</span><span class="p">,</span> <span class="s2">&quot;pretrain300k&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="using-pretrained-mattext-models">Using Pretrained MatText Models<a class="headerlink" href="#using-pretrained-mattext-models" title="Permanent link">🔗</a></h2>
+<p>The pretrained MatText models can be easily loaded from <a href="https://huggingface.co/collections/n0w0f/mattext-665fe18e5eec38c2148ccf7a">HuggingFace</a>, for example</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">AutoModel</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModel</span><span class="o">.</span><span class="n">from_pretrained</span> <span class="p">(</span><span class="s2">&quot;n0w0f/MatText−cifp1−2m&quot;</span><span class="p">)</span>
+</code></pre></div>
+<details class="info">
+<summary>Checkpoint</summary>
+<p>Here the pretrained model checkpoint is downloaded form Hugging Face hub, this step require internet for the first time.</p>
+</details>
+<h2 id="training-other-language-models-using-mattext-pipeline">Training Other Language Models Using Mattext Pipeline<a class="headerlink" href="#training-other-language-models-using-mattext-pipeline" title="Permanent link">🔗</a></h2>
+<p>You can pretrain models that are compatible with AutoModelForMaskedLM from Hugging Face using our framework. The path to the model or the model name (model name in Hugging Face) can be defined using the +model.pretrain.model_name_or_path argument. Here’s an example:</p>
+<div class="highlight"><pre><span></span><code>python main.py -cn=pretrain model=pretrain_other_models +model.representation=slices +model.dataset_type=pretrain30k +model.context_length=32 +model.pretrain.model_name_or_path=&quot;FacebookAI/roberta-base&quot;
+</code></pre></div>
+<p>For better manageability, you can define the model name and configuration in the base config file. This way, you don't need to specify the model and model configs in the CLI.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">pretrain</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-pretrain</span>
+<span class="w">  </span><span class="nt">exp_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${model.representation}_${model.pretrain.name}&quot;</span>
+<span class="w">  </span><span class="nt">model_name_or_path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;FacebookAI/roberta-base&quot;</span>
+<span class="w">  </span><span class="nt">dataset_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${model.dataset_type}&quot;</span>
+<span class="w">  </span><span class="nt">context_length</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${model.context_length}&quot;</span>
+
+<span class="w">  </span><span class="nt">model_config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">hidden_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">768</span>
+<span class="w">    </span><span class="nt">num_hidden_layers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">    </span><span class="nt">num_attention_heads</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+<span class="w">    </span><span class="nt">is_decoder</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">add_cross_attention</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">max_position_embeddings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">768</span>
+</code></pre></div>
+<h2 id="pretraining-on-your-custom-dataset">Pretraining on Your Custom Dataset<a class="headerlink" href="#pretraining-on-your-custom-dataset" title="Permanent link">🔗</a></h2>
+<p>You can use your own     datasets stored locally on your machine or hosted on the Hugging Face Hub.</p>
+<p>For using dataset in a local path,  Define the dataset_local_path variable in your base configuration file.
+By default, this value is set to False, indicating no local dataset is used.
+Refer to the example configuration file <code>/conf/model/pretrain_own_data_example</code>, execute the following command to run the pretraining script with your local dataset:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>main.py<span class="w"> </span>-cn<span class="o">=</span>pretrain<span class="w"> </span><span class="nv">model</span><span class="o">=</span>pretrain_own_data_example<span class="w"> </span>+model.representation<span class="o">=</span>composition<span class="w"> </span>+model.context_length<span class="o">=</span><span class="m">32</span><span class="w"> </span>++model.dataset_local_path<span class="o">=</span>path/to/local
+</code></pre></div>
+<p>For Hugging Face datasets, specify the repository (<code>data_repository</code>) and dataset type (<code>dataset_type</code>) in the configuration.</p>
+<details class="warning">
+<summary><code>key names</code></summary>
+<p>Ensure your dataset has a key for the specific representation used for training</p>
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      LAMAlab
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/lamalab-org/" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M186.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1M480 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2m-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3m-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/jablonkagroup" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "content.tabs.link", "content.code.annotation", "content.code.copy", "content.code.copy_button", "navigation.tabs", "navigation.sections", "navigation.top", "toc.integrate", "search.suggest", "search.highlight", "search.share", "navigation.tabs.sticky"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+        <script src="https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js"></script>
+      
+        <script src="../javascripts/tablesort.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
