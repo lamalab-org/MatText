@@ -17,11 +17,11 @@ special_tokens:
   }
 
 logging:
-  wandb_project: test-benchmark
+  wandb_project: classification
   wandb_log_model: "checkpoint"
 
 finetune:
-  model_name: test-benchmark
+  model_name: classification
   freeze_base_model: False
   dataset_name: "${model.dataset}-train-${model.dataset_type}"  
   exp_name:
@@ -59,7 +59,7 @@ finetune:
   training_arguments:
     output_dir: "${model.finetune.path.output_dir}"
     overwrite_output_dir: True
-    num_train_epochs: 50
+    num_train_epochs: 2
     per_device_train_batch_size: 1024
     save_strategy: "epoch"
     evaluation_strategy: "epoch"

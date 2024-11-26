@@ -1,0 +1,19 @@
+
+
+hydra:
+  job:
+    name: formation_energy
+  run:
+    dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.override_dirname}
+    
+
+defaults:
+- model: none
+
+
+runs:
+  - name: benchmark_run
+    tasks: [benchmark]

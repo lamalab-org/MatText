@@ -2,7 +2,7 @@
 
 hydra:
   job:
-    name: benchmark
+    name: is_metal
   run:
     dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
   sweep:
@@ -29,5 +29,5 @@ defaults:
 # - override hydra/launcher: submitit_slurm
 
 runs:
-  - name: benchmark_run
-    tasks: [benchmark]
+  - name: classification_run
+    tasks: [classification]

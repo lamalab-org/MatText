@@ -2,7 +2,7 @@
 
 hydra:
   job:
-    name: benchmark
+    name: bandgap
   run:
     dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
   sweep:
