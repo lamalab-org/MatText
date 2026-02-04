@@ -1,6 +1,7 @@
 from functools import partial
 from typing import List, Optional
 
+import torch
 import wandb
 from datasets import DatasetDict, load_dataset
 from omegaconf import DictConfig
@@ -116,7 +117,7 @@ class PretrainModel(TokenizerMixin):
 
         model = AutoModelForMaskedLM.from_config(config)
 
-        if self.local_rank is not None:
+        if torch.distributed.is_initialized():
             model = model.to(self.local_rank)
             model = nn.parallel.DistributedDataParallel(
                 model, device_ids=[self.local_rank]

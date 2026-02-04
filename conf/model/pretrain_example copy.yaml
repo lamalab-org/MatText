@@ -17,7 +17,7 @@ special_tokens:
   }
 
 logging:
-  wandb_project: test-pretrain-revision
+  wandb_project: testpretrain-revision
   wandb_log_model: "checkpoint"
 
 pretrain:

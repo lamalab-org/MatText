@@ -17,7 +17,7 @@ special_tokens:
   }
 
 logging:
-  wandb_project: test-pretrain-revision
+  wandb_project: pretrain-robocrys30k-prod
   wandb_log_model: "checkpoint"
 
 pretrain:
@@ -59,8 +59,8 @@ pretrain:
     overwrite_output_dir: True
     label_names: ["labels"]
     save_total_limit: 5 # Maximum number of checkpoints to save
-    per_device_train_batch_size: 1024 # Batch size per device during training
-    num_train_epochs: 2 # Number of training epochs
+    per_device_train_batch_size: 16 # Batch size per device during training
+    num_train_epochs: 50 # Number of training epochs
     learning_rate: 2e-4
     save_steps: 1000
     report_to: "wandb"
