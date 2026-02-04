@@ -6,6 +6,7 @@ This script trains MODNet models for 3 different material properties
 total_energy targets.
 
 Featurization is cached per property to avoid redundant computation.
+Uses fast feature selection (MI with target only, no cross-NMI).
 """
 
 import json
@@ -26,6 +27,7 @@ import pandas as pd
 from pymatgen.core import Structure
 from modnet.preprocessing import MODData
 from modnet.models import MODNetModel
+from sklearn.feature_selection import mutual_info_regression
 
 # Configure logging
 logging.basicConfig(
@@ -136,14 +138,43 @@ def featurize_structures(
     return df_featurized
 
 
-def create_moddata_with_targets(
+def fast_feature_selection(
+    df_features: pd.DataFrame,
+    targets: np.ndarray,
+    n_features: int = 100
+) -> List[str]:
+    """
+    Fast feature selection using only MI with target (no cross-NMI).
+    This is much faster than MODNet's default feature selection.
+    """
+    logger.info(f"Fast feature selection: selecting top {n_features} features by MI with target...")
+
+    # Clean features - remove NaN, inf
+    df_clean = df_features.replace([np.inf, -np.inf], np.nan)
+    df_clean = df_clean.fillna(0)
+
+    # Compute MI between each feature and target
+    mi_scores = mutual_info_regression(df_clean.values, targets.ravel(), random_state=42)
+
+    # Create feature ranking
+    feature_ranking = pd.Series(mi_scores, index=df_clean.columns)
+    feature_ranking = feature_ranking.sort_values(ascending=False)
+
+    # Select top features
+    selected_features = feature_ranking.head(n_features).index.tolist()
+
+    logger.info(f"Selected {len(selected_features)} features")
+    return selected_features
+
+
+def create_moddata_for_training(
     df_featurized: pd.DataFrame,
     data: List[Dict],
     target_name: str,
-    ids: List[str]
+    selected_features: List[str]
 ) -> MODData:
     """
-    Create MODData with pre-featurized data and specific targets.
+    Create MODData with selected features and targets for training.
     """
     # Extract targets for entries that were successfully featurized
     id_to_target = {}
@@ -154,21 +185,21 @@ def create_moddata_with_targets(
 
     # Align targets with featurized data
     valid_ids = [idx for idx in df_featurized.index if idx in id_to_target]
-    targets = np.array([[id_to_target[idx]] for idx in valid_ids])  # 2D array
+    targets = np.array([[id_to_target[idx]] for idx in valid_ids])
 
-    df_targets = pd.DataFrame(
-        {target_name: [id_to_target[idx] for idx in valid_ids]},
-        index=valid_ids
-    )
+    # Select only the features we want
+    df_selected = df_featurized.loc[valid_ids, selected_features]
 
-    # Create MODData with pre-featurized data and targets
+    # Create MODData
     mod_data = MODData(
         targets=targets,
         target_names=[target_name],
         structure_ids=valid_ids,
-        df_featurized=df_featurized.loc[valid_ids]
+        df_featurized=df_selected
     )
-    mod_data.df_targets = df_targets
+
+    # Set optimal features (skip MODNet's feature selection)
+    mod_data.optimal_features = selected_features
 
     return mod_data
 
@@ -179,10 +210,12 @@ def train_model(
     config: Dict
 ) -> MODNetModel:
     """Train a MODNet model."""
+    n_feat = min(config["n_feat"], len(train_data.optimal_features))
+
     model = MODNetModel(
         targets=[[target_name]],
         weights={target_name: 1.0},
-        n_feat=config["n_feat"],
+        n_feat=n_feat,
         num_neurons=([256], [128], [64], [32]),
         act="elu"
     )
@@ -207,8 +240,19 @@ def evaluate_model(
     """Evaluate model on test data."""
     # Get predictions (disable remap_out_of_bounds to avoid MODNet 0.4.5 bug)
     predictions_df = model.predict(test_data, remap_out_of_bounds=False)
-    predictions = predictions_df[target_name].values
-    actuals = test_data.df_targets[target_name].values
+
+    # Handle column name - MODNet may use different naming conventions
+    if target_name in predictions_df.columns:
+        predictions = predictions_df[target_name].values
+    else:
+        # Use first column if target name not found
+        predictions = predictions_df.iloc[:, 0].values
+
+    # Get actuals - similar handling
+    if target_name in test_data.df_targets.columns:
+        actuals = test_data.df_targets[target_name].values
+    else:
+        actuals = test_data.df_targets.iloc[:, 0].values
 
     # Calculate metrics
     mae = np.mean(np.abs(predictions - actuals))
@@ -270,17 +314,30 @@ def run_property_training(property_name: str) -> Dict:
         logger.info(f"{'-'*40}")
 
         try:
-            # Create MODData with specific targets
-            train_moddata = create_moddata_with_targets(
-                train_features, train_entries, target_name, train_ids
-            )
-            test_moddata = create_moddata_with_targets(
-                test_features, test_entries, target_name, test_ids
+            # Get targets for feature selection
+            id_to_target = {}
+            for entry in train_entries:
+                mbid = entry.get("mbid", "")
+                if mbid in train_features.index:
+                    id_to_target[mbid] = entry[target_name]
+
+            valid_ids = [idx for idx in train_features.index if idx in id_to_target]
+            train_targets = np.array([id_to_target[idx] for idx in valid_ids])
+
+            # Fast feature selection (no cross-NMI)
+            selected_features = fast_feature_selection(
+                train_features.loc[valid_ids],
+                train_targets,
+                n_features=TRAINING_CONFIG["n_feat"]
             )
 
-            # Feature selection
-            logger.info("Performing feature selection...")
-            train_moddata.feature_selection(n=TRAINING_CONFIG["n_feat"])
+            # Create MODData with selected features
+            train_moddata = create_moddata_for_training(
+                train_features, train_entries, target_name, selected_features
+            )
+            test_moddata = create_moddata_for_training(
+                test_features, test_entries, target_name, selected_features
+            )
 
             # Train model
             logger.info("Training model...")
@@ -311,6 +368,7 @@ def run_property_training(property_name: str) -> Dict:
                 "n_train": len(train_entries),
                 "n_test": eval_results["n_samples"],
                 "checkpoint_path": str(checkpoint_path),
+                "selected_features": selected_features,
                 "predictions": eval_results["predictions"],
                 "actuals": eval_results["actuals"]
             }
