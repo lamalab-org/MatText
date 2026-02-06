@@ -111,16 +111,20 @@ class BaseFinetuneModel(TokenizerMixin, ABC):
             callbacks=callbacks,
         )
 
-        wandb.log({"Training Arguments": str(config_train_args)})
-        wandb.log({"model_summary": str(model)})
+        is_main = self.local_rank is None or self.local_rank == 0
+
+        if is_main:
+            wandb.log({"Training Arguments": str(config_train_args)})
+            wandb.log({"model_summary": str(model)})
 
         trainer.train()
 
-        eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset["test"])
-        wandb.log(eval_result)
+        if is_main:
+            eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset["test"])
+            wandb.log(eval_result)
+            model.save_pretrained(self.cfg.path.finetuned_modelname)
+            wandb.finish()
 
-        model.save_pretrained(self.cfg.path.finetuned_modelname)
-        wandb.finish()
         return self.cfg.path.finetuned_modelname
 
     @abstractmethod
