@@ -13,7 +13,7 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 from sklearn.preprocessing import label_binarize
-from torch import nn
+
 from transformers import (
     AutoModelForSequenceClassification,
     EarlyStoppingCallback,
@@ -97,9 +97,6 @@ class BaseFinetuneModel(TokenizerMixin, ABC):
 
         if self.local_rank is not None:
             model = model.to(self.local_rank)
-            model = nn.parallel.DistributedDataParallel(
-                model, device_ids=[self.local_rank]
-            )
         else:
             model = model.to("cuda")
 
