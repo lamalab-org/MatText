@@ -25,7 +25,7 @@ hydra:
   #   tasks_per_node: 1
 
 defaults:
-- model: none
+- model: null
 # - override hydra/launcher: submitit_slurm
 
 runs:
