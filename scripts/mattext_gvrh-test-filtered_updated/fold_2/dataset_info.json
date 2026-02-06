@@ -1,0 +1,118 @@
+{
+  "builder_name": "parquet",
+  "citation": "",
+  "config_name": "gvrh-test-filtered",
+  "dataset_name": "mat_text",
+  "dataset_size": 22596515,
+  "description": "",
+  "download_checksums": {
+    "hf://datasets/n0w0f/MatText@61a0ac8f4413ce2843a962bb04cb56430eb7ee94/gvrh-test-filtered/fold_0-00000-of-00001.parquet": {
+      "num_bytes": 1451319,
+      "checksum": null
+    },
+    "hf://datasets/n0w0f/MatText@61a0ac8f4413ce2843a962bb04cb56430eb7ee94/gvrh-test-filtered/fold_1-00000-of-00001.parquet": {
+      "num_bytes": 1442122,
+      "checksum": null
+    },
+    "hf://datasets/n0w0f/MatText@61a0ac8f4413ce2843a962bb04cb56430eb7ee94/gvrh-test-filtered/fold_2-00000-of-00001.parquet": {
+      "num_bytes": 1372984,
+      "checksum": null
+    },
+    "hf://datasets/n0w0f/MatText@61a0ac8f4413ce2843a962bb04cb56430eb7ee94/gvrh-test-filtered/fold_3-00000-of-00001.parquet": {
+      "num_bytes": 1386069,
+      "checksum": null
+    },
+    "hf://datasets/n0w0f/MatText@61a0ac8f4413ce2843a962bb04cb56430eb7ee94/gvrh-test-filtered/fold_4-00000-of-00001.parquet": {
+      "num_bytes": 1464097,
+      "checksum": null
+    }
+  },
+  "download_size": 7116591,
+  "features": {
+    "atom_sequences": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "cif_symmetrized": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "crystal_text_llm": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "composition": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "slices": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "cif_p1": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "zmatrix": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "mbid": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "local_env": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "atom_sequences_plusplus": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "robocrys_rep": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 29713106,
+  "splits": {
+    "fold_0": {
+      "name": "fold_0",
+      "num_bytes": 4565258,
+      "num_examples": 1528,
+      "dataset_name": "mat_text"
+    },
+    "fold_1": {
+      "name": "fold_1",
+      "num_bytes": 4577638,
+      "num_examples": 1537,
+      "dataset_name": "mat_text"
+    },
+    "fold_2": {
+      "name": "fold_2",
+      "num_bytes": 4374577,
+      "num_examples": 1475,
+      "dataset_name": "mat_text"
+    },
+    "fold_3": {
+      "name": "fold_3",
+      "num_bytes": 4446675,
+      "num_examples": 1508,
+      "dataset_name": "mat_text"
+    },
+    "fold_4": {
+      "name": "fold_4",
+      "num_bytes": 4632367,
+      "num_examples": 1553,
+      "dataset_name": "mat_text"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}
