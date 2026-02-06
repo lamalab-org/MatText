@@ -149,7 +149,7 @@ class PotentialModel(TokenizerMixin):
             args=training_args,
             data_collator=None,
             compute_metrics=self._compute_metrics,
-            tokenizer=self._wrapped_tokenizer,
+            processing_class=self._wrapped_tokenizer,
             train_dataset=self.tokenized_dataset["train"],
             eval_dataset=self.tokenized_dataset["test"],
             callbacks=callbacks,

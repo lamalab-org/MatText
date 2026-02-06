@@ -127,12 +127,16 @@ class TokenizerMixin:
         self, texts: Dict[str, Any], context_length: int
     ) -> Dict[str, Any]:
         """Tokenizes, pads, and truncates input texts."""
-        return self._wrapped_tokenizer(
+        tokenized = self._wrapped_tokenizer(
             texts[str(self.representation)],
             truncation=True,
             padding="max_length",
             max_length=context_length,
         )
+        # Preserve labels if present in the dataset
+        if "labels" in texts:
+            tokenized["labels"] = texts["labels"]
+        return tokenized
 
 
 class CustomWandbCallback_Inference(TrainerCallback):

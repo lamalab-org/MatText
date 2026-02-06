@@ -70,6 +70,7 @@ model:
       eval_steps: 1
       seed: 42
       load_best_model_at_end: True
+      remove_unused_columns: False
 
   inference:
     benchmark_dataset: "${model.dataset}-test-${model.dataset_type}"
