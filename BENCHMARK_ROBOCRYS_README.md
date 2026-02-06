@@ -220,3 +220,6 @@ Track your runs in real-time on Weights & Biases:
 - Datasets will be cached locally after first download
 - Training progress is saved every epoch
 - Best model (based on validation loss) is automatically loaded at the end
+
+
+python -m torch.distributed.run --nproc_per_node=4 /home/alamparan/mattext_code/MatText/src/mattext/main.py -cn=benchmark --multirun model=benchmark_robocrys_gvrh,benchmark_robocrys_kvrh,benchmark_robocrys_perovskites

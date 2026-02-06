@@ -45,7 +45,7 @@ model:
       logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
       finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
 
-    context_length: 512
+    context_length: 1024
     dataprep_seed: 42
     callbacks:
       early_stopping: True
