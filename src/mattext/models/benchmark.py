@@ -2,6 +2,7 @@ import os
 import traceback
 from abc import ABC, abstractmethod
 
+import torch
 import wandb
 from matbench.bench import MatbenchBenchmark
 from omegaconf import DictConfig
@@ -43,6 +44,9 @@ class BaseBenchmark(ABC):
             task = MatTextTask(task_name=self.task)
         return task
 
+    def _is_main_process(self, local_rank):
+        return local_rank is None or local_rank == 0
+
     def _run_experiment(self, task, i, exp_name, test_name, local_rank):
         fold_name = fold_key_namer(i)
         logger.info(
@@ -57,6 +61,14 @@ class BaseBenchmark(ABC):
         finetuner = self._get_finetuner(exp_cfg, local_rank, fold_name)
         ckpt = finetuner.finetune()
         logger.info("Checkpoint: ",ckpt)
+
+        # Synchronize all processes before inference
+        if torch.distributed.is_initialized():
+            torch.distributed.barrier()
+
+        # Only run inference and record results on the main process
+        if not self._is_main_process(local_rank):
+            return
 
         wandb.init(
             config=dict(self.task_cfg.model.inference),
@@ -109,14 +121,16 @@ class Matbenchmark(BaseBenchmark):
         for i, (exp_name, test_name) in enumerate(
             zip(self.exp_names, self.test_exp_names)
         ):
-            wandb.init(
-                config=dict(self.task_cfg.model.finetune),
-                project=self.task_cfg.model.logging.wandb_project,
-                name=exp_name,
-            )
+            if self._is_main_process(local_rank):
+                wandb.init(
+                    config=dict(self.task_cfg.model.finetune),
+                    project=self.task_cfg.model.logging.wandb_project,
+                    name=exp_name,
+                )
             self._run_experiment(task, i, exp_name, test_name, local_rank)
 
-        self._save_results(task)
+        if self._is_main_process(local_rank):
+            self._save_results(task)
 
     def _get_finetuner(self, exp_cfg, local_rank, fold_name):
         return FinetuneModel(exp_cfg, local_rank, fold=fold_name)
@@ -140,14 +154,16 @@ class MatbenchmarkClassification(BaseBenchmark):
         for i, (exp_name, test_name) in enumerate(
             zip(self.exp_names, self.test_exp_names)
         ):
-            wandb.init(
-                config=dict(self.task_cfg.model.finetune),
-                project=self.task_cfg.model.logging.wandb_project,
-                name=exp_name,
-            )
+            if self._is_main_process(local_rank):
+                wandb.init(
+                    config=dict(self.task_cfg.model.finetune),
+                    project=self.task_cfg.model.logging.wandb_project,
+                    name=exp_name,
+                )
             self._run_experiment(task, i, exp_name, test_name, local_rank)
 
-        self._save_results(task)
+        if self._is_main_process(local_rank):
+            self._save_results(task)
 
     def _initialize_task(self):
         return MatTextTask(task_name=self.task, is_classification=True)
