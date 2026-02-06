@@ -225,7 +225,7 @@ class FinetuneLLama:
             args=training_args,
             data_collator=None,
             compute_metrics=self._compute_metrics,
-            tokenizer=self.tokenizer,
+            processing_class=self.tokenizer,
             train_dataset=self.tokenized_dataset["train"],
             eval_dataset=self.tokenized_dataset["test"],
             callbacks=callbacks,

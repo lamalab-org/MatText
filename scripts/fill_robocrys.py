@@ -5,19 +5,18 @@ Uses robocrystallographer to generate descriptions from CIF structures.
 Parallelized for better performance.
 """
 
-import os
-import warnings
 import logging
+import warnings
 from datetime import datetime
 from multiprocessing import Pool, cpu_count
-from datasets import load_dataset
+
+from datasets import load_dataset, DatasetDict
 from pymatgen.core import Structure
-from pymatgen.analysis.local_env import CrystalNN
 from robocrys import StructureCondenser, StructureDescriber
 from tqdm import tqdm
 
 # Configuration
-NUM_WORKERS = 64 #  max(1, cpu_count() - 12)  # Leave one core free
+NUM_WORKERS =  max(1, cpu_count() - 4)  # Leave one core free
 
 # Setup logging
 log_filename = f"robocrys_failures_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
@@ -93,104 +92,129 @@ def process_single_entry(args: tuple) -> tuple[int, str | None, str | None]:
 def main():
     # Configuration
     dataset_name = "n0w0f/MatText"
-    subset_name = "pretrain300k"
-    output_dir = "./mattext_pretrain300k_updated"
 
-    logger.info(f"Loading dataset: {dataset_name}, subset: {subset_name}")
-    logger.info(f"Using {NUM_WORKERS} worker processes")
+    list_of_subsets = [ "gvrh-test-filtered", "gvrh-train-filtered", "kvrh-test-filtered", "kvrh-train-filtered", "perovskites-test-filtered", "perovskites-train-filtered",]
 
-    # Load the dataset
-    dataset = load_dataset(dataset_name, subset_name)
+    for subset_name in list_of_subsets:
 
-    # Get the split (usually 'train')
-    split_name = list(dataset.keys())[0]
-    logger.info(f"Working with split: {split_name}")
-    data = dataset[split_name]
+        output_dir = f"./mattext_{subset_name}_updated"
 
-    # Count missing entries and prepare work items
-    total_entries = len(data)
-    work_items = []  # (idx, cif_symmetrized, cif_p1) for entries needing processing
-    existing_robocrys = {}  # idx -> existing robocrys_rep
+        logger.info(f"Loading dataset: {dataset_name}, subset: {subset_name}")
+        logger.info(f"Using {NUM_WORKERS} worker processes")
 
-    for idx, entry in enumerate(data):
-        current_robocrys = entry.get("robocrys_rep")
-        if current_robocrys is not None and current_robocrys != "":
-            existing_robocrys[idx] = current_robocrys
-        else:
-            work_items.append((
-                idx,
-                entry.get("cif_symmetrized"),
-                entry.get("cif_p1"),
-            ))
+        # Load the dataset
+        dataset = load_dataset(dataset_name, subset_name)
 
-    missing_count = len(work_items)
-    logger.info(f"Total entries: {total_entries}")
-    logger.info(f"Already have robocrys_rep: {len(existing_robocrys)}")
-    logger.info(f"Missing robocrys_rep entries to process: {missing_count}")
+        # Process all splits
+        all_splits_updated = {}
+        subset_summary = {
+            "total_entries": 0,
+            "total_missing": 0,
+            "total_filled": 0,
+            "total_failed": 0,
+        }
 
-    if missing_count == 0:
-        logger.info("No missing entries to fill. Exiting.")
-        return
+        for split_name in dataset.keys():
+            logger.info("=" * 50)
+            logger.info(f"Working with split: {split_name}")
+            logger.info("=" * 50)
+            data = dataset[split_name]
 
-    # Process missing entries in parallel
-    results = {}  # idx -> description
-    failed_indices = []
+            # Count missing entries and prepare work items
+            total_entries = len(data)
+            work_items = []  # (idx, cif_symmetrized, cif_p1) for entries needing processing
+            existing_robocrys = {}  # idx -> existing robocrys_rep
 
-    with Pool(processes=NUM_WORKERS) as pool:
-        for idx, description, error in tqdm(
-            pool.imap_unordered(process_single_entry, work_items),
-            total=len(work_items),
-            desc="Processing entries",
-        ):
-            if description:
-                results[idx] = description
-            else:
-                failed_indices.append(idx)
-                logger.warning(error)
+            for idx, entry in enumerate(data):
+                current_robocrys = entry.get("robocrys_rep")
+                if current_robocrys is not None and current_robocrys != "":
+                    existing_robocrys[idx] = current_robocrys
+                else:
+                    work_items.append((
+                        idx,
+                        entry.get("cif_symmetrized"),
+                        entry.get("cif_p1"),
+                    ))
 
-    success_count = len(results)
-    logger.info(f"Successfully generated {success_count} new descriptions")
-    logger.info(f"Failed to generate {len(failed_indices)} descriptions")
+            missing_count = len(work_items)
+            logger.info(f"Total entries: {total_entries}")
+            logger.info(f"Already have robocrys_rep: {len(existing_robocrys)}")
+            logger.info(f"Missing robocrys_rep entries to process: {missing_count}")
 
-    # Build final robocrys_rep list in order
-    final_robocrys = []
-    for idx in range(total_entries):
-        if idx in existing_robocrys:
-            final_robocrys.append(existing_robocrys[idx])
-        elif idx in results:
-            final_robocrys.append(results[idx])
-        else:
-            final_robocrys.append(None)
+            if missing_count == 0:
+                logger.info("No missing entries in this split. Keeping original data.")
+                all_splits_updated[split_name] = data
+                subset_summary["total_entries"] += total_entries
+                continue
 
-    # Update the dataset with new robocrys_rep values
-    def update_robocrys(example, idx):
-        example["robocrys_rep"] = final_robocrys[idx]
-        return example
+            # Process missing entries in parallel
+            results = {}  # idx -> description
+            failed_indices = []
 
-    updated_data = data.map(update_robocrys, with_indices=True)
+            with Pool(processes=NUM_WORKERS) as pool:
+                for idx, description, error in tqdm(
+                    pool.imap_unordered(process_single_entry, work_items),
+                    total=len(work_items),
+                    desc=f"Processing {split_name}",
+                ):
+                    if description:
+                        results[idx] = description
+                    else:
+                        failed_indices.append(idx)
+                        logger.warning(error)
 
-    # Save the updated dataset locally
-    logger.info(f"Saving updated dataset to: {output_dir}")
-    updated_data.save_to_disk(output_dir)
+            success_count = len(results)
+            logger.info(f"Successfully generated {success_count} new descriptions")
+            logger.info(f"Failed to generate {len(failed_indices)} descriptions")
 
-    # Log summary
-    logger.info("=" * 50)
-    logger.info("SUMMARY")
-    logger.info("=" * 50)
-    logger.info(f"Total entries: {total_entries}")
-    logger.info(f"Previously missing: {missing_count}")
-    logger.info(f"Successfully filled: {success_count}")
-    logger.info(f"Still missing (failed): {len(failed_indices)}")
-    logger.info(f"Failed indices logged to: {log_filename}")
-    logger.info(f"Updated dataset saved to: {output_dir}")
+            # Build final robocrys_rep list in order
+            final_robocrys = []
+            for idx in range(total_entries):
+                if idx in existing_robocrys:
+                    final_robocrys.append(existing_robocrys[idx])
+                elif idx in results:
+                    final_robocrys.append(results[idx])
+                else:
+                    final_robocrys.append(None)
 
-    # Write failed indices to a separate file for easy reference
-    if failed_indices:
-        failed_file = f"failed_indices_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-        with open(failed_file, "w") as f:
-            for idx in sorted(failed_indices):
-                f.write(f"{idx}\n")
-        logger.info(f"Failed indices also saved to: {failed_file}")
+            # Update the dataset with new robocrys_rep values
+            def update_robocrys(example, idx):
+                example["robocrys_rep"] = final_robocrys[idx]
+                return example
+
+            updated_data = data.map(update_robocrys, with_indices=True)
+            all_splits_updated[split_name] = updated_data
+
+            # Update subset summary
+            subset_summary["total_entries"] += total_entries
+            subset_summary["total_missing"] += missing_count
+            subset_summary["total_filled"] += success_count
+            subset_summary["total_failed"] += len(failed_indices)
+
+            # Write failed indices for this split
+            if failed_indices:
+                failed_file = f"failed_indices_{subset_name}_{split_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+                with open(failed_file, "w") as f:
+                    for idx in sorted(failed_indices):
+                        f.write(f"{idx}\n")
+                logger.info(f"Failed indices for {split_name} saved to: {failed_file}")
+
+        # Create DatasetDict with all updated splits
+        final_dataset = DatasetDict(all_splits_updated)
+
+        # Save the updated dataset locally
+        logger.info(f"Saving updated dataset with all splits to: {output_dir}")
+        final_dataset.save_to_disk(output_dir)
+
+        # Log overall summary for this subset
+        logger.info("=" * 50)
+        logger.info(f"SUBSET SUMMARY: {subset_name}")
+        logger.info("=" * 50)
+        logger.info(f"Total entries across all splits: {subset_summary['total_entries']}")
+        logger.info(f"Previously missing: {subset_summary['total_missing']}")
+        logger.info(f"Successfully filled: {subset_summary['total_filled']}")
+        logger.info(f"Still missing (failed): {subset_summary['total_failed']}")
+        logger.info(f"Updated dataset saved to: {output_dir}")
 
 
 if __name__ == "__main__":
