@@ -21,6 +21,9 @@ MATTEXT_MATBENCH = {
     "bandgap": "matbench_mp_gap",
     "form_energy": "matbench_mp_e_form",
     "is-metal": "matbench_mp_is_metal",
+    "mattext_kvrh": "matbench_log_kvrh",
+    "mattext_gvrh": "matbench_log_gvrh",
+    "mattext_perovskites": "matbench_perovskites",
 }
 
 MATMINER_COLUMNS = {
@@ -30,6 +33,9 @@ MATMINER_COLUMNS = {
     "is-metal": "is_metal",
     "bandgap": "gap pbe",
     "form_energy": "e_form",
+    "mattext_kvrh": "log10(K_VRH)",
+    "mattext_gvrh": "log10(G_VRH)",
+    "mattext_perovskites": "e_form",
 }
 
 
