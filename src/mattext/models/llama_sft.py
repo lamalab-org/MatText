@@ -181,65 +181,77 @@ class FinetuneLLamaSFT:
             callbacks=callbacks,
         )
 
-        wandb.log({"Training Arguments": str(config_train_args)})
-        wandb.log({"model_summary": str(self.model)})
+        is_main = self.local_rank is None or self.local_rank == 0
+
+        if is_main:
+            wandb.log({"Training Arguments": str(config_train_args)})
+            wandb.log({"model_summary": str(self.model)})
 
         self.output_dir_ = (
             f"{self.cfg.path.finetuned_modelname}/llamav3-8b-lora-fine-tune"
         )
         trainer.train()
 
-        pipe = pipeline(
-            "text-generation",
-            model=trainer.model,
-            tokenizer=self.tokenizer,
-            return_full_text=False,
-            do_sample=False,
-            max_new_tokens=4,
-        )
-        with torch.cuda.amp.autocast():
-            pred = pipe(self.formatting_tests_func(self.testdata))
-        logger.debug("Prediction: %s", pred)
+        # Synchronize all processes before inference and saving
+        if torch.distributed.is_initialized():
+            torch.distributed.barrier()
 
-        with open(
-            f"{self.cfg.path.finetuned_modelname}_{self.fold}_predictions.json", "w"
-        ) as json_file:
-            json.dump(pred, json_file)
+        if is_main:
+            pipe = pipeline(
+                "text-generation",
+                model=trainer.model,
+                tokenizer=self.tokenizer,
+                return_full_text=False,
+                do_sample=False,
+                max_new_tokens=4,
+            )
+            with torch.cuda.amp.autocast():
+                pred = pipe(self.formatting_tests_func(self.testdata))
+            logger.debug("Prediction: %s", pred)
 
-        trainer.save_state()
-        trainer.save_model(self.output_dir_)
+            with open(
+                f"{self.cfg.path.finetuned_modelname}_{self.fold}_predictions.json", "w"
+            ) as json_file:
+                json.dump(pred, json_file)
 
-        # # Merge LoRA and base model
-        # merged_model = trainer.model.merge_and_unload()
-        # # Save the merged model
-        # merged_model.save_pretrained(
-        #     f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained",
-        #     save_config=True,
-        #     safe_serialization=True,
-        # )
-        self.tokenizer.save_pretrained(
-            f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained"
-        )
+            trainer.save_state()
+            trainer.save_model(self.output_dir_)
 
-        with torch.cuda.amp.autocast():
-            merge_pred = pipe(self.formatting_tests_func(self.testdata))
-        logger.debug("Prediction: %s", merge_pred)
+            # # Merge LoRA and base model
+            # merged_model = trainer.model.merge_and_unload()
+            # # Save the merged model
+            # merged_model.save_pretrained(
+            #     f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained",
+            #     save_config=True,
+            #     safe_serialization=True,
+            # )
+            self.tokenizer.save_pretrained(
+                f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained"
+            )
 
-        with open(
-            f"{self.cfg.path.finetuned_modelname}__{self.fold}_predictions_merged.json",
-            "w",
-        ) as json_file:
-            json.dump(merge_pred, json_file)
+            with torch.cuda.amp.autocast():
+                merge_pred = pipe(self.formatting_tests_func(self.testdata))
+            logger.debug("Prediction: %s", merge_pred)
 
-        # Empty VRAM
+            with open(
+                f"{self.cfg.path.finetuned_modelname}__{self.fold}_predictions_merged.json",
+                "w",
+            ) as json_file:
+                json.dump(merge_pred, json_file)
+
+            # Empty VRAM
+            del pipe
+
         del trainer
         del collator
-        del pipe
         del self.model
         del self.tokenizer
         import gc
 
         gc.collect()
         gc.collect()
-        wandb.finish()
+
+        if is_main:
+            wandb.finish()
+
         return self.cfg.path.finetuned_modelname

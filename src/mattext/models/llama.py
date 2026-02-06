@@ -231,19 +231,27 @@ class FinetuneLLama:
             callbacks=callbacks,
         )
 
-        wandb.log({"Training Arguments": str(config_train_args)})
-        wandb.log({"model_summary": str(self.model)})
+        is_main = self.local_rank is None or self.local_rank == 0
+
+        if is_main:
+            wandb.log({"Training Arguments": str(config_train_args)})
+            wandb.log({"model_summary": str(self.model)})
 
         trainer.train()
-        trainer.save_model(
-            f"{self.cfg.path.finetuned_modelname}/llamav2-7b-lora-fine-tune"
-        )
 
-        eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset["test"])
-        wandb.log(eval_result)
+        # Synchronize all processes before evaluation and saving
+        if torch.distributed.is_initialized():
+            torch.distributed.barrier()
 
-        self.model.save_pretrained(self.cfg.path.finetuned_modelname)
-        wandb.finish()
+        if is_main:
+            trainer.save_model(
+                f"{self.cfg.path.finetuned_modelname}/llamav2-7b-lora-fine-tune"
+            )
+            eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset["test"])
+            wandb.log(eval_result)
+            self.model.save_pretrained(self.cfg.path.finetuned_modelname)
+            wandb.finish()
+
         return self.cfg.path.finetuned_modelname
 
     def evaluate(self):

@@ -138,9 +138,6 @@ class PotentialModel(TokenizerMixin):
 
         if self.local_rank is not None:
             model = model.to(self.local_rank)
-            model = nn.parallel.DistributedDataParallel(
-                model, device_ids=[self.local_rank]
-            )
         else:
             model = model.to("cuda")
 
@@ -155,15 +152,24 @@ class PotentialModel(TokenizerMixin):
             callbacks=callbacks,
         )
 
-        wandb.log({"Training Arguments": str(config_train_args)})
-        wandb.log({"model_summary": str(model)})
+        is_main = self.local_rank is None or self.local_rank == 0
+
+        if is_main:
+            wandb.log({"Training Arguments": str(config_train_args)})
+            wandb.log({"model_summary": str(model)})
 
         trainer.train()
-        model.save_pretrained(self.cfg.path.finetuned_modelname)
 
-        eval_result = trainer.evaluate(eval_dataset=self.tokenized_testset)
-        wandb.log(eval_result)
-        wandb.finish()
+        # Synchronize all processes before evaluation and saving
+        if torch.distributed.is_initialized():
+            torch.distributed.barrier()
+
+        if is_main:
+            model.save_pretrained(self.cfg.path.finetuned_modelname)
+            eval_result = trainer.evaluate(eval_dataset=self.tokenized_testset)
+            wandb.log(eval_result)
+            wandb.finish()
+
         return self.cfg.path.finetuned_modelname
 
     def evaluate(self):

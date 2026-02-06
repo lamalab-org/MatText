@@ -105,7 +105,7 @@ class BaseBenchmark(ABC):
 
     def _save_results(self, task):
         if not os.path.exists(self.benchmark_save_path):
-            os.makedirs(self.benchmark_save_path)
+            os.makedirs(self.benchmark_save_path, exist_ok=True)
 
         file_name = os.path.join(
             self.benchmark_save_path,
