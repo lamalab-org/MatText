@@ -162,14 +162,29 @@ class PotentialModel(TokenizerMixin):
 
         # Synchronize all processes before evaluation and saving
         if torch.distributed.is_initialized():
+            print(f"[Rank {self.local_rank}] Waiting at barrier 1 (after training)")
             torch.distributed.barrier()
+            print(f"[Rank {self.local_rank}] Passed barrier 1")
 
         if is_main:
-            model.save_pretrained(self.cfg.path.finetuned_modelname)
+            print(f"[Rank {self.local_rank}] Saving checkpoint to {self.cfg.path.finetuned_modelname}")
+            # Unwrap model from DDP if wrapped
+            model_to_save = model.module if hasattr(model, 'module') else model
+            model_to_save.save_pretrained(self.cfg.path.finetuned_modelname)
+            print(f"[Rank {self.local_rank}] Checkpoint saved, evaluating...")
             eval_result = trainer.evaluate(eval_dataset=self.tokenized_testset)
+            print(f"[Rank {self.local_rank}] Evaluation complete, logging to wandb...")
             wandb.log(eval_result)
             wandb.finish()
+            print(f"[Rank {self.local_rank}] Wandb finished")
 
+        # Synchronize again so all ranks return together
+        if torch.distributed.is_initialized():
+            print(f"[Rank {self.local_rank}] Waiting at barrier 2 (before return)")
+            torch.distributed.barrier()
+            print(f"[Rank {self.local_rank}] Passed barrier 2")
+
+        print(f"[Rank {self.local_rank}] Returning from finetune()")
         return self.cfg.path.finetuned_modelname
 
     def evaluate(self):

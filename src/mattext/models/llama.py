@@ -252,6 +252,10 @@ class FinetuneLLama:
             self.model.save_pretrained(self.cfg.path.finetuned_modelname)
             wandb.finish()
 
+        # Synchronize again so all ranks return together
+        if torch.distributed.is_initialized():
+            torch.distributed.barrier()
+
         return self.cfg.path.finetuned_modelname
 
     def evaluate(self):
