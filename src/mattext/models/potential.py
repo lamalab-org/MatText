@@ -122,6 +122,13 @@ class PotentialModel(TokenizerMixin):
         config_train_args = self.cfg.training_arguments
         callbacks = self._callbacks()
 
+        # In DDP mode, disable load_best_model_at_end to avoid checkpoint loading issues
+        # Only rank 0 saves checkpoints, but all ranks try to load at the end
+        if self.local_rank is not None and config_train_args.get('load_best_model_at_end', False):
+            print(f"[Rank {self.local_rank}] Disabling load_best_model_at_end in DDP mode")
+            config_train_args = dict(config_train_args)  # Make a copy
+            config_train_args['load_best_model_at_end'] = False
+
         training_args = TrainingArguments(
             **config_train_args,
             metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
