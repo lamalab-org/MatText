@@ -1,0 +1,114 @@
+# @package _global_
+model:
+  representation: robocrys_rep
+  add_special_tokens: False
+  dataset: "perovskites"
+  dataset_type: "filtered"
+  fold: 5
+  data_repository: "jablonkagroup/MatText"
+  checkpoint: "meta-llama/Llama-2-7b-chat-hf"
+  special_tokens:
+    {
+      "unk_token": "[UNK]",
+      "pad_token": "[PAD]",
+      "cls_token": "[CLS]",
+      "sep_token": "[SEP]",
+      "mask_token": "[MASK]",
+      "eos_token": "[EOS]",
+      "bos_token": "[BOS]",
+    }
+
+  PROPERTY_MAP:
+    {
+      "gvrh": "shear modulus (in log10(GPa))",
+      "kvrh": "bulk modulus (in log10(GPa))",
+      "perovskites": "formation energy (in eV)",
+      "mattext_gvrh": "shear modulus (in log10(GPa))",
+      "mattext_kvrh": "bulk modulus (in log10(GPa))",
+      "mattext_perovskites": "formation energy (in eV)",
+    }
+
+  MATERIAL_MAP:
+    {
+      "gvrh": "material",
+      "kvrh": "material",
+      "perovskites": "perovskite material",
+      "mattext_gvrh": "material",
+      "mattext_kvrh": "material",
+      "mattext_perovskites": "perovskite material",
+    }
+
+  logging:
+    wandb_project: llama2-robocrys-perovskites
+    wandb_log_model: "checkpoint"
+
+  finetune:
+    model_name: llama2-robocrys-perovskites
+    freeze_base_model: False
+    dataprep_seed: 42
+    dataset_name: "mattext_${model.dataset}-train-${model.dataset_type}"
+    benchmark_dataset: "mattext_${model.dataset}-test-${model.dataset_type}"
+    exp_name: "train_${model.representation}_${model.finetune.dataset_name}"
+
+    path:
+      pretrained_checkpoint: "${model.checkpoint}"
+      finetune_data_rootpath: /data/alamparan/Mattext_robocrys
+      finetune_traindata: []
+      finetune_testdata: []
+      root_path: "/data/alamparan/Mattext_robocrys/llama2-7b/${model.finetune.model_name}"
+      output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
+      logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
+      finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"
+
+    context_length: 1024
+    callbacks:
+      early_stopping: False
+      custom_logger: False
+      early_stopping_patience: 5
+      early_stopping_threshold: 0.001
+
+    bnb_config:
+      use_4bit: True
+      use_8bit: False
+      bnb_4bit_compute_dtype: "float16"
+      bnb_4bit_quant_type: "nf4"
+      use_nested_quant: False
+
+    lora_config:
+      r: 32
+      lora_alpha: 64
+      lora_dropout: 0.05
+      bias: "none"
+      task_type: "CAUSAL_LM"
+
+    training_arguments:
+      output_dir: "${model.finetune.path.output_dir}"
+      bf16: True
+      fp16: False
+      dataloader_num_workers: 2
+      num_train_epochs: 5
+      per_device_train_batch_size: 8
+      per_device_eval_batch_size: 8
+      save_strategy: "steps"
+      do_eval: True
+      eval_strategy: "steps"
+      logging_strategy: "steps"
+      logging_first_step: True
+      save_steps: 50
+      report_to: "wandb"
+      save_total_limit: 2
+      logging_steps: 10
+      eval_steps: 50
+      seed: 42
+      load_best_model_at_end: True
+      gradient_accumulation_steps: 4
+      gradient_checkpointing: True
+      max_grad_norm: 0.3
+      learning_rate: 3e-4
+      weight_decay: 0.001
+      optim: "paged_adamw_32bit"
+      lr_scheduler_type: "cosine"
+      warmup_ratio: 0.03
+      warmup_steps: 10
+      eval_accumulation_steps: 4
+      remove_unused_columns: False

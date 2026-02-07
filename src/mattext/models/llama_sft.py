@@ -15,10 +15,9 @@ from transformers import (
     BitsAndBytesConfig,
     EarlyStoppingCallback,
     TrainerCallback,
-    TrainingArguments,
     pipeline,
 )
-from trl import DataCollatorForCompletionOnlyLM, SFTTrainer
+from trl import SFTConfig, SFTTrainer
 
 from mattext.models.utils import (
     EvaluateFirstStepCallback,
@@ -53,12 +52,12 @@ class FinetuneLLamaSFT:
         self.callbacks = self.cfg.callbacks
         self.ckpt = self.cfg.path.pretrained_checkpoint
         self.bnb_config = self.cfg.bnb_config
+        self.test_sample_size = test_sample_size
         self.dataset = self.prepare_data(self.train_data)
         self.testdata = self.prepare_test_data(self.test_data)
         self.model, self.tokenizer, self.peft_config = self._setup_model_tokenizer()
         self.property_ = self.property_map[self.dataset_]
         self.material_ = self.material_map[self.dataset_]
-        self.test_sample_size = test_sample_size
 
     def prepare_test_data(self, subset):
         dataset = load_dataset(self.data_repository, subset)[self.fold]
@@ -125,6 +124,18 @@ class FinetuneLLamaSFT:
             output_texts.append(text)
         return output_texts
 
+    def _add_prompt_completion_columns(self, dataset):
+        """Add prompt and completion columns for completion-only loss."""
+        def _map_fn(example):
+            return {
+                "prompt": f"### What is the {self.property_} of {example[self.representation]}\n ### Answer:",
+                "completion": f" {example['labels']:.3f}@@@",
+            }
+        dataset = dataset.map(_map_fn)
+        # Remove original columns to avoid conflicts with the trainer's label handling
+        cols_to_remove = [c for c in dataset.column_names if c not in ("prompt", "completion")]
+        return dataset.remove_columns(cols_to_remove)
+
     def formatting_tests_func(self, example):
         output_texts = []
         for i in range(len(example[self.representation])):
@@ -153,8 +164,11 @@ class FinetuneLLamaSFT:
 
         config_train_args = self.cfg.training_arguments
 
-        # In DDP mode, disable load_best_model_at_end to avoid checkpoint loading issues
         config_dict = dict(config_train_args)
+        # Remove keys not supported by SFTConfig
+        config_dict.pop('overwrite_output_dir', None)
+
+        # In DDP mode, disable load_best_model_at_end to avoid checkpoint loading issues
         if self.local_rank is not None:
             if config_dict.get('load_best_model_at_end', False):
                 print(f"[Rank {self.local_rank}] WARNING: Disabling load_best_model_at_end in DDP mode")
@@ -163,32 +177,26 @@ class FinetuneLLamaSFT:
                 print(f"[Rank {self.local_rank}] WARNING: save_on_each_node should be False in DDP")
                 config_dict['save_on_each_node'] = False
 
-        training_args = TrainingArguments(
+        max_length = 2048 if self.representation == "cif_p1" else 1024
+
+        training_args = SFTConfig(
             **config_dict,
+            packing=False,
+            max_length=max_length,
+            completion_only_loss=True,
         )
         callbacks = self._callbacks()
 
-        response_template = " ### Answer:"
-        collator = DataCollatorForCompletionOnlyLM(
-            response_template, tokenizer=self.tokenizer
-        )
-
-        packing = False
-        max_seq_length = None
-        if self.representation == "cif_p1":
-            max_seq_length = 2048
+        train_dataset = self._add_prompt_completion_columns(self.dataset["train"])
+        eval_dataset = self._add_prompt_completion_columns(self.dataset["test"])
 
         trainer = SFTTrainer(
             model=self.model,
             peft_config=self.peft_config,
-            train_dataset=self.dataset["train"],
-            eval_dataset=self.dataset["test"],
-            formatting_func=self.formatting_prompts_func,
-            data_collator=collator,
-            max_seq_length=max_seq_length,
-            tokenizer=self.tokenizer,
+            train_dataset=train_dataset,
+            eval_dataset=eval_dataset,
+            processing_class=self.tokenizer,
             args=training_args,
-            packing=packing,
             callbacks=callbacks,
         )
 
@@ -239,7 +247,6 @@ class FinetuneLLamaSFT:
 
         # Cleanup (all ranks)
         del trainer
-        del collator
         del self.model
         del self.tokenizer
         import gc
