@@ -247,24 +247,15 @@ class FinetuneLLama:
             wandb.log({"Training Arguments": str(config_train_args)})
             wandb.log({"model_summary": str(self.model)})
 
+        # Trainer handles all DDP synchronization automatically
         trainer.train()
 
-        # Synchronize all processes before evaluation and saving
-        if torch.distributed.is_initialized():
-            torch.distributed.barrier()
-
         if is_main:
-            trainer.save_model(
-                f"{self.cfg.path.finetuned_modelname}/llamav2-7b-lora-fine-tune"
-            )
+            trainer.save_model(f"{self.cfg.path.finetuned_modelname}/llamav2-7b-lora-fine-tune")
             eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset["test"])
             wandb.log(eval_result)
             self.model.save_pretrained(self.cfg.path.finetuned_modelname)
             wandb.finish()
-
-        # Synchronize again so all ranks return together
-        if torch.distributed.is_initialized():
-            torch.distributed.barrier()
 
         return self.cfg.path.finetuned_modelname
 

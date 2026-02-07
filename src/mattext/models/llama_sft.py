@@ -198,16 +198,13 @@ class FinetuneLLamaSFT:
             wandb.log({"Training Arguments": str(config_train_args)})
             wandb.log({"model_summary": str(self.model)})
 
-        self.output_dir_ = (
-            f"{self.cfg.path.finetuned_modelname}/llamav3-8b-lora-fine-tune"
-        )
+        self.output_dir_ = f"{self.cfg.path.finetuned_modelname}/llamav3-8b-lora-fine-tune"
+
+        # Trainer handles all DDP synchronization automatically
         trainer.train()
 
-        # Synchronize all processes before inference and saving
-        if torch.distributed.is_initialized():
-            torch.distributed.barrier()
-
         if is_main:
+            # Run inference and save predictions
             pipe = pipeline(
                 "text-generation",
                 model=trainer.model,
@@ -216,57 +213,36 @@ class FinetuneLLamaSFT:
                 do_sample=False,
                 max_new_tokens=4,
             )
+
             with torch.cuda.amp.autocast():
                 pred = pipe(self.formatting_tests_func(self.testdata))
             logger.debug("Prediction: %s", pred)
 
-            with open(
-                f"{self.cfg.path.finetuned_modelname}_{self.fold}_predictions.json", "w"
-            ) as json_file:
-                json.dump(pred, json_file)
+            with open(f"{self.cfg.path.finetuned_modelname}_{self.fold}_predictions.json", "w") as f:
+                json.dump(pred, f)
 
+            # Save model and tokenizer
             trainer.save_state()
             trainer.save_model(self.output_dir_)
-
-            # # Merge LoRA and base model
-            # merged_model = trainer.model.merge_and_unload()
-            # # Save the merged model
-            # merged_model.save_pretrained(
-            #     f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained",
-            #     save_config=True,
-            #     safe_serialization=True,
-            # )
             self.tokenizer.save_pretrained(
                 f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained"
             )
 
             with torch.cuda.amp.autocast():
                 merge_pred = pipe(self.formatting_tests_func(self.testdata))
-            logger.debug("Prediction: %s", merge_pred)
 
-            with open(
-                f"{self.cfg.path.finetuned_modelname}__{self.fold}_predictions_merged.json",
-                "w",
-            ) as json_file:
-                json.dump(merge_pred, json_file)
+            with open(f"{self.cfg.path.finetuned_modelname}__{self.fold}_predictions_merged.json", "w") as f:
+                json.dump(merge_pred, f)
 
-            # Empty VRAM
             del pipe
+            wandb.finish()
 
+        # Cleanup (all ranks)
         del trainer
         del collator
         del self.model
         del self.tokenizer
         import gc
-
         gc.collect()
-        gc.collect()
-
-        if is_main:
-            wandb.finish()
-
-        # Synchronize again so all ranks return together
-        if torch.distributed.is_initialized():
-            torch.distributed.barrier()
 
         return self.cfg.path.finetuned_modelname

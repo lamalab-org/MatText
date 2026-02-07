@@ -127,23 +127,14 @@ class BaseFinetuneModel(TokenizerMixin, ABC):
             wandb.log({"Training Arguments": str(config_train_args)})
             wandb.log({"model_summary": str(model)})
 
+        # Trainer handles all DDP synchronization automatically
         trainer.train()
-
-        # Synchronize before evaluation and saving
-        if torch.distributed.is_initialized():
-            torch.distributed.barrier()
 
         if is_main:
             eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset["test"])
             wandb.log(eval_result)
-            # Unwrap model from DDP if wrapped
-            model_to_save = model.module if hasattr(model, 'module') else model
-            model_to_save.save_pretrained(self.cfg.path.finetuned_modelname)
+            trainer.save_model(self.cfg.path.finetuned_modelname)
             wandb.finish()
-
-        # Synchronize so all ranks return together
-        if torch.distributed.is_initialized():
-            torch.distributed.barrier()
 
         return self.cfg.path.finetuned_modelname
 

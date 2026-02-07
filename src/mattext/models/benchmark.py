@@ -59,23 +59,12 @@ class BaseBenchmark(ABC):
         exp_cfg.model.finetune.path.finetune_traindata = self.train_data
 
         finetuner = self._get_finetuner(exp_cfg, local_rank, fold_name)
-        print(f"[Benchmark Rank {local_rank}] Starting finetune()")
         ckpt = finetuner.finetune()
-        print(f"[Benchmark Rank {local_rank}] Finetune returned: {ckpt}")
         logger.info(f"Checkpoint: {ckpt}")
-
-        # Synchronize all processes before inference
-        if torch.distributed.is_initialized():
-            print(f"[Benchmark Rank {local_rank}] Waiting at barrier before inference")
-            torch.distributed.barrier()
-            print(f"[Benchmark Rank {local_rank}] Passed barrier before inference")
 
         # Only run inference and record results on the main process
         if not self._is_main_process(local_rank):
-            print(f"[Benchmark Rank {local_rank}] Non-main process, returning early")
             return
-
-        print(f"[Benchmark Rank {local_rank}] Main process, starting inference")
 
         wandb.init(
             config=dict(self.task_cfg.model.inference),
