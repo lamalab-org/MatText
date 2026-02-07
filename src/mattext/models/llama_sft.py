@@ -154,13 +154,17 @@ class FinetuneLLamaSFT:
         config_train_args = self.cfg.training_arguments
 
         # In DDP mode, disable load_best_model_at_end to avoid checkpoint loading issues
-        if self.local_rank is not None and config_train_args.get('load_best_model_at_end', False):
-            print(f"[Rank {self.local_rank}] Disabling load_best_model_at_end in DDP mode")
-            config_train_args = dict(config_train_args)  # Make a copy
-            config_train_args['load_best_model_at_end'] = False
+        config_dict = dict(config_train_args)
+        if self.local_rank is not None:
+            if config_dict.get('load_best_model_at_end', False):
+                print(f"[Rank {self.local_rank}] WARNING: Disabling load_best_model_at_end in DDP mode")
+                config_dict['load_best_model_at_end'] = False
+            if config_dict.get('save_on_each_node', False):
+                print(f"[Rank {self.local_rank}] WARNING: save_on_each_node should be False in DDP")
+                config_dict['save_on_each_node'] = False
 
         training_args = TrainingArguments(
-            **config_train_args,
+            **config_dict,
         )
         callbacks = self._callbacks()
 

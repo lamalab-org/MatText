@@ -124,15 +124,20 @@ class PotentialModel(TokenizerMixin):
 
         # In DDP mode, disable load_best_model_at_end to avoid checkpoint loading issues
         # Only rank 0 saves checkpoints, but all ranks try to load at the end
-        if self.local_rank is not None and config_train_args.get('load_best_model_at_end', False):
-            print(f"[Rank {self.local_rank}] Disabling load_best_model_at_end in DDP mode")
-            config_train_args = dict(config_train_args)  # Make a copy
-            config_train_args['load_best_model_at_end'] = False
+        config_dict = dict(config_train_args)  # Convert OmegaConf to dict
+        if self.local_rank is not None:
+            if config_dict.get('load_best_model_at_end', False):
+                print(f"[Rank {self.local_rank}] WARNING: Disabling load_best_model_at_end in DDP mode")
+                config_dict['load_best_model_at_end'] = False
+            # Also ensure save_on_each_node is False (default)
+            if config_dict.get('save_on_each_node', False):
+                print(f"[Rank {self.local_rank}] WARNING: save_on_each_node should be False in DDP")
+                config_dict['save_on_each_node'] = False
 
         training_args = TrainingArguments(
-            **config_train_args,
-            metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
-            greater_is_better=False,  # Lower eval_rmse is better
+            **config_dict,
+            metric_for_best_model="eval_rmse",
+            greater_is_better=False,
         )
 
         model = AutoModelForSequenceClassification.from_pretrained(
