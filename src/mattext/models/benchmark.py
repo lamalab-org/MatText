@@ -2,8 +2,8 @@ import os
 import traceback
 from abc import ABC, abstractmethod
 
-import torch
 import wandb
+from accelerate import PartialState
 from matbench.bench import MatbenchBenchmark
 from omegaconf import DictConfig
 
@@ -44,10 +44,8 @@ class BaseBenchmark(ABC):
             task = MatTextTask(task_name=self.task)
         return task
 
-    def _is_main_process(self, local_rank):
-        return local_rank is None or local_rank == 0
-
     def _run_experiment(self, task, i, exp_name, test_name, local_rank):
+        state = PartialState()
         fold_name = fold_key_namer(i)
         logger.info(
             f"Running training on {self.train_data}, and testing on {self.test_data} for fold {i}"
@@ -62,30 +60,31 @@ class BaseBenchmark(ABC):
         ckpt = finetuner.finetune()
         logger.info(f"Checkpoint: {ckpt}")
 
-        # Only run inference and record results on the main process
-        if not self._is_main_process(local_rank):
-            return
-
-        wandb.init(
-            config=dict(self.task_cfg.model.inference),
-            project=self.task_cfg.model.logging.wandb_project,
-            name=test_name,
-        )
-
-        exp_cfg.model.inference.path.test_data = self.test_data
-        exp_cfg.model.inference.path.pretrained_checkpoint = ckpt
-
-        try:
-            predict = self._get_inference(exp_cfg, fold_name)
-            predictions, prediction_ids = predict.predict()
-            self._record_predictions(task, i, predictions, prediction_ids)
-        except Exception as e:
-            logger.error(
-                f"Error occurred during inference for finetuned checkpoint '{exp_name}': {str(e)}"
+        # Only rank 0 runs inference
+        if state.is_main_process:
+            wandb.init(
+                config=dict(self.task_cfg.model.inference),
+                project=self.task_cfg.model.logging.wandb_project,
+                name=test_name,
             )
-            if isinstance(e, (ValueError, TypeError)):
-                    raise
-            logger.error(traceback.format_exc())
+
+            exp_cfg.model.inference.path.test_data = self.test_data
+            exp_cfg.model.inference.path.pretrained_checkpoint = ckpt
+
+            try:
+                predict = self._get_inference(exp_cfg, fold_name)
+                predictions, prediction_ids = predict.predict()
+                self._record_predictions(task, i, predictions, prediction_ids)
+            except Exception as e:
+                logger.error(
+                    f"Error occurred during inference for finetuned checkpoint '{exp_name}': {str(e)}"
+                )
+                if isinstance(e, (ValueError, TypeError)):
+                        raise
+                logger.error(traceback.format_exc())
+
+        # All ranks sync after inference before next fold
+        state.wait_for_everyone()
 
     @abstractmethod
     def _get_finetuner(self, exp_cfg, local_rank, fold_name):
@@ -112,12 +111,13 @@ class BaseBenchmark(ABC):
 
 class Matbenchmark(BaseBenchmark):
     def run_benchmarking(self, local_rank=None) -> None:
+        state = PartialState()
         task = self._initialize_task()
 
         for i, (exp_name, test_name) in enumerate(
             zip(self.exp_names, self.test_exp_names)
         ):
-            if self._is_main_process(local_rank):
+            if state.is_main_process:
                 wandb.init(
                     config=dict(self.task_cfg.model.finetune),
                     project=self.task_cfg.model.logging.wandb_project,
@@ -125,7 +125,7 @@ class Matbenchmark(BaseBenchmark):
                 )
             self._run_experiment(task, i, exp_name, test_name, local_rank)
 
-        if self._is_main_process(local_rank):
+        if state.is_main_process:
             self._save_results(task)
 
     def _get_finetuner(self, exp_cfg, local_rank, fold_name):
@@ -145,12 +145,13 @@ class Matbenchmark(BaseBenchmark):
 
 class MatbenchmarkClassification(BaseBenchmark):
     def run_benchmarking(self, local_rank=None) -> None:
+        state = PartialState()
         task = self._initialize_task()
 
         for i, (exp_name, test_name) in enumerate(
             zip(self.exp_names, self.test_exp_names)
         ):
-            if self._is_main_process(local_rank):
+            if state.is_main_process:
                 wandb.init(
                     config=dict(self.task_cfg.model.finetune),
                     project=self.task_cfg.model.logging.wandb_project,
@@ -158,7 +159,7 @@ class MatbenchmarkClassification(BaseBenchmark):
                 )
             self._run_experiment(task, i, exp_name, test_name, local_rank)
 
-        if self._is_main_process(local_rank):
+        if state.is_main_process:
             self._save_results(task)
 
     def _initialize_task(self):

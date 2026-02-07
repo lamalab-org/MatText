@@ -2,11 +2,11 @@
 model:
   representation: robocrys_rep
   special_num_token: False
-  dataset: "mattext_kvrh"
+  dataset: "mattext_perovskites"
   dataset_type: "filtered"
   fold: 5
   data_repository: "jablonkagroup/MatText"
-  checkpoint: ${oc.env:MATTEXT_CHECKPOINT,n0w0f/MatText-robocrys_30k}
+  checkpoint: n0w0f/MatText-robocrys_100k
   special_tokens:
     {
       "unk_token": "[UNK]",
@@ -19,11 +19,11 @@ model:
     }
 
   logging:
-    wandb_project: benchmark-robocrys-kvrh
+    wandb_project: benchmark-robocrys-perovskites
     wandb_log_model: "checkpoint"
 
   finetune:
-    model_name: robocrys-kvrh
+    model_name: robocrys-perovskites
     freeze_base_model: False
     dataset_name: "${model.dataset}-train-${model.dataset_type}"
     exp_name:

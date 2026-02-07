@@ -165,6 +165,8 @@ class MatTextTask:
             return obj.tolist()
         elif isinstance(obj, (np.bool_, np.integer, np.floating)):
             return obj.item()
+        elif hasattr(obj, "to_pylist"):
+            return obj.to_pylist()
         elif isinstance(obj, MatTextTask):
             return {
                 "task_name": obj.task_name,

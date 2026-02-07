@@ -6,7 +6,7 @@ model:
   dataset_type: "filtered"
   fold: 5
   data_repository: "jablonkagroup/MatText"
-  checkpoint: "n0w0f/MatText-robocrys_30k"
+  checkpoint: ${oc.env:MATTEXT_CHECKPOINT,n0w0f/MatText-robocrys_30k}
   special_tokens:
     {
       "unk_token": "[UNK]",
@@ -37,10 +37,10 @@ model:
 
     path:
       pretrained_checkpoint: "${model.checkpoint}"
-      finetune_data_rootpath: results
+      finetune_data_rootpath: /home/alamparan/mattext_code/MatText/results
       finetune_traindata: []
       finetune_testdata:
-      root_path: "${hydra:runtime.cwd}/../../results/${now:%Y-%m-%d}/${now:%H-%M-%S}/${model.finetune.model_name}"
+      root_path: "${hydra:runtime.cwd}/../../results/${now:%Y-%m-%d}/${model.checkpoint}/${model.finetune.model_name}"
       output_dir: "${model.finetune.path.root_path}/checkpoints/${model.finetune.exp_name}"
       logging_dir: "${model.finetune.path.root_path}/logs/${model.finetune.exp_name}"
       finetuned_modelname: "${model.finetune.path.root_path}/checkpoints/finetuned_${model.finetune.exp_name}"

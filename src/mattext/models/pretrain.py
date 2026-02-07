@@ -5,7 +5,6 @@ import torch
 import wandb
 from datasets import DatasetDict, load_dataset
 from omegaconf import DictConfig
-from torch import nn
 from transformers import (
     AutoConfig,
     AutoModelForMaskedLM,
@@ -117,11 +116,9 @@ class PretrainModel(TokenizerMixin):
 
         model = AutoModelForMaskedLM.from_config(config)
 
-        if torch.distributed.is_initialized():
+        # Let Trainer handle DDP wrapping — just place on correct device
+        if self.local_rank is not None:
             model = model.to(self.local_rank)
-            model = nn.parallel.DistributedDataParallel(
-                model, device_ids=[self.local_rank]
-            )
         else:
             model = model.to("cuda")
 

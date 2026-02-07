@@ -4,9 +4,9 @@ hydra:
   job:
     name: benchmark
   run:
-    dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    dir: ${hydra:runtime.cwd}/outputs/${now:%Y-%m-%d}/${now:%H-%M}
   sweep:
-    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M}
     subdir: ${hydra.job.override_dirname}
     
   # launcher:

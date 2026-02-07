@@ -130,8 +130,10 @@ class BaseFinetuneModel(TokenizerMixin, ABC):
         # Trainer handles all DDP synchronization automatically
         trainer.train()
 
+        # All ranks must call evaluate (distributed collectives)
+        eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset["test"])
+
         if is_main:
-            eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset["test"])
             wandb.log(eval_result)
             trainer.save_model(self.cfg.path.finetuned_modelname)
             wandb.finish()

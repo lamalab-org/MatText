@@ -6,7 +6,7 @@ model:
   dataset_type: "filtered"
   fold: 5
   data_repository: "jablonkagroup/MatText"
-  checkpoint: ${oc.env:MATTEXT_CHECKPOINT,n0w0f/MatText-robocrys_30k}
+  checkpoint: n0w0f/MatText-robocrys_100k
   special_tokens:
     {
       "unk_token": "[UNK]",
