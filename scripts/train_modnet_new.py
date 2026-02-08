@@ -2,29 +2,33 @@
 MODNet Training Script for NEW Material Property Datasets
 
 Trains on: bandgap, form_energy, jdft2d, phonons
-Data directory: data_cleaned_normalized/
+Data source: HuggingFace dataset jablonkagroup/MatText-hypo_pot
 Output directory: modnet_outputs_new/ (separate from original)
 """
 
 import json
+import logging
+import multiprocessing
 import os
+import pickle
 import warnings
 from pathlib import Path
-from typing import Dict, List, Optional
-import logging
-import pickle
-
-# Suppress TensorFlow warnings
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-warnings.filterwarnings('ignore')
 
 import numpy as np
 import pandas as pd
-from pymatgen.core import Structure
-from modnet.preprocessing import MODData
+from datasets import load_dataset as hf_load_dataset
 from modnet.models import MODNetModel
+from modnet.preprocessing import MODData
+from pymatgen.core import Structure
 from sklearn.feature_selection import mutual_info_regression
+
+# Suppress TensorFlow warnings and configure Keras compatibility
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+os.environ['TF_USE_LEGACY_KERAS'] = 'True'  # Use Keras 2 for MODNet compatibility
+warnings.filterwarnings('ignore')
+
+
 
 # Configure logging
 logging.basicConfig(
@@ -34,17 +38,20 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuration - NEW datasets
-DATA_DIR = Path("data_cleaned_normalized")
+HF_DATASET_NAME = "jablonkagroup/MatText-hypo_pot"
 OUTPUT_DIR = Path("modnet_outputs_new")  # Separate output directory
 CHECKPOINT_DIR = OUTPUT_DIR / "checkpoints"
 RESULTS_DIR = OUTPUT_DIR / "results"
 CACHE_DIR = OUTPUT_DIR / "cache"
 
-# NEW properties to train on
-PROPERTIES = ["bandgap", "form_energy", "jdft2d", "phonons"]
+# NEW properties to train on (these are the subset names in the HF dataset)
+PROPERTIES =["phonons"] #["bandgap", "form_energy", "jdft2d", "phonons"]
 
 # Alpha values for total_energy targets
 ALPHA_VALUES = ["0", "0.2", "0.4", "0.5", "0.6", "0.8", "1"]
+
+# Get number of available CPU cores for parallelization
+N_JOBS = max(1, multiprocessing.cpu_count() - 1)  # Leave 1 core free
 
 # Training parameters
 TRAINING_CONFIG = {
@@ -53,18 +60,30 @@ TRAINING_CONFIG = {
     "lr": 0.001,
     "val_fraction": 0.1,
     "n_feat": 100,
-    "verbose": 1
+    "verbose": 1,
+    "n_jobs": N_JOBS  # For featurization parallelization
 }
 
 
-def load_dataset(file_path: Path) -> List[Dict]:
-    """Load dataset from JSON file (one JSON object per line)."""
-    data = []
-    with open(file_path, 'r') as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                data.append(json.loads(line))
+def load_dataset_from_hf(property_name: str, split: str = "train") -> list[dict]:
+    """Load dataset from HuggingFace for a specific property and split.
+
+    Args:
+        property_name: Name of the property (subset) to load
+        split: Either "train" or "test"
+
+    Returns:
+        List of dictionaries containing the data
+    """
+    logger.info(f"Loading {split} split for property '{property_name}' from HuggingFace...")
+
+    # Load the specific subset from HF
+    dataset = hf_load_dataset(HF_DATASET_NAME, name=property_name, split=split)
+
+    # Convert to list of dictionaries
+    data = [dict(example) for example in dataset]
+
+    logger.info(f"Loaded {len(data)} examples from HF dataset")
     return data
 
 
@@ -74,7 +93,7 @@ def cif_to_structure(cif_string: str) -> Structure:
 
 
 def create_base_moddata(
-    data: List[Dict],
+    data: list[dict],
     structure_key: str = "cif_p1"
 ) -> tuple:
     """Create structures and IDs from dataset entries."""
@@ -94,18 +113,32 @@ def create_base_moddata(
 
 
 def featurize_structures(
-    structures: List[Structure],
-    ids: List[str],
-    cache_path: Optional[Path] = None,
-    n_jobs: int = 4
+    structures: list[Structure],
+    ids: list[str],
+    cache_path: Path | None = None,
+    n_jobs: int | None = None
 ) -> pd.DataFrame:
-    """Featurize structures and optionally cache the result."""
+    """Featurize structures and optionally cache the result.
+
+    Args:
+        structures: List of pymatgen Structure objects
+        ids: List of structure IDs
+        cache_path: Optional path to cache the featurized data
+        n_jobs: Number of parallel jobs for featurization (default: use TRAINING_CONFIG)
+
+    Returns:
+        DataFrame with featurized data
+    """
     if cache_path and cache_path.exists():
         logger.info(f"Loading cached featurized data from {cache_path}")
         with open(cache_path, 'rb') as f:
             return pickle.load(f)
 
-    logger.info(f"Featurizing {len(structures)} structures (this may take a while)...")
+    if n_jobs is None:
+        n_jobs = TRAINING_CONFIG["n_jobs"]
+
+    logger.info(f"Featurizing {len(structures)} structures using {n_jobs} parallel jobs...")
+    logger.info("This may take a while depending on dataset size...")
 
     dummy_targets = [0.0] * len(structures)
     mod_data = MODData(
@@ -131,7 +164,7 @@ def fast_feature_selection(
     df_features: pd.DataFrame,
     targets: np.ndarray,
     n_features: int = 100
-) -> List[str]:
+) -> list[str]:
     """Fast feature selection using only MI with target."""
     logger.info(f"Fast feature selection: selecting top {n_features} features by MI with target...")
 
@@ -151,22 +184,26 @@ def fast_feature_selection(
 
 def create_moddata_for_training(
     df_featurized: pd.DataFrame,
-    data: List[Dict],
+    data: list[dict],
     target_name: str,
-    selected_features: List[str]
+    selected_features: list[str]
 ) -> MODData:
     """Create MODData with selected features and targets for training."""
+    # Extract targets for entries that were successfully featurized
     id_to_target = {}
     for entry in data:
         mbid = entry.get("mbid", "")
         if mbid in df_featurized.index:
             id_to_target[mbid] = entry[target_name]
 
+    # Align targets with featurized data
     valid_ids = [idx for idx in df_featurized.index if idx in id_to_target]
     targets = np.array([[id_to_target[idx]] for idx in valid_ids])
 
+    # Select only the features we want
     df_selected = df_featurized.loc[valid_ids, selected_features]
 
+    # Create MODData
     mod_data = MODData(
         targets=targets,
         target_names=[target_name],
@@ -174,6 +211,7 @@ def create_moddata_for_training(
         df_featurized=df_selected
     )
 
+    # Set optimal features (skip MODNet's feature selection)
     mod_data.optimal_features = selected_features
 
     return mod_data
@@ -182,7 +220,7 @@ def create_moddata_for_training(
 def train_model(
     train_data: MODData,
     target_name: str,
-    config: Dict
+    config: dict
 ) -> MODNetModel:
     """Train a MODNet model."""
     n_feat = min(config["n_feat"], len(train_data.optimal_features))
@@ -211,20 +249,25 @@ def evaluate_model(
     model: MODNetModel,
     test_data: MODData,
     target_name: str
-) -> Dict:
+) -> dict:
     """Evaluate model on test data."""
+    # Get predictions (disable remap_out_of_bounds to avoid MODNet 0.4.5 bug)
     predictions_df = model.predict(test_data, remap_out_of_bounds=False)
 
+    # Handle column name - MODNet may use different naming conventions
     if target_name in predictions_df.columns:
         predictions = predictions_df[target_name].values
     else:
+        # Use first column if target name not found
         predictions = predictions_df.iloc[:, 0].values
 
+    # Get actuals - similar handling
     if target_name in test_data.df_targets.columns:
         actuals = test_data.df_targets[target_name].values
     else:
         actuals = test_data.df_targets.iloc[:, 0].values
 
+    # Calculate metrics
     mae = np.mean(np.abs(predictions - actuals))
     mse = np.mean((predictions - actuals) ** 2)
     rmse = np.sqrt(mse)
@@ -244,20 +287,18 @@ def evaluate_model(
     }
 
 
-def run_property_training(property_name: str) -> Dict:
+def run_property_training(property_name: str) -> dict:
     """Run training for all alpha values of a single property."""
     logger.info(f"\n{'='*60}")
     logger.info(f"Processing property: {property_name}")
     logger.info(f"{'='*60}")
 
-    train_file = DATA_DIR / f"train_{property_name}_0.json"
-    test_file = DATA_DIR / f"test_{property_name}_0.json"
+    # Load data from HuggingFace
+    logger.info(f"Loading training data from HuggingFace dataset: {HF_DATASET_NAME}")
+    train_entries = load_dataset_from_hf(property_name, split="train")
 
-    logger.info(f"Loading training data from {train_file}")
-    train_entries = load_dataset(train_file)
-
-    logger.info(f"Loading test data from {test_file}")
-    test_entries = load_dataset(test_file)
+    logger.info(f"Loading test data from HuggingFace dataset: {HF_DATASET_NAME}")
+    test_entries = load_dataset_from_hf(property_name, split="test")
 
     logger.info("Creating structures from CIF...")
     train_structures, train_ids = create_base_moddata(train_entries)
@@ -266,8 +307,15 @@ def run_property_training(property_name: str) -> Dict:
     train_cache = CACHE_DIR / f"train_{property_name}_features.pkl"
     test_cache = CACHE_DIR / f"test_{property_name}_features.pkl"
 
-    train_features = featurize_structures(train_structures, train_ids, train_cache)
-    test_features = featurize_structures(test_structures, test_ids, test_cache)
+    logger.info(f"Featurizing training set with {TRAINING_CONFIG['n_jobs']} parallel jobs...")
+    train_features = featurize_structures(
+        train_structures, train_ids, train_cache, n_jobs=TRAINING_CONFIG["n_jobs"]
+    )
+
+    logger.info(f"Featurizing test set with {TRAINING_CONFIG['n_jobs']} parallel jobs...")
+    test_features = featurize_structures(
+        test_structures, test_ids, test_cache, n_jobs=TRAINING_CONFIG["n_jobs"]
+    )
 
     results = {}
 
@@ -351,6 +399,15 @@ def main():
     CHECKPOINT_DIR.mkdir(exist_ok=True)
     RESULTS_DIR.mkdir(exist_ok=True)
     CACHE_DIR.mkdir(exist_ok=True)
+
+    logger.info(f"{'='*60}")
+    logger.info("MODNet Training Script - HuggingFace Dataset")
+    logger.info(f"{'='*60}")
+    logger.info(f"Dataset: {HF_DATASET_NAME}")
+    logger.info(f"Properties to train: {PROPERTIES}")
+    logger.info(f"Parallel jobs for featurization: {TRAINING_CONFIG['n_jobs']}")
+    logger.info(f"Output directory: {OUTPUT_DIR}")
+    logger.info(f"{'='*60}\n")
 
     all_results = {}
 
