@@ -52,7 +52,8 @@ class TaskRunner:
         use_train_data_path: bool = False,
     ):
         if use_folds:
-            iterations = range(task_cfg.model.fold)
+            skip_folds = set(task_cfg.model.get("skip_folds", []))
+            iterations = [i for i in range(task_cfg.model.fold) if i not in skip_folds]
         elif use_train_data_path:
             iterations = zip(
                 task_cfg.model.finetune.exp_name,

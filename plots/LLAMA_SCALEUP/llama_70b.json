@@ -1,0 +1,197 @@
+{
+    "gvrh" :{
+        "atom_sequences": {
+            "mean_mae_score": 0.12322228269717794,
+            "std_mae_score": 0.006837895301430685,
+            "mean_rmse_score": 0.1846697647756898,
+            "std_rmse_score": 0.011072331802604297,
+            "std_score": 0.006837895301430685
+        },
+        "local_env": {
+            "mean_mae_score": 0.12685342507502267,
+            "std_mae_score": 0.0030423938386532085,
+            "mean_rmse_score": 0.180463269542063,
+            "std_rmse_score": 0.0065257567749326395,
+            "std_score": 0.0030423938386532085
+        },
+        "slices": {
+            "mean_mae_score": 0.11750983669129082,
+            "std_mae_score": 0.0027408569517839913,
+            "mean_rmse_score": 0.17334273108901926,
+            "std_rmse_score": 0.0075698590073706605,
+            "std_score": 0.0027408569517839913
+        },
+        "composition": {
+            "mean_mae_score": 0.13906756869927198,
+            "std_mae_score": 0.002211846779677064,
+            "mean_rmse_score": 0.20544730965604727,
+            "std_rmse_score": 0.00984813513619935,
+            "std_score": 0.002211846779677064
+        },
+        "zmatrix": {
+            "mean_mae_score": 0.12387206330926248,
+            "std_mae_score": 0.003135820122547117,
+            "mean_rmse_score": 0.18200207082894887,
+            "std_rmse_score": 0.005642654025816817,
+            "std_score": 0.003135820122547117
+        },
+        "cif_symmetrized": {
+            "mean_mae_score": 0.12434577121178317,
+            "std_mae_score": 0.007729132033745625,
+            "mean_rmse_score": 0.18376526039594973,
+            "std_rmse_score": 0.009406732149356426,
+            "std_score": 0.007729132033745625
+        },
+        "cif_p1": {
+            "mean_mae_score": 0.12184455460123442,
+            "std_mae_score": 0.0067752191315071115,
+            "mean_rmse_score": 0.17992318999778248,
+            "std_rmse_score": 0.009841900841156723,
+            "std_score": 0.0067752191315071115
+        },
+        "atom_sequences_plus_plus": {
+            "mean_mae_score": 0.12556731673184282,
+            "std_mae_score": 0.008896537575063021,
+            "mean_rmse_score": 0.18466315487532997,
+            "std_rmse_score": 0.012490823134181437,
+            "std_score": 0.008896537575063021
+        },
+        "crystal_text_llm": {
+            "mean_mae_score": 0.12469384242145862,
+            "std_mae_score": 0.003521819598660434,
+            "mean_rmse_score": 0.1848829006455636,
+            "std_rmse_score": 0.004264515187476732,
+            "std_score": 0.003521819598660434
+        }
+    },
+    "kvrh": {
+        "crystal_text_llm": {
+            "mean_mae_score": 0.09602404140896392,
+            "std_mae_score": 0.005452898131228267,
+            "mean_rmse_score": 0.16742329277417917,
+            "std_rmse_score": 0.008534837403365091,
+            "std_score": 0.005452898131228267,
+        },
+        "atom_sequences_plus_plus": {
+            "mean_mae_score": 0.09742332658169067,
+            "std_mae_score": 0.006711593477699865,
+            "mean_rmse_score": 0.1721796059448799,
+            "std_rmse_score": 0.008960897525919938,
+            "std_score": 0.006711593477699865,
+        },
+        "cif_p1": {
+            "mean_mae_score": 0.09806051284216788,
+            "std_mae_score": 0.009017893208442667,
+            "mean_rmse_score": 0.17061720787171802,
+            "std_rmse_score": 0.007609257819511075,
+            "std_score": 0.009017893208442667,
+        },
+        "cif_symmetrized": {
+            "mean_mae_score": 0.10548956238745352,
+            "std_mae_score": 0.008611911621141628,
+            "mean_rmse_score": 0.18213989651129442,
+            "std_rmse_score": 0.01222453624830365,
+            "std_score": 0.008611911621141628,
+        },
+        "composition": {
+            "mean_mae_score": 0.10860194078053265,
+            "std_mae_score": 0.0055620525172790985,
+            "mean_rmse_score": 0.19347565950976012,
+            "std_rmse_score": 0.007753928808676833,
+            "std_score": 0.0055620525172790985,
+        },
+        "zmatrix": {
+            "mean_mae_score": 0.09972010643961102,
+            "std_mae_score": 0.007427670921985085,
+            "mean_rmse_score": 0.17385228763470376,
+            "std_rmse_score": 0.012443410866495435,
+            "std_score": 0.007427670921985085,
+        },
+        "slices": {
+            "mean_mae_score": 0.1026054166644665,
+            "std_mae_score": 0.006075692454166044,
+            "mean_rmse_score": 0.17277723513712434,
+            "std_rmse_score": 0.00800636939476858,
+            "std_score": 0.006075692454166044,
+        },
+        "local_env": {
+            "mean_mae_score": 0.10016380374991103,
+            "std_mae_score": 0.008951226382554594,
+            "mean_rmse_score": 0.17085187538638885,
+            "std_rmse_score": 0.012151994699500967,
+            "std_score": 0.008951226382554594,
+        },
+        "atom_sequences": {
+            "mean_mae_score": 0.09740472465820325,
+            "std_mae_score": 0.003546513465688318,
+            "mean_rmse_score": 0.17572902813442232,
+            "std_rmse_score": 0.006523956004459374,
+            "std_score": 0.003546513465688318,
+        },
+    },
+    "perovskites": {
+        "composition": {
+            "mean_mae_score": 0.4594881921226852,
+            "std_mae_score": 0.010617907174738109,
+            "mean_rmse_score": 0.7150823916406396,
+            "std_rmse_score": 0.013865667638681745,
+            "std_score": 0.010617907174738109,
+        },
+        "atom_sequences": {
+            "mean_mae_score": 0.4566223498797279,
+            "std_mae_score": 0.012292174561694109,
+            "mean_rmse_score": 0.7266326276731336,
+            "std_rmse_score": 0.020172585096018956,
+            "std_score": 0.012292174561694109,
+        },
+        "cif_symmetrized": {
+            "mean_mae_score": 0.10590156796820101,
+            "std_mae_score": 0.0025438909300709114,
+            "mean_rmse_score": 0.14937279773893847,
+            "std_rmse_score": 0.005630507986086043,
+            "std_score": 0.0025438909300709114,
+        },
+        "zmatrix": {
+            "mean_mae_score": 0.09283089125548412,
+            "std_mae_score": 0.001436628547225142,
+            "mean_rmse_score": 0.12713879330564754,
+            "std_rmse_score": 0.0013433032147916386,
+            "std_score": 0.001436628547225142,
+        },
+        "cif_p1": {
+            "mean_mae_score": 0.0836307100972016,
+            "std_mae_score": 0.0026792856822074433,
+            "mean_rmse_score": 0.11525253160951673,
+            "std_rmse_score": 0.0024204202562136392,
+            "std_score": 0.0026792856822074433,
+        },
+        "atom_sequences_plus_plus": {
+            "mean_mae_score": 0.2562309084222551,
+            "std_mae_score": 0.014947545039715788,
+            "mean_rmse_score": 0.39398289838860395,
+            "std_rmse_score": 0.020908605980463395,
+            "std_score": 0.014947545039715788,
+        },
+        "slices": {
+            "mean_mae_score": 0.08132186341809951,
+            "std_mae_score": 0.0023112074397150153,
+            "mean_rmse_score": 0.11202963649147524,
+            "std_rmse_score": 0.0022556343296280352,
+            "std_score": 0.0023112074397150153,
+        },
+        "local_env": {
+            "mean_mae_score": 0.07821544772125072,
+            "std_mae_score": 0.001428034984204504,
+            "mean_rmse_score": 0.11047508116062559,
+            "std_rmse_score": 0.0009532771280788109,
+            "std_score": 0.001428034984204504,
+        },
+        "crystal_text_llm": {
+            "mean_mae_score": 0.08185680652002336,
+            "std_mae_score": 0.0026225607046155603,
+            "mean_rmse_score": 0.11288046710658803,
+            "std_rmse_score": 0.0034453175298506267,
+            "std_score": 0.0026225607046155603,
+        },
+    },
+}
