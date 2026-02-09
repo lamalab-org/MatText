@@ -1,0 +1,19 @@
+# coGN Training Dependencies
+# Core deep learning and GNN libraries
+tensorflow>=2.10.0
+kgcnn>=2.0.0
+pymatgen>=2023.0.0
+networkx>=2.8
+
+# Data handling
+datasets>=2.0.0
+h5py>=3.7.0
+pandas>=1.5.0
+numpy>=1.23.0
+scikit-learn>=1.1.0
+
+# GraphList utility (may need to be installed from source)
+# git+https://github.com/aimat-lab/GraphList.git
+
+# Note: You may need to install graphlist manually:
+# pip install git+https://github.com/aimat-lab/GraphList.git
