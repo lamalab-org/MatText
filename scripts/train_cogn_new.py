@@ -43,14 +43,14 @@ logger = logging.getLogger(__name__)
 
 # Configuration - NEW datasets
 HF_DATASET_NAME = "jablonkagroup/MatText-hypo_pot"
-OUTPUT_DIR = Path("cogn_outputs_new")
+OUTPUT_DIR = Path("/data/alamparan/COGN")
 CHECKPOINT_DIR = OUTPUT_DIR / "checkpoints"
 RESULTS_DIR = OUTPUT_DIR / "results"
 CACHE_DIR = OUTPUT_DIR / "cache"
 GRAPH_CACHE_DIR = OUTPUT_DIR / "graph_cache"
 
 # Properties to train on
-PROPERTIES = ["phonons"]  # ["bandgap", "form_energy", "jdft2d", "phonons"]
+PROPERTIES =  ["dielectric","gvrh","jdft2d", "phonons", "bandgap", "formenergy"]
 
 # Alpha values for total_energy targets
 ALPHA_VALUES = ["0", "0.2", "0.4", "0.5", "0.6", "0.8", "1"]
