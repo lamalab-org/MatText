@@ -1,0 +1,81 @@
+{
+  "model_size": "7b",
+  "property": "kvrh",
+  "num_folds": 5,
+  "mean_mae": 0.23946198835895433,
+  "std_mae": 0.1083229405607675,
+  "mean_rmse": 0.3656489347864332,
+  "std_rmse": 0.15010264368619944,
+  "fold_results": [
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_2_fold_2_predictions.json",
+      "model_size": "7b",
+      "property": "kvrh",
+      "fold": "2",
+      "metrics": {
+        "mae": 0.36598340140308755,
+        "rmse": 0.516697639193085,
+        "num_valid": 1472,
+        "num_total": 1475
+      },
+      "num_predictions": 1475,
+      "num_ground_truth": 1475
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_4_fold_4_predictions.json",
+      "model_size": "7b",
+      "property": "kvrh",
+      "fold": "4",
+      "metrics": {
+        "mae": 0.10630438431050981,
+        "rmse": 0.17544282693142757,
+        "num_valid": 1552,
+        "num_total": 1553
+      },
+      "num_predictions": 1553,
+      "num_ground_truth": 1553
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_0_fold_0_predictions.json",
+      "model_size": "7b",
+      "property": "kvrh",
+      "fold": "0",
+      "metrics": {
+        "mae": 0.3626554856401615,
+        "rmse": 0.5562094277241558,
+        "num_valid": 1526,
+        "num_total": 1528
+      },
+      "num_predictions": 1528,
+      "num_ground_truth": 1528
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_1_fold_1_predictions.json",
+      "model_size": "7b",
+      "property": "kvrh",
+      "fold": "1",
+      "metrics": {
+        "mae": 0.21966216828761947,
+        "rmse": 0.34419310147372223,
+        "num_valid": 1530,
+        "num_total": 1537
+      },
+      "num_predictions": 1537,
+      "num_ground_truth": 1537
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_3_fold_3_predictions.json",
+      "model_size": "7b",
+      "property": "kvrh",
+      "fold": "3",
+      "metrics": {
+        "mae": 0.14270450215339336,
+        "rmse": 0.23570167860977526,
+        "num_valid": 1505,
+        "num_total": 1508
+      },
+      "num_predictions": 1508,
+      "num_ground_truth": 1508
+    }
+  ]
+}

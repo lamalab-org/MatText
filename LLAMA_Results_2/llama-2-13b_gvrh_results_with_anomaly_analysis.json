@@ -1,0 +1,330 @@
+{
+  "model_size": "13b",
+  "property": "gvrh",
+  "num_folds": 5,
+  "total_anomalies": 21,
+  "metrics_all": {
+    "mean_mae": 1.551885139350499,
+    "std_mae": 1.5030294372061843,
+    "mean_rmse": 26.904469882683777,
+    "std_rmse": 27.631287110383024
+  },
+  "metrics_clean": {
+    "mean_mae": 0.18161114572547005,
+    "std_mae": 0.02308010563051014,
+    "mean_rmse": 0.2379987875430175,
+    "std_rmse": 0.02115250720639416
+  },
+  "fold_results": [
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_3_fold_3_predictions.json",
+      "model_size": "13b",
+      "property": "gvrh",
+      "fold": "3",
+      "metrics_all": {
+        "mae": 1.960188514143311,
+        "rmse": 43.214245467268114,
+        "num_valid": 1335,
+        "num_total": 1508,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.16317620744988684,
+        "rmse": 0.22223587324141492,
+        "num_valid": 1328,
+        "num_total": 1508,
+        "num_excluded": 7
+      },
+      "anomalies": [
+        {
+          "index": 346,
+          "mbid": "mb-log-gvrh-02187",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 419,
+          "mbid": "mb-log-gvrh-02686",
+          "prediction": 179.0,
+          "ground_truth": 1.6532125137753437,
+          "ratio": 108.27404130351535,
+          "absolute_diff": 177.34678748622466,
+          "relative_diff": 107.27404130351535,
+          "reason": "ratio_108.27x_exceeds_upper_5.0x; relative_diff_107.27_exceeds_4.0"
+        },
+        {
+          "index": 762,
+          "mbid": "mb-log-gvrh-04660",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 783,
+          "mbid": "mb-log-gvrh-04821",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 1107,
+          "mbid": "mb-log-gvrh-08232",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 1341,
+          "mbid": "mb-log-gvrh-09915",
+          "prediction": 1111.0,
+          "ground_truth": 2.0170333392987803,
+          "ratio": 550.8089421993581,
+          "absolute_diff": 1108.9829666607013,
+          "relative_diff": 549.8089421993581,
+          "reason": "ratio_550.81x_exceeds_upper_5.0x; relative_diff_549.81_exceeds_4.0"
+        },
+        {
+          "index": 1501,
+          "mbid": "mb-log-gvrh-10933",
+          "prediction": 1111.0,
+          "ground_truth": 1.1760912590556813,
+          "ratio": 944.6545847913663,
+          "absolute_diff": 1109.8239087409443,
+          "relative_diff": 943.6545847913663,
+          "reason": "ratio_944.65x_exceeds_upper_5.0x; relative_diff_943.65_exceeds_4.0"
+        }
+      ],
+      "num_anomalies": 7
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_1_fold_1_predictions.json",
+      "model_size": "13b",
+      "property": "gvrh",
+      "fold": "1",
+      "metrics_all": {
+        "mae": 3.839780044220035,
+        "rmse": 63.88857095153076,
+        "num_valid": 1509,
+        "num_total": 1537,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.1584707250823687,
+        "rmse": 0.22083327733796057,
+        "num_valid": 1498,
+        "num_total": 1537,
+        "num_excluded": 11
+      },
+      "anomalies": [
+        {
+          "index": 276,
+          "mbid": "mb-log-gvrh-01932",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 298,
+          "mbid": "mb-log-gvrh-02117",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 869,
+          "mbid": "mb-log-gvrh-06633",
+          "prediction": 1.43,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.43,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.43"
+        },
+        {
+          "index": 930,
+          "mbid": "mb-log-gvrh-07001",
+          "prediction": 1111.0,
+          "ground_truth": 0.6020599913279624,
+          "ratio": 1845.3310567099297,
+          "absolute_diff": 1110.397940008672,
+          "relative_diff": 1844.33105670993,
+          "reason": "ratio_1845.33x_exceeds_upper_5.0x; relative_diff_1844.33_exceeds_4.0"
+        },
+        {
+          "index": 1236,
+          "mbid": "mb-log-gvrh-09108",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 1280,
+          "mbid": "mb-log-gvrh-09441",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 1310,
+          "mbid": "mb-log-gvrh-09659",
+          "prediction": 1111.0,
+          "ground_truth": 1.3010299956639813,
+          "ratio": 853.9388051795075,
+          "absolute_diff": 1109.698970004336,
+          "relative_diff": 852.9388051795074,
+          "reason": "ratio_853.94x_exceeds_upper_5.0x; relative_diff_852.94_exceeds_4.0"
+        },
+        {
+          "index": 1313,
+          "mbid": "mb-log-gvrh-09671",
+          "prediction": 1111.0,
+          "ground_truth": 1.2787536009528289,
+          "ratio": 868.8147577235898,
+          "absolute_diff": 1109.7212463990472,
+          "relative_diff": 867.8147577235898,
+          "reason": "ratio_868.81x_exceeds_upper_5.0x; relative_diff_867.81_exceeds_4.0"
+        },
+        {
+          "index": 1521,
+          "mbid": "mb-log-gvrh-10913",
+          "prediction": 1.96,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.96,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.96"
+        },
+        {
+          "index": 1529,
+          "mbid": "mb-log-gvrh-10952",
+          "prediction": 1111.0,
+          "ground_truth": 1.1139433523068367,
+          "ratio": 997.3577181454143,
+          "absolute_diff": 1109.886056647693,
+          "relative_diff": 996.3577181454142,
+          "reason": "ratio_997.36x_exceeds_upper_5.0x; relative_diff_996.36_exceeds_4.0"
+        },
+        {
+          "index": 1534,
+          "mbid": "mb-log-gvrh-10975",
+          "prediction": 1111.0,
+          "ground_truth": 1.255272505103306,
+          "ratio": 885.0667846887694,
+          "absolute_diff": 1109.7447274948968,
+          "relative_diff": 884.0667846887695,
+          "reason": "ratio_885.07x_exceeds_upper_5.0x; relative_diff_884.07_exceeds_4.0"
+        }
+      ],
+      "num_anomalies": 11
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_4_fold_4_predictions.json",
+      "model_size": "13b",
+      "property": "gvrh",
+      "fold": "4",
+      "metrics_all": {
+        "mae": 0.219158592193828,
+        "rmse": 0.2793677633826647,
+        "num_valid": 887,
+        "num_total": 1553,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.2163842435248025,
+        "rmse": 0.27323065103912747,
+        "num_valid": 884,
+        "num_total": 1553,
+        "num_excluded": 3
+      },
+      "anomalies": [
+        {
+          "index": 231,
+          "mbid": "mb-log-gvrh-01283",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 1303,
+          "mbid": "mb-log-gvrh-09421",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 1357,
+          "mbid": "mb-log-gvrh-09724",
+          "prediction": 1.11,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.11,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.11"
+        }
+      ],
+      "num_anomalies": 3
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_0_fold_0_predictions.json",
+      "model_size": "13b",
+      "property": "gvrh",
+      "fold": "0",
+      "metrics_all": {
+        "mae": NaN,
+        "rmse": NaN,
+        "num_valid": 0,
+        "num_total": 1528,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": NaN,
+        "rmse": NaN,
+        "num_valid": 0,
+        "num_total": 1528,
+        "num_excluded": 0
+      },
+      "anomalies": [],
+      "num_anomalies": 0
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_2_fold_2_predictions.json",
+      "model_size": "13b",
+      "property": "gvrh",
+      "fold": "2",
+      "metrics_all": {
+        "mae": 0.1884134068448222,
+        "rmse": 0.2356953485535671,
+        "num_valid": 255,
+        "num_total": 1475,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.1884134068448222,
+        "rmse": 0.2356953485535671,
+        "num_valid": 255,
+        "num_total": 1475,
+        "num_excluded": 0
+      },
+      "anomalies": [],
+      "num_anomalies": 0
+    }
+  ]
+}

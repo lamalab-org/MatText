@@ -1,0 +1,912 @@
+{
+  "aggregated": {
+    "llama-2-7b_perovskites": {
+      "model_size": "7b",
+      "property": "perovskites",
+      "num_folds": 5,
+      "mean_mae": 0.27847696993930915,
+      "std_mae": 0.05856647413740674,
+      "mean_rmse": 0.3951841071161762,
+      "std_rmse": 0.09633813169513912,
+      "fold_results": [
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_3_fold_3_predictions.json",
+          "model_size": "7b",
+          "property": "perovskites",
+          "fold": "3",
+          "metrics": {
+            "mae": 0.3033130779392338,
+            "rmse": 0.4789027529295904,
+            "num_valid": 3785,
+            "num_total": 3785
+          },
+          "num_predictions": 3785,
+          "num_ground_truth": 3785
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_1_fold_1_predictions.json",
+          "model_size": "7b",
+          "property": "perovskites",
+          "fold": "1",
+          "metrics": {
+            "mae": 0.37584257791864767,
+            "rmse": 0.5338602455267014,
+            "num_valid": 3786,
+            "num_total": 3786
+          },
+          "num_predictions": 3786,
+          "num_ground_truth": 3786
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_0_fold_0_predictions.json",
+          "model_size": "7b",
+          "property": "perovskites",
+          "fold": "0",
+          "metrics": {
+            "mae": 0.26521394611727417,
+            "rmse": 0.354329795252229,
+            "num_valid": 3786,
+            "num_total": 3786
+          },
+          "num_predictions": 3786,
+          "num_ground_truth": 3786
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_4_fold_4_predictions.json",
+          "model_size": "7b",
+          "property": "perovskites",
+          "fold": "4",
+          "metrics": {
+            "mae": 0.24572787318361955,
+            "rmse": 0.3361766535680716,
+            "num_valid": 3785,
+            "num_total": 3785
+          },
+          "num_predictions": 3785,
+          "num_ground_truth": 3785
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_2_fold_2_predictions.json",
+          "model_size": "7b",
+          "property": "perovskites",
+          "fold": "2",
+          "metrics": {
+            "mae": 0.20228737453777074,
+            "rmse": 0.2726510883042885,
+            "num_valid": 3786,
+            "num_total": 3786
+          },
+          "num_predictions": 3786,
+          "num_ground_truth": 3786
+        }
+      ]
+    },
+    "llama-2-7b_gvrh": {
+      "model_size": "7b",
+      "property": "gvrh",
+      "num_folds": 5,
+      "mean_mae": 0.23673360862734866,
+      "std_mae": 0.037930981603260326,
+      "mean_rmse": 0.326945430268186,
+      "std_rmse": 0.050430372963188176,
+      "fold_results": [
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_3_fold_3_predictions.json",
+          "model_size": "7b",
+          "property": "gvrh",
+          "fold": "3",
+          "metrics": {
+            "mae": 0.29556313578898186,
+            "rmse": 0.40032376553857907,
+            "num_valid": 1314,
+            "num_total": 1508
+          },
+          "num_predictions": 1508,
+          "num_ground_truth": 1508
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_1_fold_1_predictions.json",
+          "model_size": "7b",
+          "property": "gvrh",
+          "fold": "1",
+          "metrics": {
+            "mae": 0.2311308601501537,
+            "rmse": 0.31929563631585045,
+            "num_valid": 1516,
+            "num_total": 1537
+          },
+          "num_predictions": 1537,
+          "num_ground_truth": 1537
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_4_fold_4_predictions.json",
+          "model_size": "7b",
+          "property": "gvrh",
+          "fold": "4",
+          "metrics": {
+            "mae": 0.23396237272163622,
+            "rmse": 0.33119476136103043,
+            "num_valid": 1552,
+            "num_total": 1553
+          },
+          "num_predictions": 1553,
+          "num_ground_truth": 1553
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_0_fold_0_predictions.json",
+          "model_size": "7b",
+          "property": "gvrh",
+          "fold": "0",
+          "metrics": {
+            "mae": 0.24629759002065882,
+            "rmse": 0.34098049340565406,
+            "num_valid": 1526,
+            "num_total": 1528
+          },
+          "num_predictions": 1528,
+          "num_ground_truth": 1528
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_2_fold_2_predictions.json",
+          "model_size": "7b",
+          "property": "gvrh",
+          "fold": "2",
+          "metrics": {
+            "mae": 0.17671408445531256,
+            "rmse": 0.24293249471981598,
+            "num_valid": 1470,
+            "num_total": 1475
+          },
+          "num_predictions": 1475,
+          "num_ground_truth": 1475
+        }
+      ]
+    },
+    "llama-2-7b_kvrh": {
+      "model_size": "7b",
+      "property": "kvrh",
+      "num_folds": 5,
+      "mean_mae": 0.23946198835895433,
+      "std_mae": 0.1083229405607675,
+      "mean_rmse": 0.3656489347864332,
+      "std_rmse": 0.15010264368619944,
+      "fold_results": [
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_2_fold_2_predictions.json",
+          "model_size": "7b",
+          "property": "kvrh",
+          "fold": "2",
+          "metrics": {
+            "mae": 0.36598340140308755,
+            "rmse": 0.516697639193085,
+            "num_valid": 1472,
+            "num_total": 1475
+          },
+          "num_predictions": 1475,
+          "num_ground_truth": 1475
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_4_fold_4_predictions.json",
+          "model_size": "7b",
+          "property": "kvrh",
+          "fold": "4",
+          "metrics": {
+            "mae": 0.10630438431050981,
+            "rmse": 0.17544282693142757,
+            "num_valid": 1552,
+            "num_total": 1553
+          },
+          "num_predictions": 1553,
+          "num_ground_truth": 1553
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_0_fold_0_predictions.json",
+          "model_size": "7b",
+          "property": "kvrh",
+          "fold": "0",
+          "metrics": {
+            "mae": 0.3626554856401615,
+            "rmse": 0.5562094277241558,
+            "num_valid": 1526,
+            "num_total": 1528
+          },
+          "num_predictions": 1528,
+          "num_ground_truth": 1528
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_1_fold_1_predictions.json",
+          "model_size": "7b",
+          "property": "kvrh",
+          "fold": "1",
+          "metrics": {
+            "mae": 0.21966216828761947,
+            "rmse": 0.34419310147372223,
+            "num_valid": 1530,
+            "num_total": 1537
+          },
+          "num_predictions": 1537,
+          "num_ground_truth": 1537
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_3_fold_3_predictions.json",
+          "model_size": "7b",
+          "property": "kvrh",
+          "fold": "3",
+          "metrics": {
+            "mae": 0.14270450215339336,
+            "rmse": 0.23570167860977526,
+            "num_valid": 1505,
+            "num_total": 1508
+          },
+          "num_predictions": 1508,
+          "num_ground_truth": 1508
+        }
+      ]
+    },
+    "llama-2-13b_perovskites": {
+      "model_size": "13b",
+      "property": "perovskites",
+      "num_folds": 5,
+      "mean_mae": 265.1603535614222,
+      "std_mae": 206.50449329540854,
+      "mean_rmse": 752.0246374171905,
+      "std_rmse": 355.2100528969872,
+      "fold_results": [
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_3_fold_3_predictions.json",
+          "model_size": "13b",
+          "property": "perovskites",
+          "fold": "3",
+          "metrics": {
+            "mae": NaN,
+            "rmse": NaN,
+            "num_valid": 0,
+            "num_total": 3785
+          },
+          "num_predictions": 3785,
+          "num_ground_truth": 3785
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_1_fold_1_predictions.json",
+          "model_size": "13b",
+          "property": "perovskites",
+          "fold": "1",
+          "metrics": {
+            "mae": 254.23550977284734,
+            "rmse": 678.0405520913934,
+            "num_valid": 3786,
+            "num_total": 3786
+          },
+          "num_predictions": 3786,
+          "num_ground_truth": 3786
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_0_fold_0_predictions.json",
+          "model_size": "13b",
+          "property": "perovskites",
+          "fold": "0",
+          "metrics": {
+            "mae": 591.1680953642385,
+            "rmse": 1078.8847849840806,
+            "num_valid": 3775,
+            "num_total": 3786
+          },
+          "num_predictions": 3786,
+          "num_ground_truth": 3786
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_4_fold_4_predictions.json",
+          "model_size": "13b",
+          "property": "perovskites",
+          "fold": "4",
+          "metrics": {
+            "mae": 192.8755956907478,
+            "rmse": 1050.0935993721982,
+            "num_valid": 3156,
+            "num_total": 3785
+          },
+          "num_predictions": 3785,
+          "num_ground_truth": 3785
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_2_fold_2_predictions.json",
+          "model_size": "13b",
+          "property": "perovskites",
+          "fold": "2",
+          "metrics": {
+            "mae": 22.362213417855255,
+            "rmse": 201.07961322109003,
+            "num_valid": 3786,
+            "num_total": 3786
+          },
+          "num_predictions": 3786,
+          "num_ground_truth": 3786
+        }
+      ]
+    },
+    "llama-2-13b_gvrh": {
+      "model_size": "13b",
+      "property": "gvrh",
+      "num_folds": 5,
+      "mean_mae": 1.551885139350499,
+      "std_mae": 1.5030294372061843,
+      "mean_rmse": 26.904469882683777,
+      "std_rmse": 27.631287110383024,
+      "fold_results": [
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_3_fold_3_predictions.json",
+          "model_size": "13b",
+          "property": "gvrh",
+          "fold": "3",
+          "metrics": {
+            "mae": 1.960188514143311,
+            "rmse": 43.214245467268114,
+            "num_valid": 1335,
+            "num_total": 1508
+          },
+          "num_predictions": 1508,
+          "num_ground_truth": 1508
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_1_fold_1_predictions.json",
+          "model_size": "13b",
+          "property": "gvrh",
+          "fold": "1",
+          "metrics": {
+            "mae": 3.839780044220035,
+            "rmse": 63.88857095153076,
+            "num_valid": 1509,
+            "num_total": 1537
+          },
+          "num_predictions": 1537,
+          "num_ground_truth": 1537
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_4_fold_4_predictions.json",
+          "model_size": "13b",
+          "property": "gvrh",
+          "fold": "4",
+          "metrics": {
+            "mae": 0.219158592193828,
+            "rmse": 0.2793677633826647,
+            "num_valid": 887,
+            "num_total": 1553
+          },
+          "num_predictions": 1553,
+          "num_ground_truth": 1553
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_0_fold_0_predictions.json",
+          "model_size": "13b",
+          "property": "gvrh",
+          "fold": "0",
+          "metrics": {
+            "mae": NaN,
+            "rmse": NaN,
+            "num_valid": 0,
+            "num_total": 1528
+          },
+          "num_predictions": 1528,
+          "num_ground_truth": 1528
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_2_fold_2_predictions.json",
+          "model_size": "13b",
+          "property": "gvrh",
+          "fold": "2",
+          "metrics": {
+            "mae": 0.1884134068448222,
+            "rmse": 0.2356953485535671,
+            "num_valid": 255,
+            "num_total": 1475
+          },
+          "num_predictions": 1475,
+          "num_ground_truth": 1475
+        }
+      ]
+    },
+    "llama-2-13b_kvrh": {
+      "model_size": "13b",
+      "property": "kvrh",
+      "num_folds": 5,
+      "mean_mae": 6.357593268170558,
+      "std_mae": 12.080589923678945,
+      "mean_rmse": 32.96513869548166,
+      "std_rmse": 65.07835930227546,
+      "fold_results": [
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_2_fold_2_predictions.json",
+          "model_size": "13b",
+          "property": "kvrh",
+          "fold": "2",
+          "metrics": {
+            "mae": 0.2839794044457286,
+            "rmse": 0.44484836762927554,
+            "num_valid": 9,
+            "num_total": 1475
+          },
+          "num_predictions": 1475,
+          "num_ground_truth": 1475
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_4_fold_4_predictions.json",
+          "model_size": "13b",
+          "property": "kvrh",
+          "fold": "4",
+          "metrics": {
+            "mae": 0.16426544256485878,
+            "rmse": 0.22113482915298474,
+            "num_valid": 1488,
+            "num_total": 1553
+          },
+          "num_predictions": 1553,
+          "num_ground_truth": 1553
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_0_fold_0_predictions.json",
+          "model_size": "13b",
+          "property": "kvrh",
+          "fold": "0",
+          "metrics": {
+            "mae": 0.3730532240235088,
+            "rmse": 0.5894284056683582,
+            "num_valid": 333,
+            "num_total": 1528
+          },
+          "num_predictions": 1528,
+          "num_ground_truth": 1528
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_1_fold_1_predictions.json",
+          "model_size": "13b",
+          "property": "kvrh",
+          "fold": "1",
+          "metrics": {
+            "mae": 30.518029963652967,
+            "rmse": 163.12164356879197,
+            "num_valid": 1493,
+            "num_total": 1537
+          },
+          "num_predictions": 1537,
+          "num_ground_truth": 1537
+        },
+        {
+          "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_3_fold_3_predictions.json",
+          "model_size": "13b",
+          "property": "kvrh",
+          "fold": "3",
+          "metrics": {
+            "mae": 0.4486383061657273,
+            "rmse": 0.4486383061657273,
+            "num_valid": 1,
+            "num_total": 1508
+          },
+          "num_predictions": 1508,
+          "num_ground_truth": 1508
+        }
+      ]
+    }
+  },
+  "individual_files": [
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_3_fold_3_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "3",
+      "metrics": {
+        "mae": 0.3033130779392338,
+        "rmse": 0.4789027529295904,
+        "num_valid": 3785,
+        "num_total": 3785
+      },
+      "num_predictions": 3785,
+      "num_ground_truth": 3785
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_1_fold_1_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "1",
+      "metrics": {
+        "mae": 0.37584257791864767,
+        "rmse": 0.5338602455267014,
+        "num_valid": 3786,
+        "num_total": 3786
+      },
+      "num_predictions": 3786,
+      "num_ground_truth": 3786
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_0_fold_0_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "0",
+      "metrics": {
+        "mae": 0.26521394611727417,
+        "rmse": 0.354329795252229,
+        "num_valid": 3786,
+        "num_total": 3786
+      },
+      "num_predictions": 3786,
+      "num_ground_truth": 3786
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_4_fold_4_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "4",
+      "metrics": {
+        "mae": 0.24572787318361955,
+        "rmse": 0.3361766535680716,
+        "num_valid": 3785,
+        "num_total": 3785
+      },
+      "num_predictions": 3785,
+      "num_ground_truth": 3785
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_2_fold_2_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "2",
+      "metrics": {
+        "mae": 0.20228737453777074,
+        "rmse": 0.2726510883042885,
+        "num_valid": 3786,
+        "num_total": 3786
+      },
+      "num_predictions": 3786,
+      "num_ground_truth": 3786
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_3_fold_3_predictions.json",
+      "model_size": "7b",
+      "property": "gvrh",
+      "fold": "3",
+      "metrics": {
+        "mae": 0.29556313578898186,
+        "rmse": 0.40032376553857907,
+        "num_valid": 1314,
+        "num_total": 1508
+      },
+      "num_predictions": 1508,
+      "num_ground_truth": 1508
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_1_fold_1_predictions.json",
+      "model_size": "7b",
+      "property": "gvrh",
+      "fold": "1",
+      "metrics": {
+        "mae": 0.2311308601501537,
+        "rmse": 0.31929563631585045,
+        "num_valid": 1516,
+        "num_total": 1537
+      },
+      "num_predictions": 1537,
+      "num_ground_truth": 1537
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_4_fold_4_predictions.json",
+      "model_size": "7b",
+      "property": "gvrh",
+      "fold": "4",
+      "metrics": {
+        "mae": 0.23396237272163622,
+        "rmse": 0.33119476136103043,
+        "num_valid": 1552,
+        "num_total": 1553
+      },
+      "num_predictions": 1553,
+      "num_ground_truth": 1553
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_0_fold_0_predictions.json",
+      "model_size": "7b",
+      "property": "gvrh",
+      "fold": "0",
+      "metrics": {
+        "mae": 0.24629759002065882,
+        "rmse": 0.34098049340565406,
+        "num_valid": 1526,
+        "num_total": 1528
+      },
+      "num_predictions": 1528,
+      "num_ground_truth": 1528
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_2_fold_2_predictions.json",
+      "model_size": "7b",
+      "property": "gvrh",
+      "fold": "2",
+      "metrics": {
+        "mae": 0.17671408445531256,
+        "rmse": 0.24293249471981598,
+        "num_valid": 1470,
+        "num_total": 1475
+      },
+      "num_predictions": 1475,
+      "num_ground_truth": 1475
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_2_fold_2_predictions.json",
+      "model_size": "7b",
+      "property": "kvrh",
+      "fold": "2",
+      "metrics": {
+        "mae": 0.36598340140308755,
+        "rmse": 0.516697639193085,
+        "num_valid": 1472,
+        "num_total": 1475
+      },
+      "num_predictions": 1475,
+      "num_ground_truth": 1475
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_4_fold_4_predictions.json",
+      "model_size": "7b",
+      "property": "kvrh",
+      "fold": "4",
+      "metrics": {
+        "mae": 0.10630438431050981,
+        "rmse": 0.17544282693142757,
+        "num_valid": 1552,
+        "num_total": 1553
+      },
+      "num_predictions": 1553,
+      "num_ground_truth": 1553
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_0_fold_0_predictions.json",
+      "model_size": "7b",
+      "property": "kvrh",
+      "fold": "0",
+      "metrics": {
+        "mae": 0.3626554856401615,
+        "rmse": 0.5562094277241558,
+        "num_valid": 1526,
+        "num_total": 1528
+      },
+      "num_predictions": 1528,
+      "num_ground_truth": 1528
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_1_fold_1_predictions.json",
+      "model_size": "7b",
+      "property": "kvrh",
+      "fold": "1",
+      "metrics": {
+        "mae": 0.21966216828761947,
+        "rmse": 0.34419310147372223,
+        "num_valid": 1530,
+        "num_total": 1537
+      },
+      "num_predictions": 1537,
+      "num_ground_truth": 1537
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_3_fold_3_predictions.json",
+      "model_size": "7b",
+      "property": "kvrh",
+      "fold": "3",
+      "metrics": {
+        "mae": 0.14270450215339336,
+        "rmse": 0.23570167860977526,
+        "num_valid": 1505,
+        "num_total": 1508
+      },
+      "num_predictions": 1508,
+      "num_ground_truth": 1508
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_3_fold_3_predictions.json",
+      "model_size": "13b",
+      "property": "perovskites",
+      "fold": "3",
+      "metrics": {
+        "mae": NaN,
+        "rmse": NaN,
+        "num_valid": 0,
+        "num_total": 3785
+      },
+      "num_predictions": 3785,
+      "num_ground_truth": 3785
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_1_fold_1_predictions.json",
+      "model_size": "13b",
+      "property": "perovskites",
+      "fold": "1",
+      "metrics": {
+        "mae": 254.23550977284734,
+        "rmse": 678.0405520913934,
+        "num_valid": 3786,
+        "num_total": 3786
+      },
+      "num_predictions": 3786,
+      "num_ground_truth": 3786
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_0_fold_0_predictions.json",
+      "model_size": "13b",
+      "property": "perovskites",
+      "fold": "0",
+      "metrics": {
+        "mae": 591.1680953642385,
+        "rmse": 1078.8847849840806,
+        "num_valid": 3775,
+        "num_total": 3786
+      },
+      "num_predictions": 3786,
+      "num_ground_truth": 3786
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_4_fold_4_predictions.json",
+      "model_size": "13b",
+      "property": "perovskites",
+      "fold": "4",
+      "metrics": {
+        "mae": 192.8755956907478,
+        "rmse": 1050.0935993721982,
+        "num_valid": 3156,
+        "num_total": 3785
+      },
+      "num_predictions": 3785,
+      "num_ground_truth": 3785
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_2_fold_2_predictions.json",
+      "model_size": "13b",
+      "property": "perovskites",
+      "fold": "2",
+      "metrics": {
+        "mae": 22.362213417855255,
+        "rmse": 201.07961322109003,
+        "num_valid": 3786,
+        "num_total": 3786
+      },
+      "num_predictions": 3786,
+      "num_ground_truth": 3786
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_3_fold_3_predictions.json",
+      "model_size": "13b",
+      "property": "gvrh",
+      "fold": "3",
+      "metrics": {
+        "mae": 1.960188514143311,
+        "rmse": 43.214245467268114,
+        "num_valid": 1335,
+        "num_total": 1508
+      },
+      "num_predictions": 1508,
+      "num_ground_truth": 1508
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_1_fold_1_predictions.json",
+      "model_size": "13b",
+      "property": "gvrh",
+      "fold": "1",
+      "metrics": {
+        "mae": 3.839780044220035,
+        "rmse": 63.88857095153076,
+        "num_valid": 1509,
+        "num_total": 1537
+      },
+      "num_predictions": 1537,
+      "num_ground_truth": 1537
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_4_fold_4_predictions.json",
+      "model_size": "13b",
+      "property": "gvrh",
+      "fold": "4",
+      "metrics": {
+        "mae": 0.219158592193828,
+        "rmse": 0.2793677633826647,
+        "num_valid": 887,
+        "num_total": 1553
+      },
+      "num_predictions": 1553,
+      "num_ground_truth": 1553
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_0_fold_0_predictions.json",
+      "model_size": "13b",
+      "property": "gvrh",
+      "fold": "0",
+      "metrics": {
+        "mae": NaN,
+        "rmse": NaN,
+        "num_valid": 0,
+        "num_total": 1528
+      },
+      "num_predictions": 1528,
+      "num_ground_truth": 1528
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_2_fold_2_predictions.json",
+      "model_size": "13b",
+      "property": "gvrh",
+      "fold": "2",
+      "metrics": {
+        "mae": 0.1884134068448222,
+        "rmse": 0.2356953485535671,
+        "num_valid": 255,
+        "num_total": 1475
+      },
+      "num_predictions": 1475,
+      "num_ground_truth": 1475
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_2_fold_2_predictions.json",
+      "model_size": "13b",
+      "property": "kvrh",
+      "fold": "2",
+      "metrics": {
+        "mae": 0.2839794044457286,
+        "rmse": 0.44484836762927554,
+        "num_valid": 9,
+        "num_total": 1475
+      },
+      "num_predictions": 1475,
+      "num_ground_truth": 1475
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_4_fold_4_predictions.json",
+      "model_size": "13b",
+      "property": "kvrh",
+      "fold": "4",
+      "metrics": {
+        "mae": 0.16426544256485878,
+        "rmse": 0.22113482915298474,
+        "num_valid": 1488,
+        "num_total": 1553
+      },
+      "num_predictions": 1553,
+      "num_ground_truth": 1553
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_0_fold_0_predictions.json",
+      "model_size": "13b",
+      "property": "kvrh",
+      "fold": "0",
+      "metrics": {
+        "mae": 0.3730532240235088,
+        "rmse": 0.5894284056683582,
+        "num_valid": 333,
+        "num_total": 1528
+      },
+      "num_predictions": 1528,
+      "num_ground_truth": 1528
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_1_fold_1_predictions.json",
+      "model_size": "13b",
+      "property": "kvrh",
+      "fold": "1",
+      "metrics": {
+        "mae": 30.518029963652967,
+        "rmse": 163.12164356879197,
+        "num_valid": 1493,
+        "num_total": 1537
+      },
+      "num_predictions": 1537,
+      "num_ground_truth": 1537
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-13b/kvrh/finetuned_train_robocrys_rep_mattext_kvrh-train-filtered_fold_3_fold_3_predictions.json",
+      "model_size": "13b",
+      "property": "kvrh",
+      "fold": "3",
+      "metrics": {
+        "mae": 0.4486383061657273,
+        "rmse": 0.4486383061657273,
+        "num_valid": 1,
+        "num_total": 1508
+      },
+      "num_predictions": 1508,
+      "num_ground_truth": 1508
+    }
+  ]
+}

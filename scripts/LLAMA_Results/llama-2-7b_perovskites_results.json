@@ -1,0 +1,81 @@
+{
+  "model_size": "7b",
+  "property": "perovskites",
+  "num_folds": 5,
+  "mean_mae": 0.27847696993930915,
+  "std_mae": 0.05856647413740674,
+  "mean_rmse": 0.3951841071161762,
+  "std_rmse": 0.09633813169513912,
+  "fold_results": [
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_3_fold_3_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "3",
+      "metrics": {
+        "mae": 0.3033130779392338,
+        "rmse": 0.4789027529295904,
+        "num_valid": 3785,
+        "num_total": 3785
+      },
+      "num_predictions": 3785,
+      "num_ground_truth": 3785
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_1_fold_1_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "1",
+      "metrics": {
+        "mae": 0.37584257791864767,
+        "rmse": 0.5338602455267014,
+        "num_valid": 3786,
+        "num_total": 3786
+      },
+      "num_predictions": 3786,
+      "num_ground_truth": 3786
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_0_fold_0_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "0",
+      "metrics": {
+        "mae": 0.26521394611727417,
+        "rmse": 0.354329795252229,
+        "num_valid": 3786,
+        "num_total": 3786
+      },
+      "num_predictions": 3786,
+      "num_ground_truth": 3786
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_4_fold_4_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "4",
+      "metrics": {
+        "mae": 0.24572787318361955,
+        "rmse": 0.3361766535680716,
+        "num_valid": 3785,
+        "num_total": 3785
+      },
+      "num_predictions": 3785,
+      "num_ground_truth": 3785
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_2_fold_2_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "2",
+      "metrics": {
+        "mae": 0.20228737453777074,
+        "rmse": 0.2726510883042885,
+        "num_valid": 3786,
+        "num_total": 3786
+      },
+      "num_predictions": 3786,
+      "num_ground_truth": 3786
+    }
+  ]
+}

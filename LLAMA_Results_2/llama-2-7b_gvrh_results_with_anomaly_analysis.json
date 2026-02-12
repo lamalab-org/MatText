@@ -1,0 +1,444 @@
+{
+  "model_size": "7b",
+  "property": "gvrh",
+  "num_folds": 5,
+  "total_anomalies": 32,
+  "metrics_all": {
+    "mean_mae": 0.23673360862734866,
+    "std_mae": 0.037930981603260326,
+    "mean_rmse": 0.326945430268186,
+    "std_rmse": 0.050430372963188176
+  },
+  "metrics_clean": {
+    "mean_mae": 0.2317402026013442,
+    "std_mae": 0.034818445762462784,
+    "mean_rmse": 0.31503095647705737,
+    "std_rmse": 0.044534591684510544
+  },
+  "fold_results": [
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_3_fold_3_predictions.json",
+      "model_size": "7b",
+      "property": "gvrh",
+      "fold": "3",
+      "metrics_all": {
+        "mae": 0.29556313578898186,
+        "rmse": 0.40032376553857907,
+        "num_valid": 1314,
+        "num_total": 1508,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.28282381838744963,
+        "rmse": 0.3718470752881469,
+        "num_valid": 1299,
+        "num_total": 1508,
+        "num_excluded": 15
+      },
+      "anomalies": [
+        {
+          "index": 275,
+          "mbid": "mb-log-gvrh-01727",
+          "prediction": 0.17,
+          "ground_truth": 1.6532125137753437,
+          "ratio": 0.10283009509272407,
+          "absolute_diff": 1.4832125137753438,
+          "relative_diff": 0.897169904907276,
+          "reason": "ratio_0.10x_below_lower_0.2x"
+        },
+        {
+          "index": 345,
+          "mbid": "mb-log-gvrh-02171",
+          "prediction": 0.0,
+          "ground_truth": 1.9138138523837167,
+          "ratio": 0.0,
+          "absolute_diff": 1.9138138523837167,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        },
+        {
+          "index": 382,
+          "mbid": "mb-log-gvrh-02425",
+          "prediction": 0.1,
+          "ground_truth": 1.1139433523068367,
+          "ratio": 0.08977117175026232,
+          "absolute_diff": 1.0139433523068366,
+          "relative_diff": 0.9102288282497376,
+          "reason": "ratio_0.09x_below_lower_0.2x"
+        },
+        {
+          "index": 469,
+          "mbid": "mb-log-gvrh-02973",
+          "prediction": 0.0,
+          "ground_truth": 1.7781512503836436,
+          "ratio": 0.0,
+          "absolute_diff": 1.7781512503836436,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        },
+        {
+          "index": 592,
+          "mbid": "mb-log-gvrh-03726",
+          "prediction": 0.2,
+          "ground_truth": 2.2624510897304293,
+          "ratio": 0.08839970106219179,
+          "absolute_diff": 2.062451089730429,
+          "relative_diff": 0.9116002989378081,
+          "reason": "ratio_0.09x_below_lower_0.2x"
+        },
+        {
+          "index": 842,
+          "mbid": "mb-log-gvrh-05295",
+          "prediction": 0.0,
+          "ground_truth": 1.255272505103306,
+          "ratio": 0.0,
+          "absolute_diff": 1.255272505103306,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        },
+        {
+          "index": 999,
+          "mbid": "mb-log-gvrh-07432",
+          "prediction": 0.0,
+          "ground_truth": 1.3617278360175928,
+          "ratio": 0.0,
+          "absolute_diff": 1.3617278360175928,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        },
+        {
+          "index": 1044,
+          "mbid": "mb-log-gvrh-07829",
+          "prediction": 0.0,
+          "ground_truth": 1.146128035678238,
+          "ratio": 0.0,
+          "absolute_diff": 1.146128035678238,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        },
+        {
+          "index": 1111,
+          "mbid": "mb-log-gvrh-08257",
+          "prediction": 0.0,
+          "ground_truth": 1.0791812460476249,
+          "ratio": 0.0,
+          "absolute_diff": 1.0791812460476249,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        },
+        {
+          "index": 1331,
+          "mbid": "mb-log-gvrh-09825",
+          "prediction": 0.0,
+          "ground_truth": 1.146128035678238,
+          "ratio": 0.0,
+          "absolute_diff": 1.146128035678238,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        },
+        {
+          "index": 1336,
+          "mbid": "mb-log-gvrh-09858",
+          "prediction": 0.0,
+          "ground_truth": 1.2787536009528289,
+          "ratio": 0.0,
+          "absolute_diff": 1.2787536009528289,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        },
+        {
+          "index": 1367,
+          "mbid": "mb-log-gvrh-10156",
+          "prediction": 0.0,
+          "ground_truth": 1.7993405494535817,
+          "ratio": 0.0,
+          "absolute_diff": 1.7993405494535817,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        },
+        {
+          "index": 1434,
+          "mbid": "mb-log-gvrh-10496",
+          "prediction": 0.15,
+          "ground_truth": 1.2041199826559248,
+          "ratio": 0.12457230355827609,
+          "absolute_diff": 1.0541199826559249,
+          "relative_diff": 0.875427696441724,
+          "reason": "ratio_0.12x_below_lower_0.2x"
+        },
+        {
+          "index": 1470,
+          "mbid": "mb-log-gvrh-10692",
+          "prediction": 0.17,
+          "ground_truth": 1.6334684555795864,
+          "ratio": 0.10407302290981842,
+          "absolute_diff": 1.4634684555795865,
+          "relative_diff": 0.8959269770901817,
+          "reason": "ratio_0.10x_below_lower_0.2x"
+        },
+        {
+          "index": 1489,
+          "mbid": "mb-log-gvrh-10837",
+          "prediction": 0.0,
+          "ground_truth": 1.146128035678238,
+          "ratio": 0.0,
+          "absolute_diff": 1.146128035678238,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        }
+      ],
+      "num_anomalies": 15
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_1_fold_1_predictions.json",
+      "model_size": "7b",
+      "property": "gvrh",
+      "fold": "1",
+      "metrics_all": {
+        "mae": 0.2311308601501537,
+        "rmse": 0.31929563631585045,
+        "num_valid": 1516,
+        "num_total": 1537,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.22642346983790454,
+        "rmse": 0.3081129688045465,
+        "num_valid": 1509,
+        "num_total": 1537,
+        "num_excluded": 7
+      },
+      "anomalies": [
+        {
+          "index": 276,
+          "mbid": "mb-log-gvrh-01932",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 869,
+          "mbid": "mb-log-gvrh-06633",
+          "prediction": 1.11,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.11,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.11"
+        },
+        {
+          "index": 1236,
+          "mbid": "mb-log-gvrh-09108",
+          "prediction": 1.07,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.07,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.07"
+        },
+        {
+          "index": 1280,
+          "mbid": "mb-log-gvrh-09441",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 1439,
+          "mbid": "mb-log-gvrh-10431",
+          "prediction": 0.0,
+          "ground_truth": 1.462397997898956,
+          "ratio": 0.0,
+          "absolute_diff": 1.462397997898956,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        },
+        {
+          "index": 1448,
+          "mbid": "mb-log-gvrh-10490",
+          "prediction": 1.69,
+          "ground_truth": 0.3010299956639812,
+          "ratio": 5.614058480359642,
+          "absolute_diff": 1.3889700043360187,
+          "relative_diff": 4.614058480359642,
+          "reason": "ratio_5.61x_exceeds_upper_5.0x; relative_diff_4.61_exceeds_4.0"
+        },
+        {
+          "index": 1521,
+          "mbid": "mb-log-gvrh-10913",
+          "prediction": 1.69,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.69,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.69"
+        }
+      ],
+      "num_anomalies": 7
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_4_fold_4_predictions.json",
+      "model_size": "7b",
+      "property": "gvrh",
+      "fold": "4",
+      "metrics_all": {
+        "mae": 0.23396237272163622,
+        "rmse": 0.33119476136103043,
+        "num_valid": 1552,
+        "num_total": 1553,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.23304355968514395,
+        "rmse": 0.32861236006677547,
+        "num_valid": 1551,
+        "num_total": 1553,
+        "num_excluded": 1
+      },
+      "anomalies": [
+        {
+          "index": 103,
+          "mbid": "mb-log-gvrh-00531",
+          "prediction": 0.3,
+          "ground_truth": 1.9590413923210936,
+          "ratio": 0.15313612115390615,
+          "absolute_diff": 1.6590413923210936,
+          "relative_diff": 0.8468638788460938,
+          "reason": "ratio_0.15x_below_lower_0.2x"
+        }
+      ],
+      "num_anomalies": 1
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_0_fold_0_predictions.json",
+      "model_size": "7b",
+      "property": "gvrh",
+      "fold": "0",
+      "metrics_all": {
+        "mae": 0.24629759002065882,
+        "rmse": 0.34098049340565406,
+        "num_valid": 1526,
+        "num_total": 1528,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.24222209951006374,
+        "rmse": 0.3304157006976998,
+        "num_valid": 1521,
+        "num_total": 1528,
+        "num_excluded": 5
+      },
+      "anomalies": [
+        {
+          "index": 570,
+          "mbid": "mb-log-gvrh-03772",
+          "prediction": 0.0,
+          "ground_truth": 1.724275869600789,
+          "ratio": 0.0,
+          "absolute_diff": 1.724275869600789,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        },
+        {
+          "index": 829,
+          "mbid": "mb-log-gvrh-05493",
+          "prediction": 0.0,
+          "ground_truth": 1.6127838567197355,
+          "ratio": 0.0,
+          "absolute_diff": 1.6127838567197355,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        },
+        {
+          "index": 864,
+          "mbid": "mb-log-gvrh-06632",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 986,
+          "mbid": "mb-log-gvrh-07442",
+          "prediction": 0.0,
+          "ground_truth": 1.6232492903979006,
+          "ratio": 0.0,
+          "absolute_diff": 1.6232492903979006,
+          "relative_diff": 1.0,
+          "reason": "ratio_0.00x_below_lower_0.2x"
+        },
+        {
+          "index": 1334,
+          "mbid": "mb-log-gvrh-09763",
+          "prediction": 1.47,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.47,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.47"
+        }
+      ],
+      "num_anomalies": 5
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/gvrh/finetuned_train_robocrys_rep_mattext_gvrh-train-filtered_fold_2_fold_2_predictions.json",
+      "model_size": "7b",
+      "property": "gvrh",
+      "fold": "2",
+      "metrics_all": {
+        "mae": 0.17671408445531256,
+        "rmse": 0.24293249471981598,
+        "num_valid": 1470,
+        "num_total": 1475,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.17418806558615924,
+        "rmse": 0.23616667752811799,
+        "num_valid": 1466,
+        "num_total": 1475,
+        "num_excluded": 4
+      },
+      "anomalies": [
+        {
+          "index": 14,
+          "mbid": "mb-log-gvrh-00059",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 706,
+          "mbid": "mb-log-gvrh-04817",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 1078,
+          "mbid": "mb-log-gvrh-08378",
+          "prediction": 1.41,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.41,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.41"
+        },
+        {
+          "index": 1256,
+          "mbid": "mb-log-gvrh-09551",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        }
+      ],
+      "num_anomalies": 4
+    }
+  ]
+}

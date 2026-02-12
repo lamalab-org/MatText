@@ -1,0 +1,311 @@
+{
+  "model_size": "7b",
+  "property": "perovskites",
+  "num_folds": 5,
+  "total_anomalies": 18,
+  "metrics_all": {
+    "mean_mae": 0.27847696993930915,
+    "std_mae": 0.05856647413740674,
+    "mean_rmse": 0.3951841071161762,
+    "std_rmse": 0.09633813169513912
+  },
+  "metrics_clean": {
+    "mean_mae": 0.27752514691234714,
+    "std_mae": 0.05785405938669935,
+    "mean_rmse": 0.3936251773476309,
+    "std_rmse": 0.09478904254385433
+  },
+  "fold_results": [
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_3_fold_3_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "3",
+      "metrics_all": {
+        "mae": 0.3033130779392338,
+        "rmse": 0.4789027529295904,
+        "num_valid": 3785,
+        "num_total": 3785,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.29984627617280685,
+        "rmse": 0.47294555501895974,
+        "num_valid": 3773,
+        "num_total": 3785,
+        "num_excluded": 12
+      },
+      "anomalies": [
+        {
+          "index": 328,
+          "mbid": "mb-perovskites-01646",
+          "prediction": 0.16,
+          "ground_truth": 1.32,
+          "ratio": 0.12121212121212122,
+          "absolute_diff": 1.1600000000000001,
+          "relative_diff": 0.8787878787878789,
+          "reason": "ratio_0.12x_below_lower_0.2x"
+        },
+        {
+          "index": 412,
+          "mbid": "mb-perovskites-02023",
+          "prediction": 0.18,
+          "ground_truth": 1.8,
+          "ratio": 0.09999999999999999,
+          "absolute_diff": 1.62,
+          "relative_diff": 0.9,
+          "reason": "ratio_0.10x_below_lower_0.2x"
+        },
+        {
+          "index": 516,
+          "mbid": "mb-perovskites-02515",
+          "prediction": 0.24,
+          "ground_truth": 2.18,
+          "ratio": 0.11009174311926605,
+          "absolute_diff": 1.9400000000000002,
+          "relative_diff": 0.8899082568807339,
+          "reason": "ratio_0.11x_below_lower_0.2x"
+        },
+        {
+          "index": 570,
+          "mbid": "mb-perovskites-02782",
+          "prediction": 0.2,
+          "ground_truth": 1.98,
+          "ratio": 0.10101010101010102,
+          "absolute_diff": 1.78,
+          "relative_diff": 0.898989898989899,
+          "reason": "ratio_0.10x_below_lower_0.2x"
+        },
+        {
+          "index": 815,
+          "mbid": "mb-perovskites-04036",
+          "prediction": 0.14,
+          "ground_truth": 1.3,
+          "ratio": 0.1076923076923077,
+          "absolute_diff": 1.1600000000000001,
+          "relative_diff": 0.8923076923076924,
+          "reason": "ratio_0.11x_below_lower_0.2x"
+        },
+        {
+          "index": 939,
+          "mbid": "mb-perovskites-04629",
+          "prediction": 0.18,
+          "ground_truth": 1.64,
+          "ratio": 0.10975609756097561,
+          "absolute_diff": 1.46,
+          "relative_diff": 0.8902439024390244,
+          "reason": "ratio_0.11x_below_lower_0.2x"
+        },
+        {
+          "index": 1723,
+          "mbid": "mb-perovskites-08482",
+          "prediction": 0.18,
+          "ground_truth": 1.58,
+          "ratio": 0.11392405063291139,
+          "absolute_diff": 1.4000000000000001,
+          "relative_diff": 0.8860759493670887,
+          "reason": "ratio_0.11x_below_lower_0.2x"
+        },
+        {
+          "index": 1764,
+          "mbid": "mb-perovskites-08620",
+          "prediction": 0.18,
+          "ground_truth": 1.64,
+          "ratio": 0.10975609756097561,
+          "absolute_diff": 1.46,
+          "relative_diff": 0.8902439024390244,
+          "reason": "ratio_0.11x_below_lower_0.2x"
+        },
+        {
+          "index": 2001,
+          "mbid": "mb-perovskites-09826",
+          "prediction": 0.16,
+          "ground_truth": 1.18,
+          "ratio": 0.13559322033898305,
+          "absolute_diff": 1.02,
+          "relative_diff": 0.864406779661017,
+          "reason": "ratio_0.14x_below_lower_0.2x"
+        },
+        {
+          "index": 2226,
+          "mbid": "mb-perovskites-11041",
+          "prediction": 0.14,
+          "ground_truth": 1.26,
+          "ratio": 0.11111111111111112,
+          "absolute_diff": 1.12,
+          "relative_diff": 0.888888888888889,
+          "reason": "ratio_0.11x_below_lower_0.2x"
+        },
+        {
+          "index": 2430,
+          "mbid": "mb-perovskites-12097",
+          "prediction": 0.18,
+          "ground_truth": 1.5,
+          "ratio": 0.12,
+          "absolute_diff": 1.32,
+          "relative_diff": 0.88,
+          "reason": "ratio_0.12x_below_lower_0.2x"
+        },
+        {
+          "index": 3738,
+          "mbid": "mb-perovskites-18717",
+          "prediction": 0.16,
+          "ground_truth": 1.44,
+          "ratio": 0.11111111111111112,
+          "absolute_diff": 1.28,
+          "relative_diff": 0.888888888888889,
+          "reason": "ratio_0.11x_below_lower_0.2x"
+        }
+      ],
+      "num_anomalies": 12
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_1_fold_1_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "1",
+      "metrics_all": {
+        "mae": 0.37584257791864767,
+        "rmse": 0.5338602455267014,
+        "num_valid": 3786,
+        "num_total": 3786,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.3745502645502646,
+        "rmse": 0.5320227945946057,
+        "num_valid": 3780,
+        "num_total": 3786,
+        "num_excluded": 6
+      },
+      "anomalies": [
+        {
+          "index": 151,
+          "mbid": "mb-perovskites-00748",
+          "prediction": 1.2,
+          "ground_truth": 0.16,
+          "ratio": 7.5,
+          "absolute_diff": 1.04,
+          "relative_diff": 6.5,
+          "reason": "ratio_7.50x_exceeds_upper_5.0x; relative_diff_6.50_exceeds_4.0"
+        },
+        {
+          "index": 438,
+          "mbid": "mb-perovskites-02237",
+          "prediction": 1.6,
+          "ground_truth": -0.3,
+          "ratio": 5.333333333333334,
+          "absolute_diff": 1.9000000000000001,
+          "relative_diff": 6.333333333333334,
+          "reason": "ratio_5.33x_exceeds_upper_5.0x; relative_diff_6.33_exceeds_4.0"
+        },
+        {
+          "index": 1258,
+          "mbid": "mb-perovskites-06350",
+          "prediction": 1.0,
+          "ground_truth": -0.14,
+          "ratio": 7.142857142857142,
+          "absolute_diff": 1.1400000000000001,
+          "relative_diff": 8.142857142857142,
+          "reason": "ratio_7.14x_exceeds_upper_5.0x; relative_diff_8.14_exceeds_4.0"
+        },
+        {
+          "index": 1433,
+          "mbid": "mb-perovskites-07222",
+          "prediction": 1.0,
+          "ground_truth": 0.0,
+          "ratio": Infinity,
+          "absolute_diff": 1.0,
+          "reason": "ground_truth_near_zero_but_large_prediction_abs_diff_1.00"
+        },
+        {
+          "index": 2250,
+          "mbid": "mb-perovskites-11269",
+          "prediction": 1.0,
+          "ground_truth": -0.04,
+          "ratio": 25.0,
+          "absolute_diff": 1.04,
+          "relative_diff": 26.0,
+          "reason": "ratio_25.00x_exceeds_upper_5.0x; relative_diff_26.00_exceeds_4.0"
+        },
+        {
+          "index": 2443,
+          "mbid": "mb-perovskites-12204",
+          "prediction": 1.0,
+          "ground_truth": -0.02,
+          "ratio": 50.0,
+          "absolute_diff": 1.02,
+          "relative_diff": 51.0,
+          "reason": "ratio_50.00x_exceeds_upper_5.0x; relative_diff_51.00_exceeds_4.0"
+        }
+      ],
+      "num_anomalies": 6
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_0_fold_0_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "0",
+      "metrics_all": {
+        "mae": 0.26521394611727417,
+        "rmse": 0.354329795252229,
+        "num_valid": 3786,
+        "num_total": 3786,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.26521394611727417,
+        "rmse": 0.354329795252229,
+        "num_valid": 3786,
+        "num_total": 3786,
+        "num_excluded": 0
+      },
+      "anomalies": [],
+      "num_anomalies": 0
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_4_fold_4_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "4",
+      "metrics_all": {
+        "mae": 0.24572787318361955,
+        "rmse": 0.3361766535680716,
+        "num_valid": 3785,
+        "num_total": 3785,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.24572787318361955,
+        "rmse": 0.3361766535680716,
+        "num_valid": 3785,
+        "num_total": 3785,
+        "num_excluded": 0
+      },
+      "anomalies": [],
+      "num_anomalies": 0
+    },
+    {
+      "file": "/Users/nalampara/n0w0f/dev/MatText/LLAMA_Generations/llama-2-7b/perovskites/finetuned_train_robocrys_rep_mattext_perovskites-train-filtered_fold_2_fold_2_predictions.json",
+      "model_size": "7b",
+      "property": "perovskites",
+      "fold": "2",
+      "metrics_all": {
+        "mae": 0.20228737453777074,
+        "rmse": 0.2726510883042885,
+        "num_valid": 3786,
+        "num_total": 3786,
+        "num_excluded": 0
+      },
+      "metrics_clean": {
+        "mae": 0.20228737453777074,
+        "rmse": 0.2726510883042885,
+        "num_valid": 3786,
+        "num_total": 3786,
+        "num_excluded": 0
+      },
+      "anomalies": [],
+      "num_anomalies": 0
+    }
+  ]
+}
