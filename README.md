@@ -38,11 +38,11 @@ MatText is a framework for text-based materials modeling. It supports
 We recommend using [uv](https://docs.astral.sh/uv/) for fast and reliable Python package management. To install uv, follow the [installation instructions](https://docs.astral.sh/uv/getting-started/installation/).
 
 
-<!-- ### Install latest release
+### Install latest release
 
 ```bash
-uv pip install mattext
-``` -->
+uv pip install git+https://github.com/lamalab-org/mattext.git
+```
 
 ### Install development version
 
