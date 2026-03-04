@@ -10,4 +10,3 @@ model:
       per_device_train_batch_size: 64
     path:
       pretrained_checkpoint: /home/so87pot/n0w0f/santiago_ckpt/cif_p1_pt_30k/checkpoint-23000
-

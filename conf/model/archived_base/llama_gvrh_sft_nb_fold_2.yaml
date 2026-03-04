@@ -96,7 +96,7 @@ finetune:
     per_device_eval_batch_size: 8
     save_strategy: "steps"
     do_eval: True
-    evaluation_strategy: 'steps'   
+    evaluation_strategy: 'steps'
     logging_strategy: 'steps'
     logging_first_step: True
     save_steps: 20 # Number of epochs before saving

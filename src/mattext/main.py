@@ -1,14 +1,12 @@
 import os
-from datetime import timedelta
-from typing import Callable, Union
+from collections.abc import Callable
 
-import torch
-import torch.distributed as dist
 import hydra
 import torch
 import wandb
 from hydra import main as hydra_main
 from hydra import utils
+from loguru import logger
 from omegaconf import DictConfig
 
 from mattext.models.benchmark import Matbenchmark, MatbenchmarkClassification
@@ -40,12 +38,12 @@ class TaskRunner:
             if task in self.task_map:
                 self.task_map[task](task_cfg, local_rank)
             else:
-                print(f"Unknown task: {task}")
+                logger.info(f"Unknown task: {task}")
 
     def _run_experiment(
         self,
         task_cfg: DictConfig,
-        local_rank: Union[int, None],
+        local_rank: int | None,
         model_class: Callable,
         experiment_type: str,
         use_folds: bool = False,
@@ -58,6 +56,7 @@ class TaskRunner:
             iterations = zip(
                 task_cfg.model.finetune.exp_name,
                 task_cfg.model.finetune.path.finetune_traindata,
+                strict=False,
             )
         else:
             iterations = [None]
@@ -94,28 +93,28 @@ class TaskRunner:
             result = (
                 model.finetune() if hasattr(model, "finetune") else model.pretrain_mlm()
             )
-            print(result)
+            logger.info(result)
 
             if is_main:
                 wandb.finish()
 
     def run_benchmarking(self, task_cfg: DictConfig, local_rank=None) -> None:
-        print("Benchmarking")
+        logger.info("Benchmarking")
         benchmark = Matbenchmark(task_cfg)
         benchmark.run_benchmarking(local_rank=local_rank)
 
     def run_classification(self, task_cfg: DictConfig, local_rank=None) -> None:
-        print("Benchmarking Classification")
+        logger.info("Benchmarking Classification")
         benchmark = MatbenchmarkClassification(task_cfg)
         benchmark.run_benchmarking(local_rank=local_rank)
 
     def run_qmof(self, task_cfg: DictConfig, local_rank=None) -> None:
-        print("Finetuning on qmof")
+        logger.info("Finetuning on qmof")
         matbench_predictor = Matbenchmark(task_cfg)
         matbench_predictor.run_qmof(local_rank=local_rank)
 
     def run_inference(self, task_cfg: DictConfig, local_rank=None) -> None:
-        print("Testing on matbench dataset")
+        logger.info("Testing on matbench dataset")
         matbench_predictor = Benchmark(task_cfg)
         matbench_predictor.run_benchmarking(local_rank=local_rank)
 
@@ -145,17 +144,17 @@ class TaskRunner:
     def initialize_wandb(self):
         if self.wandb_api_key:
             wandb.login(key=self.wandb_api_key)
-            print("W&B API key found")
+            logger.info("W&B API key found")
         else:
-            print(
+            logger.info(
                 "W&B API key not found. Please set the WANDB_API_KEY environment variable."
             )
 
 
 @hydra_main(config_path="../../conf", config_name="config")
 def main(cfg: DictConfig) -> None:
-    print(f"Working directory : {os.getcwd()}")
-    print(
+    logger.info(f"Working directory : {os.getcwd()}")
+    logger.info(
         f"Output directory  : {hydra.core.hydra_config.HydraConfig.get().runtime.output_dir}"
     )
 
@@ -165,18 +164,22 @@ def main(cfg: DictConfig) -> None:
     # If LOCAL_RANK is not set, we're not in DDP mode
     if local_rank == -1:
         local_rank = None
-        print("Running in single-process mode")
+        logger.info("Running in single-process mode")
     else:
-        print(f"Running in DDP mode with LOCAL_RANK={local_rank}")
+        logger.info(f"Running in DDP mode with LOCAL_RANK={local_rank}")
 
         # Validate that distributed is properly initialized
         if torch.distributed.is_initialized():
             world_size = torch.distributed.get_world_size()
             rank = torch.distributed.get_rank()
-            print(f"Distributed initialized: rank={rank}/{world_size}")
+            logger.info(f"Distributed initialized: rank={rank}/{world_size}")
         else:
-            print(f"WARNING: LOCAL_RANK is set but torch.distributed is not initialized!")
-            print("DDP may not work correctly. Please ensure you're using torchrun or accelerate.")
+            logger.info(
+                "WARNING: LOCAL_RANK is set but torch.distributed is not initialized!"
+            )
+            logger.info(
+                "DDP may not work correctly. Please ensure you're using torchrun or accelerate."
+            )
 
     task_runner = TaskRunner()
 
@@ -186,11 +189,11 @@ def main(cfg: DictConfig) -> None:
         task_runner.initialize_wandb()
 
     if cfg.runs:
-        print(cfg)
+        logger.info(cfg)
         runs = utils.instantiate(cfg.runs)
-        print(runs)
+        logger.info(runs)
         for run in runs:
-            print(run)
+            logger.info(run)
             task_runner.run_task(run["tasks"], task_cfg=cfg, local_rank=local_rank)
 
 

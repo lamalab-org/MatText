@@ -1,8 +1,8 @@
 import fire
 import matplotlib.pyplot as plt
 from datasets import load_dataset
-from tqdm import tqdm
 from loguru import logger
+from tqdm import tqdm
 
 from mattext.models.utils import TokenizerMixin
 
@@ -16,8 +16,8 @@ def count_tokens_and_plot(
 ):
     tokenizer = TokenizerMixin(representation)
     ds = load_dataset("json", data_files=dataset_path, split="train")
-    logger.info("Dataset: ",ds)
-    logger.info("Representation: "representation)
+    logger.info(f"Dataset: {ds}")
+    logger.info(f"Representation: {representation}")
     dataset = ds[representation]
 
     token_counts = []

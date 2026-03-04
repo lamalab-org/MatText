@@ -1,12 +1,13 @@
 import json
 import os
-import random
-from sklearn.model_selection import KFold
+
 import fire
+from sklearn.model_selection import KFold
+
 
 def split_dataset(input_json, output_dir, n_splits=5, random_state=42):
     # Load the data
-    with open(input_json, 'r') as f:
+    with open(input_json) as f:
         data = json.load(f)
 
     # Create KFold object
@@ -21,18 +22,21 @@ def split_dataset(input_json, output_dir, n_splits=5, random_state=42):
         test_data = [data[i] for i in test_index]
 
         # Save train data
-        train_file = os.path.join(output_dir, f'train_mp_classification_fold_{fold}.json')
-        with open(train_file, 'w') as f:
+        train_file = os.path.join(
+            output_dir, f"train_mp_classification_fold_{fold}.json"
+        )
+        with open(train_file, "w") as f:
             json.dump(train_data, f, indent=2)
 
         # Save test data
-        test_file = os.path.join(output_dir, f'test_mp_classification_fold_{fold}.json')
-        with open(test_file, 'w') as f:
+        test_file = os.path.join(output_dir, f"test_mp_classification_fold_{fold}.json")
+        with open(test_file, "w") as f:
             json.dump(test_data, f, indent=2)
 
         print(f"Fold {fold} created: {train_file} and {test_file}")
 
     print("Dataset splitting completed.")
+
 
 if __name__ == "__main__":
     fire.Fire(split_dataset)

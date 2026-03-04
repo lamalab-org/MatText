@@ -1,8 +1,9 @@
-from typing import Any, Dict, List
+from typing import Any
 
 import torch
 import wandb
 from datasets import DatasetDict, load_dataset
+from loguru import logger
 from omegaconf import DictConfig
 from peft import (
     LoraConfig,
@@ -62,8 +63,7 @@ def smart_tokenizer_and_embedding_resize(
 
 
 class FinetuneLLama:
-    """Class to perform finetuning of LLama using
-    a regression head.
+    """Class to perform finetuning of LLama using a regression head.
 
     Args:
         cfg (DictConfig): Configuration for the fine-tuning.
@@ -112,9 +112,11 @@ class FinetuneLLama:
         if compute_dtype == torch.float16:
             major, _ = torch.cuda.get_device_capability()
             if major >= 8:
-                print("=" * 80)
-                print("Your GPU supports bfloat16: accelerate training with bf16=True")
-                print("=" * 80)
+                logger.warning("=" * 80)
+                logger.warning(
+                    "Your GPU supports bfloat16: accelerate training with bf16=True"
+                )
+                logger.warning("=" * 80)
 
         device_map = {"": 0}
         model = LlamaForSequenceClassification.from_pretrained(
@@ -128,7 +130,7 @@ class FinetuneLLama:
         model = get_peft_model(model, lora_config)
         model.print_trainable_parameters()
 
-        special_tokens_dict = dict()
+        special_tokens_dict = {}
         if llama_tokenizer.pad_token is None:
             special_tokens_dict["pad_token"] = DEFAULT_PAD_TOKEN
         if llama_tokenizer.eos_token is None:
@@ -144,7 +146,7 @@ class FinetuneLLama:
             model=model,
         )
 
-        print(len(llama_tokenizer))
+        logger.debug(f"Tokenizer size: {len(llama_tokenizer)}")
         return model, llama_tokenizer
 
     def _tokenize(self, examples):
@@ -157,8 +159,7 @@ class FinetuneLLama:
         return tokenized_examples
 
     def _prepare_datasets(self, path: str) -> DatasetDict:
-        """
-        Prepare training and validation datasets.
+        """Prepare training and validation datasets.
 
         Args:
            path (Union[str, Path]): Path to json file containing the data
@@ -171,8 +172,9 @@ class FinetuneLLama:
         dataset = ds.train_test_split(shuffle=True, test_size=0.2, seed=42)
         return dataset.map(self._tokenize, batched=True)
 
-    def _callbacks(self) -> List[TrainerCallback]:
-        """Returns a list of callbacks for early stopping, and custom logging."""
+    def _callbacks(self) -> list[TrainerCallback]:
+        """Returns a list of callbacks for early stopping, and custom
+        logging."""
         callbacks = []
 
         if self.callbacks.early_stopping:
@@ -190,7 +192,7 @@ class FinetuneLLama:
 
         return callbacks
 
-    def _compute_metrics(self, p: Any, eval=True) -> Dict[str, float]:
+    def _compute_metrics(self, p: Any, eval=True) -> dict[str, float]:
         preds = torch.tensor(
             p.predictions.squeeze()
         )  # Convert predictions to PyTorch tensor
@@ -206,9 +208,7 @@ class FinetuneLLama:
             return {"train_rmse": round(loss, 3), "loss": round(loss, 3)}
 
     def finetune(self) -> None:
-        """
-        Perform fine-tuning of the language model.
-        """
+        """Perform fine-tuning of the language model."""
 
         config_train_args = self.cfg.training_arguments
         callbacks = self._callbacks()
@@ -216,12 +216,16 @@ class FinetuneLLama:
         # In DDP mode, disable load_best_model_at_end to avoid checkpoint loading issues
         config_dict = dict(config_train_args)
         if self.local_rank is not None:
-            if config_dict.get('load_best_model_at_end', False):
-                print(f"[Rank {self.local_rank}] WARNING: Disabling load_best_model_at_end in DDP mode")
-                config_dict['load_best_model_at_end'] = False
-            if config_dict.get('save_on_each_node', False):
-                print(f"[Rank {self.local_rank}] WARNING: save_on_each_node should be False in DDP")
-                config_dict['save_on_each_node'] = False
+            if config_dict.get("load_best_model_at_end", False):
+                logger.warning(
+                    f"[Rank {self.local_rank}] WARNING: Disabling load_best_model_at_end in DDP mode"
+                )
+                config_dict["load_best_model_at_end"] = False
+            if config_dict.get("save_on_each_node", False):
+                logger.warning(
+                    f"[Rank {self.local_rank}] WARNING: save_on_each_node should be False in DDP"
+                )
+                config_dict["save_on_each_node"] = False
 
         # os.environ["ACCELERATE_MIXED_PRECISION"] = "no"
         training_args = TrainingArguments(
@@ -261,7 +265,5 @@ class FinetuneLLama:
         return self.cfg.path.finetuned_modelname
 
     def evaluate(self):
-        """
-        Evaluate the fine-tuned model on the test dataset.
-        """
-        ckpt = self.finetune()
+        """Evaluate the fine-tuned model on the test dataset."""
+        self.finetune()

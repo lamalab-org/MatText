@@ -1,5 +1,4 @@
-"""
-matbench_prepare_data.py
+"""matbench_prepare_data.py.
 
 This module provides functions for processing and preparing data for the Matbench benchmark for materials science.
 It includes functionality for reading JSON data, processing entries with a timeout, and processing batches of entries in parallel using multiprocessing.
@@ -11,14 +10,13 @@ import multiprocessing
 import signal
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
-from typing import Dict, List
 
 import fire
 
 from mattext.representations import TextRep
 
 
-def read_json(json_file: str) -> List[Dict]:
+def read_json(json_file: str) -> list[dict]:
     """Read JSON data from a file.
 
     Args:
@@ -48,8 +46,8 @@ signal.signal(signal.SIGALRM, timeout_handler)
 def process_entry_train_matbench(
     entry: dict,
     timeout: int,
-    transformations: dict = {},
-    list_of_rep=["cif_p1", "cif_symmetrized", "crystal_llm_rep", "zmatrix"],
+    transformations: dict | None = None,
+    list_of_rep=None,
 ) -> dict:
     """Process as entry for Matbench train dataset with a timeout.
 
@@ -60,6 +58,10 @@ def process_entry_train_matbench(
     Returns:
         dict: The processed entry, or None if an error occurred.
     """
+    if transformations is None:
+        transformations = {}
+    if list_of_rep is None:
+        list_of_rep = ["cif_p1", "cif_symmetrized", "crystal_llm_rep", "zmatrix"]
     try:
         signal.alarm(timeout)  # Start the timer
         text_reps = TextRep.from_input(
@@ -80,8 +82,8 @@ def process_entry_train_matbench(
 def process_entry_test_matbench(
     entry: dict,
     timeout: int,
-    transformations: dict = {},
-    list_of_rep=["cif_p1", "cif_symmetrized", "crystal_llm_rep", "zmatrix"],
+    transformations: dict | None = None,
+    list_of_rep=None,
 ) -> dict:
     """Process an entry for Matbench test dataset with a timeout.
 
@@ -92,6 +94,11 @@ def process_entry_test_matbench(
     Returns:
         dict: The processed entry, or None if an error occurred.
     """
+    if transformations is None:
+        transformations = {}
+    if list_of_rep is None:
+        list_of_rep = ["cif_p1", "cif_symmetrized", "crystal_llm_rep", "zmatrix"]
+
     try:
         signal.alarm(timeout)  # Start the timer
         text_reps = TextRep.from_input(
@@ -144,10 +151,15 @@ def process_json_to_json(
     timeout: int = 600,
     save_interval: int = 100,
     last_processed_entry: int = 0,
-    transformations: dict = {},
-    text_reps: list = ["cif_p1", "cif_symmetrized", "crystal_llm_rep", "zmatrix"],
+    transformations: dict | None = None,
+    text_reps: list | None = None,
 ):
-    """Prepare Matbench dataset with different representation as implemented in Xtal2txt."""
+    """Prepare Matbench dataset with different representation as implemented in
+    Xtal2txt."""
+    if transformations is None:
+        transformations = {}
+    if text_reps is None:
+        text_reps = ["cif_p1", "cif_symmetrized", "crystal_llm_rep", "zmatrix"]
     # Your main processing function here
     num_cpus = multiprocessing.cpu_count()
 

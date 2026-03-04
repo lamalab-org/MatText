@@ -23,7 +23,7 @@ logging:
 finetune:
   model_name: test-benchmark
   freeze_base_model: False
-  dataset_name: "${model.dataset}-train-${model.dataset_type}"  
+  dataset_name: "${model.dataset}-train-${model.dataset_type}"
   exp_name:
     [
       "train_${model.representation}_${model.finetune.dataset_name}_0",
@@ -75,7 +75,7 @@ finetune:
     load_best_model_at_end: True
 
 inference:
-  benchmark_dataset: "${model.dataset}-test-${model.dataset_type}"  
+  benchmark_dataset: "${model.dataset}-test-${model.dataset_type}"
   context_length: "${model.finetune.context_length}"
   exp_name:
     [

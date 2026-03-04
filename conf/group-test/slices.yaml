@@ -13,4 +13,3 @@ model:
       per_device_train_batch_size: 1024
     path:
       pretrained_checkpoint: /work/so87pot/structllm/megaloop/checkpoints/checkpoints/slice_pretrain_30k_draco/checkpoint-23000
-    

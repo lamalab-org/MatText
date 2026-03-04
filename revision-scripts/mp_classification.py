@@ -4,7 +4,6 @@ import pickle
 
 import fire
 import lmdb
-from pymatgen.core import Structure
 
 
 class Dataset:

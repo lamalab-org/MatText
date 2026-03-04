@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -46,7 +45,7 @@ class BaseInference(TokenizerMixin, ABC):
             batched=True,
         )
 
-    def _callbacks(self) -> List[TrainerCallback]:
+    def _callbacks(self) -> list[TrainerCallback]:
         return [CustomWandbCallback_Inference()]
 
     @abstractmethod
@@ -54,10 +53,10 @@ class BaseInference(TokenizerMixin, ABC):
         pass
 
     @abstractmethod
-    def process_predictions(self, predictions) -> Union[pd.Series, pd.DataFrame]:
+    def process_predictions(self, predictions) -> pd.Series | pd.DataFrame:
         pass
 
-    def predict(self) -> Tuple[Union[pd.Series, pd.DataFrame], List[str]]:
+    def predict(self) -> tuple[pd.Series | pd.DataFrame, list[str]]:
         pretrained_ckpt = self.cfg.path.pretrained_checkpoint
         callbacks = self._callbacks()
 
@@ -108,7 +107,7 @@ class InferenceClassification(BaseInference):
             probabilities, columns=[f"class_{i}" for i in range(self.num_labels)]
         )
 
-    def evaluate(self, true_labels: List[int]) -> dict:
+    def evaluate(self, true_labels: list[int]) -> dict:
         predictions, _ = self.predict()
         pred_labels = np.argmax(predictions.values, axis=1)
 

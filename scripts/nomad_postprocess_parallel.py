@@ -12,9 +12,7 @@ scale_factor: int = 1e10  # length in nomad is in meters, scale to angstrom
 
 
 class Dataset:
-    """
-    Custom class for reading NOMAD dataset from MatSciML Zenodo
-    """
+    """Custom class for reading NOMAD dataset from MatSciML Zenodo."""
 
     def __init__(self, lmdb_path, max_readers=1, transform=None, pre_transform=None):
         """
@@ -37,9 +35,7 @@ class Dataset:
         return self.txn.stat()["entries"]
 
     def get(self, index):
-        """
-        Return a  datapoint
-        """
+        """Return a  datapoint."""
         # Select graph sample
         id = f"{index}".encode("ascii")
         datapoint = pickle.loads(self.txn.get(id))

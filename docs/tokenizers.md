@@ -7,18 +7,18 @@ Currently available [`tokenizer`](api.md#mattext.tokenizer) are `SliceTokenizer`
 ## Using MatText Tokenizers
 
 By default, the tokenizer is initialized with `[CLS]` and `[SEP]`
-tokens. For an example, see the `SliceTokenizer` usage: 
+tokens. For an example, see the `SliceTokenizer` usage:
 
 ``` python
 from mattext.tokenizer import SliceTokenizer
 
 tokenizer = SliceTokenizer(
-                model_max_length=512, 
-                truncation=True, 
-                padding="max_length", 
+                model_max_length=512,
+                truncation=True,
+                padding="max_length",
                 max_length=512
             )
-print(tokenizer.cls_token) 
+print(tokenizer.cls_token)
 print(tokenizer.tokenize("Ga Ga P P 0 3 - - o 0 2 - o - 0 1 o - -"))
 ```
 
@@ -32,7 +32,7 @@ print(tokenizer.tokenize("Ga Ga P P 0 3 - - o 0 2 - o - 0 1 o - -"))
 
 ???+ tip "tip"
 
-    You can access the `[CLS]` token using the `cls_token` attribute of the tokenizer. 
+    You can access the `[CLS]` token using the `cls_token` attribute of the tokenizer.
 
 During decoding, you can utilize the `skip_special_tokens` parameter to skip these special tokens.
 
@@ -58,10 +58,10 @@ Initialization without `[CLS]` and `[SEP]` tokens:
 
 ``` python
 tokenizer = SliceTokenizer(
-                model_max_length=512, 
-                special_tokens={}, 
+                model_max_length=512,
+                special_tokens={},
                 truncation=True,
-                padding="max_length", 
+                padding="max_length",
                 max_length=512
             )
 ```
@@ -80,10 +80,10 @@ implemented by
 ``` python
 tokenizer = SliceTokenizer(
                 special_num_token=True,
-                model_max_length=512, 
-                special_tokens={}, 
+                model_max_length=512,
+                special_tokens={},
                 truncation=True,
-                padding="max_length", 
+                padding="max_length",
                 max_length=512
             )
 tokenizer.tokenize("H2SO4")
@@ -123,10 +123,10 @@ vocab_file_path = "path/to/your/vocab_file.json"
 
 tokenizer = SliceTokenizer(
                 special_num_token=True,
-                model_max_length=512, 
-                special_tokens={}, 
+                model_max_length=512,
+                special_tokens={},
                 truncation=True,
-                padding="max_length", 
+                padding="max_length",
                 max_length=512,
                 vocab_file=vocab_file_path
             )
@@ -134,7 +134,7 @@ tokenizer = SliceTokenizer(
 
 here is an example format for the vocabulary json file
 
-   
+
 ```python
     import json
     import tempfile # (1)
@@ -175,4 +175,3 @@ here is an example format for the vocabulary json file
 
     {'H': 1, 'He': 2, 'New_Atom': 3, '1': 4, '2': 5, '[CLS]': 6, '[SEP]': 7}
     ```
-

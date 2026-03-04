@@ -6,7 +6,7 @@
     sweep:
       dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
       subdir: ${hydra.job.override_dirname}
-      
+
 
 
   defaults:
@@ -17,5 +17,3 @@
   runs:
   - name: llama_sft_run
     tasks: [llama_sft]
-
-

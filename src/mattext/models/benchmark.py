@@ -1,20 +1,20 @@
-import os
 import traceback
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 import wandb
 from accelerate import PartialState
+from loguru import logger
 from matbench.bench import MatbenchBenchmark
 from omegaconf import DictConfig
 
-from mattext.models.finetune import FinetuneModel, FinetuneClassificationModel
+from mattext.models.finetune import FinetuneClassificationModel, FinetuneModel
 from mattext.models.predict import Inference, InferenceClassification
 from mattext.models.score import (
     MATTEXT_MATBENCH,
     MatTextTask,
 )
 from mattext.models.utils import fold_key_namer
-from loguru import logger
 
 
 class BaseBenchmark(ABC):
@@ -77,10 +77,10 @@ class BaseBenchmark(ABC):
                 self._record_predictions(task, i, predictions, prediction_ids)
             except Exception as e:
                 logger.error(
-                    f"Error occurred during inference for finetuned checkpoint '{exp_name}': {str(e)}"
+                    f"Error occurred during inference for finetuned checkpoint '{exp_name}': {e!s}"
                 )
-                if isinstance(e, (ValueError, TypeError)):
-                        raise
+                if isinstance(e, ValueError | TypeError):
+                    raise
                 logger.error(traceback.format_exc())
 
         # All ranks sync after inference before next fold
@@ -99,14 +99,13 @@ class BaseBenchmark(ABC):
         pass
 
     def _save_results(self, task):
-        if not os.path.exists(self.benchmark_save_path):
-            os.makedirs(self.benchmark_save_path, exist_ok=True)
+        save_path = Path(self.benchmark_save_path)
+        save_path.mkdir(parents=True, exist_ok=True)
 
-        file_name = os.path.join(
-            self.benchmark_save_path,
-            f"mattext_benchmark_{self.representation}_{self.benchmark}.json",
+        file_name = (
+            save_path / f"mattext_benchmark_{self.representation}_{self.benchmark}.json"
         )
-        task.to_file(file_name)
+        task.to_file(str(file_name))
 
 
 class Matbenchmark(BaseBenchmark):
@@ -115,7 +114,7 @@ class Matbenchmark(BaseBenchmark):
         task = self._initialize_task()
 
         for i, (exp_name, test_name) in enumerate(
-            zip(self.exp_names, self.test_exp_names)
+            zip(self.exp_names, self.test_exp_names, strict=False)
         ):
             if state.is_main_process:
                 wandb.init(
@@ -149,7 +148,7 @@ class MatbenchmarkClassification(BaseBenchmark):
         task = self._initialize_task()
 
         for i, (exp_name, test_name) in enumerate(
-            zip(self.exp_names, self.test_exp_names)
+            zip(self.exp_names, self.test_exp_names, strict=False)
         ):
             if state.is_main_process:
                 wandb.init(

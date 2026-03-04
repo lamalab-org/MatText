@@ -65,16 +65,16 @@ The [`TextRep`](api.md#mattext.representations.TextRep) class currently supports
 For more details on each representation and how to obtain them, refer to the respective method documentation in the `TextRep` class.
 
 
-## Transformations 
+## Transformations
 
 
 The `TextRep` class supports various transformations that can be applied to the input structure.
 
 
 
-### Permute Structure 
+### Permute Structure
 
-The `permute_structure` transformation randomly permutes the order of atoms in a structure. 
+The `permute_structure` transformation randomly permutes the order of atoms in a structure.
 
 
 ```python
@@ -114,7 +114,7 @@ print(text_rep.get_requested_text_reps(text_representations_requested))
 
     ```
 
-### Translate Structure 
+### Translate Structure
 
 The `translate_structure` transformation randomly translates all atoms in a structure by a specified vector. This can simulate small displacements in the structure.
 
@@ -166,7 +166,7 @@ for vector in translation_vectors:
 
     ```
 
-???+ example 
+???+ example
 
     More examples are available as notebook in the repository.
 
@@ -202,6 +202,3 @@ MatText leverages methods from pymatgen and support all the keyword arguments in
 All transformations utilize a common seed value for reproducibility and accept additional parameters for customization.
 
 For more details on each transformation and its parameters, refer to the respective function documentation.
-
-
-

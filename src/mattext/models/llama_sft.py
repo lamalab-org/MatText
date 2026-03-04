@@ -1,5 +1,4 @@
 import json
-from typing import List
 
 import torch
 import wandb
@@ -25,8 +24,8 @@ from mattext.models.utils import (
 
 
 class FinetuneLLamaSFT:
-    """Class to perform finetuning of a language model.
-        Initialize the FinetuneModel.
+    """Class to perform finetuning of a language model. Initialize the
+    FinetuneModel.
 
     Args:
         cfg (DictConfig): Configuration for the fine-tuning.
@@ -126,14 +125,18 @@ class FinetuneLLamaSFT:
 
     def _add_prompt_completion_columns(self, dataset):
         """Add prompt and completion columns for completion-only loss."""
+
         def _map_fn(example):
             return {
                 "prompt": f"### What is the {self.property_} of {example[self.representation]}\n ### Answer:",
                 "completion": f" {example['labels']:.3f}@@@",
             }
+
         dataset = dataset.map(_map_fn)
         # Remove original columns to avoid conflicts with the trainer's label handling
-        cols_to_remove = [c for c in dataset.column_names if c not in ("prompt", "completion")]
+        cols_to_remove = [
+            c for c in dataset.column_names if c not in ("prompt", "completion")
+        ]
         return dataset.remove_columns(cols_to_remove)
 
     def formatting_tests_func(self, example):
@@ -143,8 +146,9 @@ class FinetuneLLamaSFT:
             output_texts.append(text)
         return output_texts
 
-    def _callbacks(self) -> List[TrainerCallback]:
-        """Returns a list of callbacks for early stopping, and custom logging."""
+    def _callbacks(self) -> list[TrainerCallback]:
+        """Returns a list of callbacks for early stopping, and custom
+        logging."""
         callbacks = []
 
         if self.callbacks.early_stopping:
@@ -158,24 +162,26 @@ class FinetuneLLamaSFT:
         return callbacks
 
     def finetune(self) -> None:
-        """
-        Perform fine-tuning of the language model.
-        """
+        """Perform fine-tuning of the language model."""
 
         config_train_args = self.cfg.training_arguments
 
         config_dict = dict(config_train_args)
         # Remove keys not supported by SFTConfig
-        config_dict.pop('overwrite_output_dir', None)
+        config_dict.pop("overwrite_output_dir", None)
 
         # In DDP mode, disable load_best_model_at_end to avoid checkpoint loading issues
         if self.local_rank is not None:
-            if config_dict.get('load_best_model_at_end', False):
-                print(f"[Rank {self.local_rank}] WARNING: Disabling load_best_model_at_end in DDP mode")
-                config_dict['load_best_model_at_end'] = False
-            if config_dict.get('save_on_each_node', False):
-                print(f"[Rank {self.local_rank}] WARNING: save_on_each_node should be False in DDP")
-                config_dict['save_on_each_node'] = False
+            if config_dict.get("load_best_model_at_end", False):
+                logger.warning(
+                    f"[Rank {self.local_rank}] WARNING: Disabling load_best_model_at_end in DDP mode"
+                )
+                config_dict["load_best_model_at_end"] = False
+            if config_dict.get("save_on_each_node", False):
+                logger.warning(
+                    f"[Rank {self.local_rank}] WARNING: save_on_each_node should be False in DDP"
+                )
+                config_dict["save_on_each_node"] = False
 
         max_length = 2048 if self.representation == "cif_p1" else 1024
 
@@ -206,7 +212,9 @@ class FinetuneLLamaSFT:
             wandb.log({"Training Arguments": str(config_train_args)})
             wandb.log({"model_summary": str(self.model)})
 
-        self.output_dir_ = f"{self.cfg.path.finetuned_modelname}/llamav3-8b-lora-fine-tune"
+        self.output_dir_ = (
+            f"{self.cfg.path.finetuned_modelname}/llamav3-8b-lora-fine-tune"
+        )
 
         # Trainer handles all DDP synchronization automatically
         trainer.train()
@@ -233,7 +241,9 @@ class FinetuneLLamaSFT:
                 pred = pipe(self.formatting_tests_func(self.testdata))
             logger.debug("Prediction: %s", pred)
 
-            with open(f"{self.cfg.path.finetuned_modelname}_{self.fold}_predictions.json", "w") as f:
+            with open(
+                f"{self.cfg.path.finetuned_modelname}_{self.fold}_predictions.json", "w"
+            ) as f:
                 json.dump(pred, f)
 
             del pipe
@@ -244,6 +254,7 @@ class FinetuneLLamaSFT:
         del self.model
         del self.tokenizer
         import gc
+
         gc.collect()
 
         return self.cfg.path.finetuned_modelname

@@ -3,7 +3,7 @@ model:
   representation: crystal_llm_rep
   logging:
     wandb_project: perturb_1
-  
+
   finetune:
     model_name: ft_300k_mb_small
     context_length: 512
@@ -11,4 +11,3 @@ model:
       per_device_train_batch_size: 64
     path:
       pretrained_checkpoint: ft_300k_mb_small
-

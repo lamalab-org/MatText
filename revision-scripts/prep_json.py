@@ -1,28 +1,27 @@
 import json
 import os
+
 from matbench.bench import MatbenchBenchmark
-import numpy as np
 
 # Define the available benchmarks
 available_benchmarks = [
     "matbench_mp_is_metal",
 ]
 
+
 def convert_structure_to_serializable(pymatgen_structure):
-    """
-    Convert a pymatgen Structure object to a serializable format (CIF).
-    """
+    """Convert a pymatgen Structure object to a serializable format (CIF)."""
     return pymatgen_structure.to(fmt="cif")
 
+
 def convert_label_to_serializable(label):
-    """
-    Convert labels to 0 or 1, specifically converting numpy booleans to Python integers.
-    """
+    """Convert labels to 0 or 1, specifically converting numpy booleans to
+    Python integers."""
     return int(label)
 
+
 def download_benchmark_data(benchmark_name, save_path):
-    """
-    Download and save the Matbench benchmark data as JSON files.
+    """Download and save the Matbench benchmark data as JSON files.
 
     Args:
         benchmark_name (str): The name of the benchmark to download.
@@ -35,7 +34,7 @@ def download_benchmark_data(benchmark_name, save_path):
 
     # Load the MatbenchBenchmark
     mb = MatbenchBenchmark(autoload=False)
-    
+
     # Create the save directory if it does not exist
     if not os.path.exists(save_path):
         os.mkdir(save_path)
@@ -57,7 +56,9 @@ def download_benchmark_data(benchmark_name, save_path):
             {
                 "mbid": index,  # Add material ID (index)
                 "structure": convert_structure_to_serializable(train_inputs[index]),
-                "labels": convert_label_to_serializable(train_outputs[index]),  # Convert bool to 0 or 1
+                "labels": convert_label_to_serializable(
+                    train_outputs[index]
+                ),  # Convert bool to 0 or 1
             }
             for index in train_inputs.index
         ]
@@ -73,7 +74,7 @@ def download_benchmark_data(benchmark_name, save_path):
         test_data = [
             {
                 "mbid": index,  # Add material ID (index)
-                "structure": convert_structure_to_serializable(test_inputs[index])
+                "structure": convert_structure_to_serializable(test_inputs[index]),
             }
             for index in test_inputs.index
         ]
@@ -84,6 +85,7 @@ def download_benchmark_data(benchmark_name, save_path):
             json.dump(test_data, test_file)
 
         print(f"Test data saved to {save_path}/{test_dataset_name}")
+
 
 if __name__ == "__main__":
     # Define the benchmark name and the directory to save the data

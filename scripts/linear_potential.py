@@ -3,7 +3,6 @@ import multiprocessing
 import signal
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
-from typing import Dict, List
 
 import fire
 from pymatgen.core import Structure
@@ -14,7 +13,7 @@ from mattext.analysis.xtal2pot import Xtal2Pot
 linearpotential = Xtal2Pot()
 
 
-def read_json(json_file: str) -> List[Dict]:
+def read_json(json_file: str) -> list[dict]:
     """Read JSON data from a file.
 
     Args:
@@ -161,9 +160,10 @@ def process_json_to_json(
     timeout: int = 600,
     save_interval: int = 100,
     last_processed_entry: int = 0,
-    alphas: List[float] = None,
+    alphas: list[float] = None,
 ):
-    """Prepare Matbench dataset with different representation as implemented in Xtal2txt."""
+    """Prepare Matbench dataset with different representation as implemented in
+    Xtal2txt."""
     # Your main processing function here
     num_cpus = multiprocessing.cpu_count()
 

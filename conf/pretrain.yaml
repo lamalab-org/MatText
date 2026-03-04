@@ -6,7 +6,7 @@
     sweep:
       dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
       subdir: ${hydra.job.override_dirname}
-      
+
 
 
   defaults:
@@ -18,5 +18,3 @@
 
     - name: pretrain_run
       tasks: [pretrain]
-
-
