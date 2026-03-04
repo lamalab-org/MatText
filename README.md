@@ -31,13 +31,13 @@ MatText is a framework for text-based materials modeling. It supports
 
 ## Local Installation
 
-We recommend that you create a virtual conda environment on your computer in which you install the dependencies for this package. To do so head over to [Miniconda](https://docs.conda.io/en/latest/miniconda.html) and follow the installation instructions there.
+We recommend using [uv](https://docs.astral.sh/uv/) for fast and reliable Python package management. To install uv, follow the [installation instructions](https://docs.astral.sh/uv/getting-started/installation/).
 
 
 <!-- ### Install latest release
 
 ```bash
-pip install mattext
+uv pip install mattext
 ``` -->
 
 ### Install development version
@@ -50,13 +50,19 @@ cd mattext
 ```
 
 ```bash
-pip install -e .
+uv pip install -e .
 ```
 
-If you want to use the Local Env representation, you will also need to install OpenBabel, e.g. using 
+If you want to use the Local Env representation, you will also need to install OpenBabel. You can install it via conda/mamba:
 
-```bash 
+```bash
 conda install openbabel -c conda-forge
+```
+
+or on Ubuntu/Debian:
+
+```bash
+sudo apt-get install openbabel
 ```
 
 ## Getting started

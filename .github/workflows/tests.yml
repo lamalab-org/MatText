@@ -13,37 +13,32 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.9"]
+        python-version: ["3.10", "3.11", "3.12"]
     timeout-minutes: 30
-    defaults:
-      run:
-        shell: bash -l {0}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # - uses: pdm-project/setup-pdm@v3
-      #   name: Set up PDM
-      #   with:
-      #     python-version: ${{ matrix.python-version }}
-      #     cache: true
-
-      - name: Setup Mambaforge
-        uses: conda-incubator/setup-miniconda@v3
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          use-mamba: true
           python-version: ${{ matrix.python-version }}
-          conda-channels: anaconda, conda-forge
-          activate-environment: test
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openbabel libfftw3-dev
 
       - name: Install dependencies
         run: |
-          mamba install -c conda-forge openbabel fftw -y
-          pip install -e ".[dev]" 
-          pip install pyxtal 
-          pip install "numpy<2.0"
-          
+          uv pip install --system -e ".[dev]"
+          uv pip install --system pyxtal
+          uv pip install --system "numpy<2.0"
+
       - name: Test
         run: pytest tests

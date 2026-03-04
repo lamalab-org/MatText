@@ -57,6 +57,7 @@ dev = [
   "pytest-cov",
   "ruff",
   "bump-my-version",
+  "pre-commit",
 ]
 
 docs = [
