@@ -46,6 +46,7 @@ dependencies = [
   "bitsandbytes",
   "loguru",
   "numpy<2.0",
+  "protobuf<4.0,>=3.20.0",
 ]
 
 [project.optional-dependencies]
