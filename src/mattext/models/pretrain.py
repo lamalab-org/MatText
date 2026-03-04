@@ -1,5 +1,4 @@
 from functools import partial
-from typing import List, Optional
 
 import wandb
 from datasets import DatasetDict, load_dataset
@@ -34,14 +33,19 @@ class PretrainModel(TokenizerMixin):
         self.context_length: int = self.cfg.context_length
         self.callbacks = self.cfg.callbacks
         self.model_name_or_path: str = self.cfg.model_name_or_path
-        self.local_file_path = cfg.model.dataset_local_path if cfg.model.dataset_local_path else None
-        self.tokenized_train_datasets, self.tokenized_eval_datasets =  self._prepare_datasets(
-            subset=self.cfg.dataset_name,local_file_path=self.local_file_path
+        self.local_file_path = (
+            cfg.model.dataset_local_path if cfg.model.dataset_local_path else None
+        )
+        self.tokenized_train_datasets, self.tokenized_eval_datasets = (
+            self._prepare_datasets(
+                subset=self.cfg.dataset_name, local_file_path=self.local_file_path
+            )
         )
 
-    def _prepare_datasets(self, subset: str, local_file_path: Optional[str] = None) -> DatasetDict:
-        """
-        Prepare training and validation datasets.
+    def _prepare_datasets(
+        self, subset: str, local_file_path: str | None = None
+    ) -> DatasetDict:
+        """Prepare training and validation datasets.
 
         Args:
             train_df (pd.DataFrame): DataFrame containing training data.
@@ -51,8 +55,12 @@ class PretrainModel(TokenizerMixin):
         """
         if local_file_path:
             # Load data from a local JSON file
-            train_dataset = load_dataset("json", data_files=f"{local_file_path}/train.json", split="train")
-            eval_dataset = load_dataset("json", data_files=f"{local_file_path}/test.json", split="train")
+            train_dataset = load_dataset(
+                "json", data_files=f"{local_file_path}/train.json", split="train"
+            )
+            eval_dataset = load_dataset(
+                "json", data_files=f"{local_file_path}/test.json", split="train"
+            )
         else:
             # Load data from the repository
             dataset = load_dataset(self.data_repository, subset)
@@ -78,8 +86,9 @@ class PretrainModel(TokenizerMixin):
             batched=True,
         )
 
-    def _callbacks(self) -> List[TrainerCallback]:
-        """Returns a list of callbacks for early stopping, and custom logging."""
+    def _callbacks(self) -> list[TrainerCallback]:
+        """Returns a list of callbacks for early stopping, and custom
+        logging."""
         callbacks = []
 
         if self.callbacks.early_stopping:
@@ -100,7 +109,7 @@ class PretrainModel(TokenizerMixin):
         config_mlm = self.cfg.mlm
         config_train_args = self.cfg.training_arguments
         config_model_args = self.cfg.model_config
-        #config_model_args["max_position_embeddings"] = self.context_length
+        # config_model_args["max_position_embeddings"] = self.context_length
 
         data_collator = DataCollatorForLanguageModeling(
             tokenizer=self._wrapped_tokenizer,

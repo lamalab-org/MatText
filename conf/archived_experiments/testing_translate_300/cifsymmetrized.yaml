@@ -4,7 +4,7 @@ model:
   logging:
     wandb_project: translate_1
 
-  
+
   finetune:
     model_name: ft_300k_mb_small
     context_length: 1024

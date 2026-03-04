@@ -1,10 +1,12 @@
 import os
-from typing import Callable, Union
+from collections.abc import Callable
 
 import hydra
+import torch
 import wandb
 from hydra import main as hydra_main
 from hydra import utils
+from loguru import logger
 from omegaconf import DictConfig
 
 from mattext.models.benchmark import Matbenchmark, MatbenchmarkClassification
@@ -36,23 +38,25 @@ class TaskRunner:
             if task in self.task_map:
                 self.task_map[task](task_cfg, local_rank)
             else:
-                print(f"Unknown task: {task}")
+                logger.info(f"Unknown task: {task}")
 
     def _run_experiment(
         self,
         task_cfg: DictConfig,
-        local_rank: Union[int, None],
+        local_rank: int | None,
         model_class: Callable,
         experiment_type: str,
         use_folds: bool = False,
         use_train_data_path: bool = False,
     ):
         if use_folds:
-            iterations = range(task_cfg.model.fold)
+            skip_folds = set(task_cfg.model.get("skip_folds", []))
+            iterations = [i for i in range(task_cfg.model.fold) if i not in skip_folds]
         elif use_train_data_path:
             iterations = zip(
                 task_cfg.model.finetune.exp_name,
                 task_cfg.model.finetune.path.finetune_traindata,
+                strict=False,
             )
         else:
             iterations = [None]
@@ -68,11 +72,13 @@ class TaskRunner:
                 exp_name = task_cfg.model[experiment_type].exp_name
                 fold = None
 
-            wandb.init(
-                config=dict(task_cfg.model[experiment_type]),
-                project=task_cfg.model.logging.wandb_project,
-                name=exp_name,
-            )
+            is_main = local_rank is None or local_rank == 0
+            if is_main:
+                wandb.init(
+                    config=dict(task_cfg.model[experiment_type]),
+                    project=task_cfg.model.logging.wandb_project,
+                    name=exp_name,
+                )
 
             exp_cfg = task_cfg.copy()
             exp_cfg.model[experiment_type].exp_name = exp_name
@@ -87,26 +93,28 @@ class TaskRunner:
             result = (
                 model.finetune() if hasattr(model, "finetune") else model.pretrain_mlm()
             )
-            print(result)
-            wandb.finish()
+            logger.info(result)
+
+            if is_main:
+                wandb.finish()
 
     def run_benchmarking(self, task_cfg: DictConfig, local_rank=None) -> None:
-        print("Benchmarking")
+        logger.info("Benchmarking")
         benchmark = Matbenchmark(task_cfg)
         benchmark.run_benchmarking(local_rank=local_rank)
 
     def run_classification(self, task_cfg: DictConfig, local_rank=None) -> None:
-        print("Benchmarking Classification")
+        logger.info("Benchmarking Classification")
         benchmark = MatbenchmarkClassification(task_cfg)
         benchmark.run_benchmarking(local_rank=local_rank)
 
     def run_qmof(self, task_cfg: DictConfig, local_rank=None) -> None:
-        print("Finetuning on qmof")
+        logger.info("Finetuning on qmof")
         matbench_predictor = Matbenchmark(task_cfg)
         matbench_predictor.run_qmof(local_rank=local_rank)
 
     def run_inference(self, task_cfg: DictConfig, local_rank=None) -> None:
-        print("Testing on matbench dataset")
+        logger.info("Testing on matbench dataset")
         matbench_predictor = Benchmark(task_cfg)
         matbench_predictor.run_benchmarking(local_rank=local_rank)
 
@@ -136,30 +144,56 @@ class TaskRunner:
     def initialize_wandb(self):
         if self.wandb_api_key:
             wandb.login(key=self.wandb_api_key)
-            print("W&B API key found")
+            logger.info("W&B API key found")
         else:
-            print(
+            logger.info(
                 "W&B API key not found. Please set the WANDB_API_KEY environment variable."
             )
 
 
 @hydra_main(config_path="../../conf", config_name="config")
 def main(cfg: DictConfig) -> None:
-    print(f"Working directory : {os.getcwd()}")
-    print(
+    logger.info(f"Working directory : {os.getcwd()}")
+    logger.info(
         f"Output directory  : {hydra.core.hydra_config.HydraConfig.get().runtime.output_dir}"
     )
 
-    local_rank = int(os.getenv("LOCAL_RANK", "0"))
+    # Get local rank from environment (set by torchrun/accelerate)
+    local_rank = int(os.getenv("LOCAL_RANK", "-1"))
+
+    # If LOCAL_RANK is not set, we're not in DDP mode
+    if local_rank == -1:
+        local_rank = None
+        logger.info("Running in single-process mode")
+    else:
+        logger.info(f"Running in DDP mode with LOCAL_RANK={local_rank}")
+
+        # Validate that distributed is properly initialized
+        if torch.distributed.is_initialized():
+            world_size = torch.distributed.get_world_size()
+            rank = torch.distributed.get_rank()
+            logger.info(f"Distributed initialized: rank={rank}/{world_size}")
+        else:
+            logger.info(
+                "WARNING: LOCAL_RANK is set but torch.distributed is not initialized!"
+            )
+            logger.info(
+                "DDP may not work correctly. Please ensure you're using torchrun or accelerate."
+            )
+
     task_runner = TaskRunner()
-    task_runner.initialize_wandb()
+
+    # Only initialize wandb on main process
+    is_main = local_rank is None or local_rank == 0
+    if is_main:
+        task_runner.initialize_wandb()
 
     if cfg.runs:
-        print(cfg)
+        logger.info(cfg)
         runs = utils.instantiate(cfg.runs)
-        print(runs)
+        logger.info(runs)
         for run in runs:
-            print(run)
+            logger.info(run)
             task_runner.run_task(run["tasks"], task_cfg=cfg, local_rank=local_rank)
 
 

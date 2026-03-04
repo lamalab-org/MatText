@@ -15,5 +15,3 @@ model:
       per_device_train_batch_size: 1024
     path:
       pretrained_checkpoint: n0w0f/MatText-atom-seq-2m
-
-    

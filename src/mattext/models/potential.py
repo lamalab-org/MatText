@@ -1,11 +1,11 @@
 from functools import partial
-from typing import Any, Dict, List
+from typing import Any
 
 import torch
 import wandb
 from datasets import DatasetDict, load_dataset
+from loguru import logger
 from omegaconf import DictConfig
-from torch import nn
 from transformers import (
     AutoModelForSequenceClassification,
     EarlyStoppingCallback,
@@ -22,8 +22,8 @@ from mattext.models.utils import (
 
 
 class PotentialModel(TokenizerMixin):
-    """Class to perform finetuning of a language model on
-    the hypothetical potential task.
+    """Class to perform finetuning of a language model on the hypothetical
+    potential task.
 
     Args:
         cfg (DictConfig): Configuration for the fine-tuning.
@@ -49,8 +49,7 @@ class PotentialModel(TokenizerMixin):
         self.tokenized_testset = self._prepare_datasets(self.test_data, split="test")
 
     def _prepare_datasets(self, path: str, split) -> DatasetDict:
-        """
-        Prepare training and validation datasets.
+        """Prepare training and validation datasets.
 
         Args:
             train_df (pd.DataFrame): DataFrame containing training data.
@@ -65,7 +64,7 @@ class PotentialModel(TokenizerMixin):
         if split == "train":
             ds = ds.remove_columns("labels")
         else:
-            print("test set")
+            logger.info("Using test set")
 
         labal_name = f"total_energy_alpha_{self.alpha}"
         ds = ds.rename_column(labal_name, "labels")
@@ -78,8 +77,9 @@ class PotentialModel(TokenizerMixin):
             batched=True,
         )
 
-    def _callbacks(self) -> List[TrainerCallback]:
-        """Returns a list of callbacks for early stopping, and custom logging."""
+    def _callbacks(self) -> list[TrainerCallback]:
+        """Returns a list of callbacks for early stopping, and custom
+        logging."""
         callbacks = []
 
         if self.callbacks.early_stopping:
@@ -97,7 +97,7 @@ class PotentialModel(TokenizerMixin):
 
         return callbacks
 
-    def _compute_metrics(self, p: Any, eval=True) -> Dict[str, float]:
+    def _compute_metrics(self, p: Any, eval=True) -> dict[str, float]:
         preds = torch.tensor(
             p.predictions.squeeze()
         )  # Convert predictions to PyTorch tensor
@@ -113,19 +113,33 @@ class PotentialModel(TokenizerMixin):
             return {"train_rmse": round(loss, 3), "loss": round(loss, 3)}
 
     def finetune(self) -> None:
-        """
-        Perform fine-tuning of the language model.
-        """
+        """Perform fine-tuning of the language model."""
 
         pretrained_ckpt = self.cfg.path.pretrained_checkpoint
 
         config_train_args = self.cfg.training_arguments
         callbacks = self._callbacks()
 
+        # In DDP mode, disable load_best_model_at_end to avoid checkpoint loading issues
+        # Only rank 0 saves checkpoints, but all ranks try to load at the end
+        config_dict = dict(config_train_args)  # Convert OmegaConf to dict
+        if self.local_rank is not None:
+            if config_dict.get("load_best_model_at_end", False):
+                logger.warning(
+                    f"[Rank {self.local_rank}] WARNING: Disabling load_best_model_at_end in DDP mode"
+                )
+                config_dict["load_best_model_at_end"] = False
+            # Also ensure save_on_each_node is False (default)
+            if config_dict.get("save_on_each_node", False):
+                logger.warning(
+                    f"[Rank {self.local_rank}] WARNING: save_on_each_node should be False in DDP"
+                )
+                config_dict["save_on_each_node"] = False
+
         training_args = TrainingArguments(
-            **config_train_args,
-            metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
-            greater_is_better=False,  # Lower eval_rmse is better
+            **config_dict,
+            metric_for_best_model="eval_rmse",
+            greater_is_better=False,
         )
 
         model = AutoModelForSequenceClassification.from_pretrained(
@@ -138,9 +152,6 @@ class PotentialModel(TokenizerMixin):
 
         if self.local_rank is not None:
             model = model.to(self.local_rank)
-            model = nn.parallel.DistributedDataParallel(
-                model, device_ids=[self.local_rank]
-            )
         else:
             model = model.to("cuda")
 
@@ -149,25 +160,31 @@ class PotentialModel(TokenizerMixin):
             args=training_args,
             data_collator=None,
             compute_metrics=self._compute_metrics,
-            tokenizer=self._wrapped_tokenizer,
+            processing_class=self._wrapped_tokenizer,
             train_dataset=self.tokenized_dataset["train"],
             eval_dataset=self.tokenized_dataset["test"],
             callbacks=callbacks,
         )
 
-        wandb.log({"Training Arguments": str(config_train_args)})
-        wandb.log({"model_summary": str(model)})
+        is_main = self.local_rank is None or self.local_rank == 0
 
+        if is_main:
+            wandb.log({"Training Arguments": str(config_train_args)})
+            wandb.log({"model_summary": str(model)})
+
+        # Trainer handles all DDP synchronization automatically
         trainer.train()
-        model.save_pretrained(self.cfg.path.finetuned_modelname)
 
+        # All ranks must call evaluate (distributed collectives)
         eval_result = trainer.evaluate(eval_dataset=self.tokenized_testset)
-        wandb.log(eval_result)
-        wandb.finish()
+
+        if is_main:
+            wandb.log(eval_result)
+            trainer.save_model(self.cfg.path.finetuned_modelname)
+            wandb.finish()
+
         return self.cfg.path.finetuned_modelname
 
     def evaluate(self):
-        """
-        Evaluate the fine-tuned model on the test dataset.
-        """
-        ckpt = self.finetune()
+        """Evaluate the fine-tuned model on the test dataset."""
+        self.finetune()

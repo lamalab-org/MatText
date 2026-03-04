@@ -13,5 +13,3 @@ model:
       per_device_train_batch_size: 1024
     path:
       pretrained_checkpoint: /work/so87pot/structllm/megaloop2/checkpoints/checkpoints/composition_30k_ft/checkpoint-1000
-
-    

@@ -1,6 +1,6 @@
 import json
 from functools import partial
-from typing import Any, Dict
+from typing import Any
 
 import fire
 import matplotlib.pyplot as plt
@@ -105,8 +105,8 @@ def get_dataset(path: str, representation: str):
     context_length = _REPRESENTATION_CONTEXT[representation]
 
     def _tokenize_pad_and_truncate(
-        texts: Dict[str, Any], context_length: int
-    ) -> Dict[str, Any]:
+        texts: dict[str, Any], context_length: int
+    ) -> dict[str, Any]:
         tokenized_texts = _wrapped_tokenizer(
             texts[representation],
             truncation=True,
@@ -139,6 +139,7 @@ def mask_dict(tokens):
         masks[token] = mask
 
     return masks
+
 
 def get_count_for_tokens(tokens):
     unique_tokens = set(tokens)
@@ -242,9 +243,7 @@ def _plot_heatmap(token_weights_, plot_name: str):
     """Plot a heatmap of the token weights."""
 
     # Get the set of unique tokens
-    unique_tokens = {
-        token for weights in token_weights_.values() for token in weights
-    }
+    unique_tokens = {token for weights in token_weights_.values() for token in weights}
 
     # Get the global min and max weights
     global_min = min(
@@ -260,7 +259,7 @@ def _plot_heatmap(token_weights_, plot_name: str):
     # Create a separate subplot for each token
     fig, axs = plt.subplots(len(unique_tokens), 1, figsize=(10, len(unique_tokens) * 5))
 
-    for ax, token in zip(axs, unique_tokens):
+    for ax, token in zip(axs, unique_tokens, strict=False):
         # Extract the weights for the current token
         weights = {
             (layer, head): weight[token]

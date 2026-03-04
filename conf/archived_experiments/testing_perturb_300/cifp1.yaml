@@ -10,4 +10,3 @@ model:
       per_device_train_batch_size: 64
     path:
       pretrained_checkpoint: ft_300k_mb_small
-

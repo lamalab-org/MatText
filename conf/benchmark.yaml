@@ -8,7 +8,7 @@ hydra:
   sweep:
     dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
     subdir: ${hydra.job.override_dirname}
-    
+
   # launcher:
   #   _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.SlurmLauncher
   #   submitit_folder: ${hydra.sweep.dir}/.submitit/%j

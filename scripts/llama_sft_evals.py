@@ -117,8 +117,7 @@ def get_model_for_eval(adapter, batch_size, max_length=2048):
 def _prepare_datasets(
     path: str, matbench_dataset: str, representation: str
 ) -> DatasetDict:
-    """
-    Prepare training and validation datasets.
+    """Prepare training and validation datasets.
 
     Args:
         train_df (pd.DataFrame): DataFrame containing training data.
@@ -158,7 +157,7 @@ def main(
     )
     responses_dict = {}
     resp = pipe(testset["text"])
-    for j, (prompt, responses) in enumerate(zip(testset["text"], resp)):
+    for j, (prompt, responses) in enumerate(zip(testset["text"], resp, strict=False)):
         # print(prompt)
         generated_text = responses[0]["generated_text"]
         # Extract the response part by removing the prompt part

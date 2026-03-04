@@ -1,31 +1,31 @@
-# API Documentation 
+# API Documentation
 
 
 ## Text representation
 
-### Core class 
+### Core class
 
 ::: mattext.representations.TextRep
     heading_level: 3
 
 
-### Decoding 
+### Decoding
 
-::: mattext.representations.decoder 
+::: mattext.representations.decoder
     heading_level: 3
 
 ### Transformations
 
-::: mattext.representations.transformations 
+::: mattext.representations.transformations
     heading_level: 3
 
-## Tokenizer 
+## Tokenizer
 
-::: mattext.tokenizer 
+::: mattext.tokenizer
     heading_level: 3
 
 
-## Models  
+## Models
 
 ::: mattext.models.benchmark
     heading_level: 3

@@ -1,7 +1,7 @@
 import json
 import math
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -48,11 +48,11 @@ class MatTextTask:
     num_folds: int = 5
     is_classification: bool = False
     num_classes: int = 2
-    folds_results: Dict[int, Dict[str, Any]] = field(default_factory=dict)
-    recorded_folds: List[int] = field(default_factory=list)
+    folds_results: dict[int, dict[str, Any]] = field(default_factory=dict)
+    recorded_folds: list[int] = field(default_factory=list)
 
     def record_fold(
-        self, fold: int, prediction_ids: List[str], predictions: List[float]
+        self, fold: int, prediction_ids: list[str], predictions: list[float]
     ):
         if fold in self.recorded_folds:
             raise ValueError(f"Fold {fold} has already been recorded.")
@@ -155,9 +155,9 @@ class MatTextTask:
 
     @staticmethod
     def _json_serializable(obj):
-        if isinstance(obj, (np.ndarray, pd.Series)):
+        if isinstance(obj, np.ndarray | pd.Series):
             return obj.tolist()
-        elif isinstance(obj, (np.bool_, np.integer, np.floating)):
+        elif isinstance(obj, np.bool_ | np.integer | np.floating):
             return obj.item()
         elif isinstance(obj, MatTextTask):
             return {

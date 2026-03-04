@@ -1,5 +1,4 @@
-"""
-filterdataset.py
+"""filterdataset.py.
 
 This module provides functions for processing and filtering datasets based on the length of their tokenized representations.
 The main function, `process_datasets`, takes as input a directory of JSON datasets and a dictionary mapping representations to their context lengths. It processes each dataset, filtering out entries whose tokenized representation exceeds the specified context length. The filtered datasets are saved to a specified output directory, along with a report of the entries that were removed.
@@ -10,7 +9,7 @@ This module is designed to be run as a script using the Fire library. When run a
 
 import json
 import os
-from typing import Any, Dict, List, Tuple, Type
+from typing import Any
 
 import fire
 from datasets import DatasetDict, load_dataset
@@ -23,7 +22,7 @@ from xtal2txt.tokenizer import (
 )
 
 # Mapping of representation types to their corresponding tokenizer classes
-_TOKENIZER_MAP: Dict[str, Type] = {
+_TOKENIZER_MAP: dict[str, type] = {
     "slice": SliceTokenizer,
     "composition": CompositionTokenizer,
     "cif_symmetrized": CifTokenizer,
@@ -35,7 +34,7 @@ _TOKENIZER_MAP: Dict[str, Type] = {
 }
 
 # Default special tokens for tokenization
-_DEFAULT_SPECIAL_TOKENS: Dict[str, str] = {
+_DEFAULT_SPECIAL_TOKENS: dict[str, str] = {
     "unk_token": "[UNK]",
     "pad_token": "[PAD]",
     "cls_token": "[CLS]",
@@ -47,10 +46,9 @@ _DEFAULT_SPECIAL_TOKENS: Dict[str, str] = {
 
 
 def _tokenize_without_truncation(
-    texts: Dict[str, Any], representation: str
-) -> Dict[str, Any]:
-    """
-    Tokenizes the given texts without truncation.
+    texts: dict[str, Any], representation: str
+) -> dict[str, Any]:
+    """Tokenizes the given texts without truncation.
 
     Args:
         texts: The texts to tokenize.
@@ -66,10 +64,10 @@ def _tokenize_without_truncation(
 
 
 def filter_dataset_with_context(
-    dataset, representation_context: Dict[str, int]
-) -> Tuple[DatasetDict, List[Dict[str, Any]]]:
-    """
-    Filters the given dataset based on the context lengths for each representation.
+    dataset, representation_context: dict[str, int]
+) -> tuple[DatasetDict, list[dict[str, Any]]]:
+    """Filters the given dataset based on the context lengths for each
+    representation.
 
     Args:
         dataset: The dataset to filter.
@@ -101,10 +99,10 @@ def filter_dataset_with_context(
 
 
 def process_datasets(
-    input_dir: str, output_dir: str, representation_context: Dict[str, int]
+    input_dir: str, output_dir: str, representation_context: dict[str, int]
 ) -> None:
-    """
-    Processes the datasets in the given input directory and saves the filtered datasets and reports to the output directory.
+    """Processes the datasets in the given input directory and saves the
+    filtered datasets and reports to the output directory.
 
     Args:
         input_dir: The directory containing the input datasets.
@@ -125,8 +123,7 @@ def process_datasets(
 
 
 def main(input_dir: str, output_dir: str) -> None:
-    """
-    Main function to process datasets.
+    """Main function to process datasets.
 
     Args:
         input_dir: The directory containing the input datasets.

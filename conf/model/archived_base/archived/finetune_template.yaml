@@ -28,7 +28,7 @@ finetune:
 
   path:
     checkpoint_rootpath: "/work/so87pot/mattext/model_outs2/checkpoints/02_02_100k_pt_bpe_512"  # @deprecated
-    checkpoint_name: "checkpoint-86000"         # @deprecated                    # 
+    checkpoint_name: "checkpoint-86000"         # @deprecated                    #
     pretrained_checkpoint: ??? # @override by experiment configs
 
 
@@ -61,14 +61,14 @@ finetune:
     num_train_epochs: 100
     per_device_train_batch_size: ???
     save_strategy: "epoch"
-    evaluation_strategy: 'epoch'   
+    evaluation_strategy: 'epoch'
     logging_strategy: 'epoch'
     logging_first_step: True
     save_steps: 3 # Number of epochs before saving
     report_to: "wandb"
     save_total_limit: 5
     learning_rate: 2e-4
-    logging_steps: 1 
+    logging_steps: 1
     eval_steps: 1
     seed: 42
     load_best_model_at_end: True
@@ -87,8 +87,8 @@ inference:
     ]
   path:
     pretrained_checkpoint: [
-   
-  ] 
+
+  ]
     test_data_rootpath: "/work/so87pot/material_db/matbench_text"                     # <--- Change this to the path of the finetune test data
     test_data: [
     "${model.inference.path.test_data_rootpath}/test_${model.finetune.dataset_name}_0.json",
@@ -103,5 +103,3 @@ inference:
     predictions: "${model.inference.path.root_path}/checkpoints/inference${model.inference.exp_name}"
 
   benchmark_save_file: "${model.finetune.path.root_path}"
-
-  

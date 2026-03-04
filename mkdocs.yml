@@ -51,14 +51,14 @@ theme:
   palette:
     - scheme: default
       toggle:
-        icon: material/toggle-switch-off-outline 
+        icon: material/toggle-switch-off-outline
         name: Switch to dark mode
       primary: black #teal
-      accent: purple 
-    - scheme: slate 
+      accent: purple
+    - scheme: slate
       toggle:
         icon: material/toggle-switch
-        name: Switch to light mode    
+        name: Switch to light mode
       primary: black #teal
       accent: lime
 
@@ -122,7 +122,7 @@ extra:
 #       link: https://www.linkedin.com/in/willettjames/
 
 
-  
+
 # extra_css:
 #   - stylesheets/aesthetic_fixes.css
 

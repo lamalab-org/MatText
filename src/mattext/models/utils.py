@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Any
 
 import torch
 import wandb
@@ -102,7 +102,7 @@ class TokenizerMixin:
     def __init__(
         self,
         cfg,
-        special_tokens: Dict[str, str] = _DEFAULT_SPECIAL_TOKENS,
+        special_tokens: dict[str, str] = _DEFAULT_SPECIAL_TOKENS,
         special_num_token=False,
     ) -> None:
         self.representation = cfg
@@ -124,8 +124,8 @@ class TokenizerMixin:
         # self._wrapped_tokenizer.add_special_tokens(special_tokens=special_tokens)
 
     def _tokenize_pad_and_truncate(
-        self, texts: Dict[str, Any], context_length: int
-    ) -> Dict[str, Any]:
+        self, texts: dict[str, Any], context_length: int
+    ) -> dict[str, Any]:
         """Tokenizes, pads, and truncates input texts."""
         return self._wrapped_tokenizer(
             texts[str(self.representation)],
@@ -166,7 +166,7 @@ class CustomWandbCallback_Pretrain(TrainerCallback):
         state: Any,
         control: Any,
         model: Any,
-        logs: Dict[str, Union[float, Any]],
+        logs: dict[str, float | Any],
         **kwargs: Any,
     ) -> None:
         if state.is_world_process_zero:
@@ -183,7 +183,7 @@ class CustomWandbCallback_FineTune(TrainerCallback):
         state: Any,
         control: Any,
         model: Any,
-        logs: Dict[str, Union[float, Any]],
+        logs: dict[str, float | Any],
         **kwargs: Any,
     ) -> None:
         if state.is_world_process_zero:
@@ -210,7 +210,7 @@ class EvaluateFirstStepCallback(TrainerCallback):
 
 
 class LLMSampleCB(WandbCallback):
-    """A CallBack to log samples a wandb.Table during training"""
+    """A CallBack to log samples a wandb.Table during training."""
 
     def __init__(
         self,
@@ -241,7 +241,7 @@ class LLMSampleCB(WandbCallback):
         )
 
     def samples_table(self, examples):
-        """Create a wandb.Table to store the generations"""
+        """Create a wandb.Table to store the generations."""
         records_table = wandb.Table(
             columns=["prompt", "generation", *list(self.gen_config.to_dict().keys())]
         )
@@ -254,7 +254,7 @@ class LLMSampleCB(WandbCallback):
         return records_table
 
     def on_evaluate(self, args, state, control, **kwargs):
-        """Log the wandb.Table after calling trainer.evaluate"""
+        """Log the wandb.Table after calling trainer.evaluate."""
         super().on_evaluate(args, state, control, **kwargs)
         records_table = self.samples_table(self.sample_dataset)
         self._wandb.log({"sample_predictions": records_table})

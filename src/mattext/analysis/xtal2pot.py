@@ -30,18 +30,20 @@ _df_uff_z: pd.DataFrame = mattext_storage.ensure_csv(
 )
 
 _ATOM_PARAMETERS["uff_energy"] = dict(
-    zip(_df_uff_energy["Element"], _df_uff_energy["energy"])
+    zip(_df_uff_energy["Element"], _df_uff_energy["energy"], strict=False)
 )
 
-_ATOM_PARAMETERS["uff_xi"] = dict(zip(_df_uff_xi["Element"], _df_uff_xi["xi"]))
+_ATOM_PARAMETERS["uff_xi"] = dict(
+    zip(_df_uff_xi["Element"], _df_uff_xi["xi"], strict=False)
+)
 
-_ATOM_PARAMETERS["uff_z"] = dict(zip(_df_uff_z["Element"], _df_uff_z["zi"]))
+_ATOM_PARAMETERS["uff_z"] = dict(
+    zip(_df_uff_z["Element"], _df_uff_z["zi"], strict=False)
+)
 
 
 def register(name: str, store: dict):
-    """
-    Decorator to register a mixing rule function
-    """
+    """Decorator to register a mixing rule function."""
 
     def add_to_dict(func):
         store[name] = func
@@ -86,7 +88,9 @@ def composition_potential(
     atomic_parameters: dict,
     interaction_order: int = 1,
 ) -> float:
-    """E_\\mathrm{comp}=\\sum_{k=1}^k w_k n_k+\\sum_{i_1=1}^N \\sum_{i_2=1}^N \\cdots \\sum_{i_n=1}^N \\sum_{k_1 \neq k_2 \neq \\cdots \neq k_n}^k U_{i_1 i_2 \\cdots i_n}^{\\left(k_1 k_2 \\cdots k_n\right)}
+    """E_\\mathrm{comp}=\\sum_{k=1}^k w_k n_k+\\sum_{i_1=1}^N \\sum_{i_2=1}^N
+    \\cdots \\sum_{i_n=1}^N \\sum_{k_1 \neq k_2 \neq \\cdots \neq k_n}^k U_{i_1
+    i_2 \\cdots i_n}^{\\left(k_1 k_2 \\cdots k_n\right)}
 
     Args:
         composition (dict): Composition of the structure
@@ -116,7 +120,7 @@ def lennard_jones(r: float, epsilon: float = 1, sigma: float = 1) -> float:
 def geometry_potential(
     struct, interaction_order: int = 2, potential: callable = lennard_jones
 ) -> float:
-    """Calculate the potential energy of a structure based on its geometry
+    """Calculate the potential energy of a structure based on its geometry.
 
     Args:
         struct (Structure): pymatgen Structure object
@@ -171,7 +175,9 @@ class Xtal2Pot:
         )
         return composition_energy, geometry_energy
 
-    def get_total_energy(self, struct: Structure, alphas: list[float] = [0.5]):
+    def get_total_energy(self, struct: Structure, alphas: list[float] | None = None):
+        if alphas is None:
+            alphas = [0.5]
         energies = {}
         for alpha in alphas:
             composition_energy, geometry_energy = self.get_potential(struct)

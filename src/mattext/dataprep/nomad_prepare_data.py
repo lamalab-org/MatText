@@ -1,14 +1,13 @@
 import json
 import multiprocessing
 from concurrent.futures import ProcessPoolExecutor, TimeoutError
-from typing import Dict, List
 
 import fire
 
 from mattext.representations import TextRep
 
 
-def read_json(json_file: str) -> List[Dict]:
+def read_json(json_file: str) -> list[dict]:
     """Read JSON data from a file.
 
     Args:

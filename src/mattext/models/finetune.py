@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 import torch
 import wandb
 from datasets import DatasetDict, load_dataset
+from loguru import logger
 from omegaconf import DictConfig
 from sklearn.metrics import (
     accuracy_score,
@@ -13,7 +14,6 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 from sklearn.preprocessing import label_binarize
-from torch import nn
 from transformers import (
     AutoModelForSequenceClassification,
     EarlyStoppingCallback,
@@ -60,7 +60,7 @@ class BaseFinetuneModel(TokenizerMixin, ABC):
             batched=True,
         )
 
-    def _callbacks(self) -> List[TrainerCallback]:
+    def _callbacks(self) -> list[TrainerCallback]:
         callbacks = []
         if self.callbacks.early_stopping:
             callbacks.append(
@@ -75,7 +75,7 @@ class BaseFinetuneModel(TokenizerMixin, ABC):
         return callbacks
 
     @abstractmethod
-    def _compute_metrics(self, p: Any) -> Dict[str, float]:
+    def _compute_metrics(self, p: Any) -> dict[str, float]:
         pass
 
     def finetune(self) -> str:
@@ -83,8 +83,22 @@ class BaseFinetuneModel(TokenizerMixin, ABC):
         config_train_args = self.cfg.training_arguments
         callbacks = self._callbacks()
 
+        # In DDP mode, disable load_best_model_at_end to avoid checkpoint loading issues
+        config_dict = dict(config_train_args)
+        if self.local_rank is not None:
+            if config_dict.get("load_best_model_at_end", False):
+                logger.warning(
+                    f"[Rank {self.local_rank}] WARNING: Disabling load_best_model_at_end in DDP mode"
+                )
+                config_dict["load_best_model_at_end"] = False
+            if config_dict.get("save_on_each_node", False):
+                logger.warning(
+                    f"[Rank {self.local_rank}] WARNING: save_on_each_node should be False in DDP"
+                )
+                config_dict["save_on_each_node"] = False
+
         training_args = TrainingArguments(
-            **config_train_args,
+            **config_dict,
             metric_for_best_model=self.get_best_metric(),
             greater_is_better=self.is_greater_better(),
         )
@@ -97,9 +111,6 @@ class BaseFinetuneModel(TokenizerMixin, ABC):
 
         if self.local_rank is not None:
             model = model.to(self.local_rank)
-            model = nn.parallel.DistributedDataParallel(
-                model, device_ids=[self.local_rank]
-            )
         else:
             model = model.to("cuda")
 
@@ -108,22 +119,29 @@ class BaseFinetuneModel(TokenizerMixin, ABC):
             args=training_args,
             data_collator=None,
             compute_metrics=self._compute_metrics,
-            tokenizer=self._wrapped_tokenizer,
+            processing_class=self._wrapped_tokenizer,
             train_dataset=self.tokenized_dataset["train"],
             eval_dataset=self.tokenized_dataset["test"],
             callbacks=callbacks,
         )
 
-        wandb.log({"Training Arguments": str(config_train_args)})
-        wandb.log({"model_summary": str(model)})
+        is_main = self.local_rank is None or self.local_rank == 0
 
+        if is_main:
+            wandb.log({"Training Arguments": str(config_train_args)})
+            wandb.log({"model_summary": str(model)})
+
+        # Trainer handles all DDP synchronization automatically
         trainer.train()
 
+        # All ranks must call evaluate (distributed collectives)
         eval_result = trainer.evaluate(eval_dataset=self.tokenized_dataset["test"])
-        wandb.log(eval_result)
 
-        model.save_pretrained(self.cfg.path.finetuned_modelname)
-        wandb.finish()
+        if is_main:
+            wandb.log(eval_result)
+            trainer.save_model(self.cfg.path.finetuned_modelname)
+            wandb.finish()
+
         return self.cfg.path.finetuned_modelname
 
     @abstractmethod
@@ -139,11 +157,11 @@ class BaseFinetuneModel(TokenizerMixin, ABC):
         pass
 
     def evaluate(self):
-        ckpt = self.finetune()
+        self.finetune()
 
 
 class FinetuneModel(BaseFinetuneModel):
-    def _compute_metrics(self, p: Any) -> Dict[str, float]:
+    def _compute_metrics(self, p: Any) -> dict[str, float]:
         preds = torch.tensor(p.predictions.squeeze())
         label_ids = torch.tensor(p.label_ids)
         eval_rmse = torch.sqrt(((preds - label_ids) ** 2).mean()).item()
@@ -162,7 +180,7 @@ class FinetuneModel(BaseFinetuneModel):
 
 
 class FinetuneClassificationModel(BaseFinetuneModel):
-    def _compute_metrics(self, p: Any) -> Dict[str, float]:
+    def _compute_metrics(self, p: Any) -> dict[str, float]:
         preds = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
         preds_argmax = np.argmax(preds, axis=1)
         labels = p.label_ids

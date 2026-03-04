@@ -1,14 +1,12 @@
 import copy
 import glob
 import json
-from typing import Dict, List
 
 import fire
 
 
-def read_json_file(filename: str) -> Dict:
-    """
-    Read JSON file and return its content as dictionary.
+def read_json_file(filename: str) -> dict:
+    """Read JSON file and return its content as dictionary.
 
     Args:
     filename (str): Path to the JSON file.
@@ -21,9 +19,8 @@ def read_json_file(filename: str) -> Dict:
     return data
 
 
-def get_bid_mbid(matbench_data_path: str) -> List[str]:
-    """
-    Extract 'mbid' from matbench data.
+def get_bid_mbid(matbench_data_path: str) -> list[str]:
+    """Extract 'mbid' from matbench data.
 
     Args:
     matbench_data_path (str): Path to the matbench data.
@@ -36,9 +33,8 @@ def get_bid_mbid(matbench_data_path: str) -> List[str]:
     return mbids
 
 
-def process_matbench_data(matbench_data: Dict, reports_path: str) -> Dict:
-    """
-    Process matbench data by removing entries based on reports.
+def process_matbench_data(matbench_data: dict, reports_path: str) -> dict:
+    """Process matbench data by removing entries based on reports.
 
     Args:
     matbench_data (Dict): Matbench data as dictionary.
@@ -76,9 +72,8 @@ def process_matbench_data(matbench_data: Dict, reports_path: str) -> Dict:
     return matbench_data
 
 
-def save_modified_data(matbench_data: Dict, output_file: str) -> None:
-    """
-    Save modified matbench data as JSON.
+def save_modified_data(matbench_data: dict, output_file: str) -> None:
+    """Save modified matbench data as JSON.
 
     Args:
     matbench_data (Dict): Modified matbench data.
@@ -89,8 +84,7 @@ def save_modified_data(matbench_data: Dict, output_file: str) -> None:
 
 
 def run(reports_path: str, input_file: str, output_file: str) -> None:
-    """
-    Run the processing pipeline.
+    """Run the processing pipeline.
 
     Args:
     reports_path (str): Path to the reports.

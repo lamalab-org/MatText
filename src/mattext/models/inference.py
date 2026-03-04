@@ -10,16 +10,14 @@ from mattext.models.predict import Inference
 
 
 class Benchmark:
-    """
-    Class to perform predictions on Matbench datasets.
+    """Class to perform predictions on Matbench datasets.
 
     Args:
     - task_cfg (DictConfig): Configuration dictionary containing task parameters.
     """
 
     def __init__(self, task_cfg: DictConfig):
-        """
-        Initializes the object with the given task configuration.
+        """Initializes the object with the given task configuration.
 
         Parameters:
             task_cfg (DictConfig): The configuration dictionary containing task parameters.
@@ -40,8 +38,7 @@ class Benchmark:
         self.wandb_project = self.task_cfg.model.logging.wandb_project
 
     def run_benchmarking(self, local_rank=None) -> None:
-        """
-        Runs benchmarking on the specified dataset.
+        """Runs benchmarking on the specified dataset.
 
         This function loads the MatbenchBenchmark dataset and iterates over the exp_names, test_exp_names, train_data, and test_data lists.
         For each iteration, it prints the training and testing data paths.
@@ -64,7 +61,13 @@ class Benchmark:
         benchmark.load()
 
         for i, (exp_name, test_name, train_data_path, test_data_path) in enumerate(
-            zip(self.exp_names, self.test_exp_names, self.train_data, self.test_data)
+            zip(
+                self.exp_names,
+                self.test_exp_names,
+                self.train_data,
+                self.test_data,
+                strict=False,
+            )
         ):
             logger.info(
                 f"Running training on {train_data_path}, and testing on {test_data_path}"
@@ -89,7 +92,7 @@ class Benchmark:
                 predict = Inference(exp_cfg)
                 predictions = predict.predict()
                 benchmark.record(i, predictions)
-            except Exception as e:
+            except Exception:
                 logger.error(
                     f"Error occurred during inference for finetuned checkpoint '{exp_name}':"
                 )

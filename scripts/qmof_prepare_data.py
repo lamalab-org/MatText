@@ -1,5 +1,4 @@
-"""
-matbench_prepare_data.py
+"""matbench_prepare_data.py.
 
 This module provides functions for processing and preparing data for the Matbench benchmark for materials science.
 It includes functionality for reading JSON data, processing entries with a timeout, and processing batches of entries in parallel using multiprocessing.
@@ -11,13 +10,12 @@ import multiprocessing
 import signal
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
-from typing import Dict, List
 
 import fire
 from xtal2txt.core import TextRep
 
 
-def read_json(json_file: str) -> List[Dict]:
+def read_json(json_file: str) -> list[dict]:
     """Read JSON data from a file.
 
     Args:
@@ -159,7 +157,8 @@ def process_json_to_json(
     transformations: dict = {},
     text_reps: list = ["cif_p1", "cif_symmetrized", "crystal_llm_rep", "zmatrix"],
 ):
-    """Prepare Matbench dataset with different representation as implemented in Xtal2txt."""
+    """Prepare Matbench dataset with different representation as implemented in
+    Xtal2txt."""
     # Your main processing function here
     num_cpus = multiprocessing.cpu_count()
 

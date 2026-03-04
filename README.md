@@ -18,27 +18,31 @@
 </p>
 
 
-MatText is a framework for text-based materials modeling. It supports 
+MatText is a framework for text-based materials modeling. It supports
 
-- conversion of crystal structures in to text representations 
+- conversion of crystal structures in to text representations
 - transformations of crystal structures for sensitivity analyses
 - decoding of text representations to crystal structures
 - tokenization of text-representation of crystal structures
-- pre-training, finetuning and testing of language models on text-representations of crystal structures 
+- pre-training, finetuning and testing of language models on text-representations of crystal structures
 - analysis of language models trained on text-representations of crystal structures
 
 
 
 ## Local Installation
 
-We recommend that you create a virtual conda environment on your computer in which you install the dependencies for this package. To do so head over to [Miniconda](https://docs.conda.io/en/latest/miniconda.html) and follow the installation instructions there.
+**Requirements:**
+- Python 3.10 or 3.11 (tested and supported)
+- [uv](https://docs.astral.sh/uv/) package manager (recommended)
+
+We recommend using [uv](https://docs.astral.sh/uv/) for fast and reliable Python package management. To install uv, follow the [installation instructions](https://docs.astral.sh/uv/getting-started/installation/).
 
 
-<!-- ### Install latest release
+### Install latest release
 
 ```bash
-pip install mattext
-``` -->
+uv pip install git+https://github.com/lamalab-org/mattext.git
+```
 
 ### Install development version
 
@@ -49,14 +53,30 @@ git clone https://github.com/lamalab-org/mattext.git
 cd mattext
 ```
 
+Create a virtual environment and install:
+
 ```bash
-pip install -e .
+uv venv --python 3.10
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+uv pip install -e ".[dev]"
 ```
 
-If you want to use the Local Env representation, you will also need to install OpenBabel, e.g. using 
+Install pre-commit hooks (optional, for development):
 
-```bash 
+```bash
+pre-commit install
+```
+
+If you want to use the Local Env representation, you will also need to install OpenBabel. You can install it via conda/mamba:
+
+```bash
 conda install openbabel -c conda-forge
+```
+
+or on Ubuntu/Debian:
+
+```bash
+sudo apt-get install openbabel
 ```
 
 ## Getting started
@@ -94,10 +114,10 @@ requested_text_reps = text_rep.get_requested_text_reps(requested_reps)
 python main.py -cn=pretrain model=pretrain_example +model.representation=composition +model.dataset_type=pretrain30k +model.context_length=32
 ```
 
-### Running a benchmark 
+### Running a benchmark
 
 ```bash
-python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=perovskites +model.checkpoint=path/to/checkpoint  
+python main.py -cn=benchmark model=benchmark_example +model.dataset_type=filtered +model.representation=composition +model.dataset=perovskites +model.checkpoint=path/to/checkpoint
 ```
 
 The `+` symbol before a configuration key indicates that you are adding a new key-value pair to the configuration. This is useful when you want to specify parameters that are not part of the default configuration.
@@ -105,7 +125,7 @@ The `+` symbol before a configuration key indicates that you are adding a new ke
 To override the existing default configuration, use `++`, for e.g., `++model.pretrain.training_arguments.per_device_train_batch_size=32`. Refer to the [docs](https://lamalab-org.github.io/MatText/) for more examples and advanced ways to use the configs with config groups.
 
 
-### Using data 
+### Using data
 
 The MatText datasets can be easily obtained from [HuggingFace](https://huggingface.co/datasets/n0w0f/MatText), for example
 
@@ -123,19 +143,19 @@ Contributions, whether filing an issue, making a pull request, or forking, are a
 
 ## 👋 Attribution
 
-### Citation 
+### Citation
 
-If you use MatText in your work, please cite 
+If you use MatText in your work, please cite
 
 ```
 @misc{alampara2024mattextlanguagemodelsneed,
-      title={MatText: Do Language Models Need More than Text & Scale for Materials Modeling?}, 
+      title={MatText: Do Language Models Need More than Text & Scale for Materials Modeling?},
       author={Nawaf Alampara and Santiago Miret and Kevin Maik Jablonka},
       year={2024},
       eprint={2406.17295},
       archivePrefix={arXiv},
       primaryClass={cond-mat.mtrl-sci}
-      url={https://arxiv.org/abs/2406.17295}, 
+      url={https://arxiv.org/abs/2406.17295},
 }
 ```
 
