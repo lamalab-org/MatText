@@ -188,7 +188,7 @@ class FinetuneLLamaSFT:
         training_args = SFTConfig(
             **config_dict,
             packing=False,
-            max_length=max_length,
+            max_seq_length=max_length,
             completion_only_loss=True,
         )
         callbacks = self._callbacks()
