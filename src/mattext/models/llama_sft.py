@@ -183,7 +183,7 @@ class FinetuneLLamaSFT:
                 )
                 config_dict["save_on_each_node"] = False
 
-        max_length = 2048 if self.representation == "cif_p1" else 1024
+        max_length = self.context_length
 
         training_args = SFTConfig(
             **config_dict,
