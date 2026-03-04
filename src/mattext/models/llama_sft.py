@@ -15,10 +15,9 @@ from transformers import (
     BitsAndBytesConfig,
     EarlyStoppingCallback,
     TrainerCallback,
-    TrainingArguments,
     pipeline,
 )
-from trl import DataCollatorForCompletionOnlyLM, SFTTrainer
+from trl import SFTConfig, SFTTrainer
 
 from mattext.models.utils import (
     EvaluateFirstStepCallback,
@@ -53,12 +52,12 @@ class FinetuneLLamaSFT:
         self.callbacks = self.cfg.callbacks
         self.ckpt = self.cfg.path.pretrained_checkpoint
         self.bnb_config = self.cfg.bnb_config
+        self.test_sample_size = test_sample_size
         self.dataset = self.prepare_data(self.train_data)
         self.testdata = self.prepare_test_data(self.test_data)
         self.model, self.tokenizer, self.peft_config = self._setup_model_tokenizer()
         self.property_ = self.property_map[self.dataset_]
         self.material_ = self.material_map[self.dataset_]
-        self.test_sample_size = test_sample_size
 
     def prepare_test_data(self, subset):
         dataset = load_dataset(self.data_repository, subset)[self.fold]
@@ -125,10 +124,22 @@ class FinetuneLLamaSFT:
             output_texts.append(text)
         return output_texts
 
+    def _add_prompt_completion_columns(self, dataset):
+        """Add prompt and completion columns for completion-only loss."""
+        def _map_fn(example):
+            return {
+                "prompt": f"### What is the {self.property_} of {example[self.representation]}\n ### Answer:",
+                "completion": f" {example['labels']:.3f}@@@",
+            }
+        dataset = dataset.map(_map_fn)
+        # Remove original columns to avoid conflicts with the trainer's label handling
+        cols_to_remove = [c for c in dataset.column_names if c not in ("prompt", "completion")]
+        return dataset.remove_columns(cols_to_remove)
+
     def formatting_tests_func(self, example):
         output_texts = []
         for i in range(len(example[self.representation])):
-            text = f"### What is the {self.property_} of {example[self.representation][i]}\n "
+            text = f"### What is the {self.property_} of {example[self.representation][i]}\n ### Answer:"
             output_texts.append(text)
         return output_texts
 
@@ -152,94 +163,87 @@ class FinetuneLLamaSFT:
         """
 
         config_train_args = self.cfg.training_arguments
-        training_args = TrainingArguments(
-            **config_train_args,
+
+        config_dict = dict(config_train_args)
+        # Remove keys not supported by SFTConfig
+        config_dict.pop('overwrite_output_dir', None)
+
+        # In DDP mode, disable load_best_model_at_end to avoid checkpoint loading issues
+        if self.local_rank is not None:
+            if config_dict.get('load_best_model_at_end', False):
+                print(f"[Rank {self.local_rank}] WARNING: Disabling load_best_model_at_end in DDP mode")
+                config_dict['load_best_model_at_end'] = False
+            if config_dict.get('save_on_each_node', False):
+                print(f"[Rank {self.local_rank}] WARNING: save_on_each_node should be False in DDP")
+                config_dict['save_on_each_node'] = False
+
+        max_length = 2048 if self.representation == "cif_p1" else 1024
+
+        training_args = SFTConfig(
+            **config_dict,
+            packing=False,
+            max_length=max_length,
+            completion_only_loss=True,
         )
         callbacks = self._callbacks()
 
-        response_template = " ### Answer:"
-        collator = DataCollatorForCompletionOnlyLM(
-            response_template, tokenizer=self.tokenizer
-        )
-
-        packing = False
-        max_seq_length = None
-        if self.representation == "cif_p1":
-            max_seq_length = 2048
+        train_dataset = self._add_prompt_completion_columns(self.dataset["train"])
+        eval_dataset = self._add_prompt_completion_columns(self.dataset["test"])
 
         trainer = SFTTrainer(
             model=self.model,
             peft_config=self.peft_config,
-            train_dataset=self.dataset["train"],
-            eval_dataset=self.dataset["test"],
-            formatting_func=self.formatting_prompts_func,
-            data_collator=collator,
-            max_seq_length=max_seq_length,
-            tokenizer=self.tokenizer,
+            train_dataset=train_dataset,
+            eval_dataset=eval_dataset,
+            processing_class=self.tokenizer,
             args=training_args,
-            packing=packing,
             callbacks=callbacks,
         )
 
-        wandb.log({"Training Arguments": str(config_train_args)})
-        wandb.log({"model_summary": str(self.model)})
+        is_main = self.local_rank is None or self.local_rank == 0
 
-        self.output_dir_ = (
-            f"{self.cfg.path.finetuned_modelname}/llamav3-8b-lora-fine-tune"
-        )
+        if is_main:
+            wandb.log({"Training Arguments": str(config_train_args)})
+            wandb.log({"model_summary": str(self.model)})
+
+        self.output_dir_ = f"{self.cfg.path.finetuned_modelname}/llamav3-8b-lora-fine-tune"
+
+        # Trainer handles all DDP synchronization automatically
         trainer.train()
 
-        pipe = pipeline(
-            "text-generation",
-            model=trainer.model,
-            tokenizer=self.tokenizer,
-            return_full_text=False,
-            do_sample=False,
-            max_new_tokens=4,
-        )
-        with torch.cuda.amp.autocast():
-            pred = pipe(self.formatting_tests_func(self.testdata))
-        logger.debug("Prediction: %s", pred)
+        if is_main:
+            # Save model and tokenizer
+            trainer.save_state()
+            trainer.save_model(self.output_dir_)
+            self.tokenizer.save_pretrained(
+                f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained"
+            )
 
-        with open(
-            f"{self.cfg.path.finetuned_modelname}_{self.fold}_predictions.json", "w"
-        ) as json_file:
-            json.dump(pred, json_file)
+            # Run inference and save predictions
+            pipe = pipeline(
+                "text-generation",
+                model=trainer.model,
+                tokenizer=self.tokenizer,
+                return_full_text=False,
+                do_sample=False,
+                max_new_tokens=8,
+            )
 
-        trainer.save_state()
-        trainer.save_model(self.output_dir_)
+            with torch.cuda.amp.autocast():
+                pred = pipe(self.formatting_tests_func(self.testdata))
+            logger.debug("Prediction: %s", pred)
 
-        # # Merge LoRA and base model
-        # merged_model = trainer.model.merge_and_unload()
-        # # Save the merged model
-        # merged_model.save_pretrained(
-        #     f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained",
-        #     save_config=True,
-        #     safe_serialization=True,
-        # )
-        self.tokenizer.save_pretrained(
-            f"{self.cfg.path.finetuned_modelname}_{self.fold}/llamav3-8b-lora-save-pretrained"
-        )
+            with open(f"{self.cfg.path.finetuned_modelname}_{self.fold}_predictions.json", "w") as f:
+                json.dump(pred, f)
 
-        with torch.cuda.amp.autocast():
-            merge_pred = pipe(self.formatting_tests_func(self.testdata))
-        logger.debug("Prediction: %s", merge_pred)
+            del pipe
+            wandb.finish()
 
-        with open(
-            f"{self.cfg.path.finetuned_modelname}__{self.fold}_predictions_merged.json",
-            "w",
-        ) as json_file:
-            json.dump(merge_pred, json_file)
-
-        # Empty VRAM
+        # Cleanup (all ranks)
         del trainer
-        del collator
-        del pipe
         del self.model
         del self.tokenizer
         import gc
+        gc.collect()
 
-        gc.collect()
-        gc.collect()
-        wandb.finish()
         return self.cfg.path.finetuned_modelname

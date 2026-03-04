@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mattext"
 description = "A framework for text-based materials modeling"
-version = "0.0.1"
+version = "0.0.2"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [
@@ -28,10 +28,10 @@ classifiers = [
   "Operating System :: Unix",
   "Operating System :: MacOS",
 ]
-requires-python = ">=3.9, <3.13"
+requires-python = ">=3.10"
 dependencies = [
   "matbench @ git+https://github.com/materialsproject/matbench.git", # https://github.com/materialsproject/matbench/issues/269
-  "xtal2txt",
+  "xtal2txt @ git+https://github.com/lamalab-org/xtal2txt.git",
   "transformers",
   "tokenizers",
   "datasets",
@@ -147,7 +147,7 @@ black = true
 
 
 [tool.bumpversion]
-current_version = "0.0.1-dev"
+current_version = "0.0.2-dev"
 commit = true
 commit_args = "--no-verify --allow-empty"
 tag = true

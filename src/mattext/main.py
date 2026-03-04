@@ -1,7 +1,11 @@
 import os
+from datetime import timedelta
 from typing import Callable, Union
 
+import torch
+import torch.distributed as dist
 import hydra
+import torch
 import wandb
 from hydra import main as hydra_main
 from hydra import utils
@@ -48,7 +52,8 @@ class TaskRunner:
         use_train_data_path: bool = False,
     ):
         if use_folds:
-            iterations = range(task_cfg.model.fold)
+            skip_folds = set(task_cfg.model.get("skip_folds", []))
+            iterations = [i for i in range(task_cfg.model.fold) if i not in skip_folds]
         elif use_train_data_path:
             iterations = zip(
                 task_cfg.model.finetune.exp_name,
@@ -68,11 +73,13 @@ class TaskRunner:
                 exp_name = task_cfg.model[experiment_type].exp_name
                 fold = None
 
-            wandb.init(
-                config=dict(task_cfg.model[experiment_type]),
-                project=task_cfg.model.logging.wandb_project,
-                name=exp_name,
-            )
+            is_main = local_rank is None or local_rank == 0
+            if is_main:
+                wandb.init(
+                    config=dict(task_cfg.model[experiment_type]),
+                    project=task_cfg.model.logging.wandb_project,
+                    name=exp_name,
+                )
 
             exp_cfg = task_cfg.copy()
             exp_cfg.model[experiment_type].exp_name = exp_name
@@ -88,7 +95,9 @@ class TaskRunner:
                 model.finetune() if hasattr(model, "finetune") else model.pretrain_mlm()
             )
             print(result)
-            wandb.finish()
+
+            if is_main:
+                wandb.finish()
 
     def run_benchmarking(self, task_cfg: DictConfig, local_rank=None) -> None:
         print("Benchmarking")
@@ -150,9 +159,31 @@ def main(cfg: DictConfig) -> None:
         f"Output directory  : {hydra.core.hydra_config.HydraConfig.get().runtime.output_dir}"
     )
 
-    local_rank = int(os.getenv("LOCAL_RANK", "0"))
+    # Get local rank from environment (set by torchrun/accelerate)
+    local_rank = int(os.getenv("LOCAL_RANK", "-1"))
+
+    # If LOCAL_RANK is not set, we're not in DDP mode
+    if local_rank == -1:
+        local_rank = None
+        print("Running in single-process mode")
+    else:
+        print(f"Running in DDP mode with LOCAL_RANK={local_rank}")
+
+        # Validate that distributed is properly initialized
+        if torch.distributed.is_initialized():
+            world_size = torch.distributed.get_world_size()
+            rank = torch.distributed.get_rank()
+            print(f"Distributed initialized: rank={rank}/{world_size}")
+        else:
+            print(f"WARNING: LOCAL_RANK is set but torch.distributed is not initialized!")
+            print("DDP may not work correctly. Please ensure you're using torchrun or accelerate.")
+
     task_runner = TaskRunner()
-    task_runner.initialize_wandb()
+
+    # Only initialize wandb on main process
+    is_main = local_rank is None or local_rank == 0
+    if is_main:
+        task_runner.initialize_wandb()
 
     if cfg.runs:
         print(cfg)

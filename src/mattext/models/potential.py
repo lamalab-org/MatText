@@ -122,10 +122,22 @@ class PotentialModel(TokenizerMixin):
         config_train_args = self.cfg.training_arguments
         callbacks = self._callbacks()
 
+        # In DDP mode, disable load_best_model_at_end to avoid checkpoint loading issues
+        # Only rank 0 saves checkpoints, but all ranks try to load at the end
+        config_dict = dict(config_train_args)  # Convert OmegaConf to dict
+        if self.local_rank is not None:
+            if config_dict.get('load_best_model_at_end', False):
+                print(f"[Rank {self.local_rank}] WARNING: Disabling load_best_model_at_end in DDP mode")
+                config_dict['load_best_model_at_end'] = False
+            # Also ensure save_on_each_node is False (default)
+            if config_dict.get('save_on_each_node', False):
+                print(f"[Rank {self.local_rank}] WARNING: save_on_each_node should be False in DDP")
+                config_dict['save_on_each_node'] = False
+
         training_args = TrainingArguments(
-            **config_train_args,
-            metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
-            greater_is_better=False,  # Lower eval_rmse is better
+            **config_dict,
+            metric_for_best_model="eval_rmse",
+            greater_is_better=False,
         )
 
         model = AutoModelForSequenceClassification.from_pretrained(
@@ -138,9 +150,6 @@ class PotentialModel(TokenizerMixin):
 
         if self.local_rank is not None:
             model = model.to(self.local_rank)
-            model = nn.parallel.DistributedDataParallel(
-                model, device_ids=[self.local_rank]
-            )
         else:
             model = model.to("cuda")
 
@@ -149,21 +158,29 @@ class PotentialModel(TokenizerMixin):
             args=training_args,
             data_collator=None,
             compute_metrics=self._compute_metrics,
-            tokenizer=self._wrapped_tokenizer,
+            processing_class=self._wrapped_tokenizer,
             train_dataset=self.tokenized_dataset["train"],
             eval_dataset=self.tokenized_dataset["test"],
             callbacks=callbacks,
         )
 
-        wandb.log({"Training Arguments": str(config_train_args)})
-        wandb.log({"model_summary": str(model)})
+        is_main = self.local_rank is None or self.local_rank == 0
 
+        if is_main:
+            wandb.log({"Training Arguments": str(config_train_args)})
+            wandb.log({"model_summary": str(model)})
+
+        # Trainer handles all DDP synchronization automatically
         trainer.train()
-        model.save_pretrained(self.cfg.path.finetuned_modelname)
 
+        # All ranks must call evaluate (distributed collectives)
         eval_result = trainer.evaluate(eval_dataset=self.tokenized_testset)
-        wandb.log(eval_result)
-        wandb.finish()
+
+        if is_main:
+            wandb.log(eval_result)
+            trainer.save_model(self.cfg.path.finetuned_modelname)
+            wandb.finish()
+
         return self.cfg.path.finetuned_modelname
 
     def evaluate(self):

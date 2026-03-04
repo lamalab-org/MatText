@@ -213,11 +213,21 @@ class FinetuneLLama:
         config_train_args = self.cfg.training_arguments
         callbacks = self._callbacks()
 
+        # In DDP mode, disable load_best_model_at_end to avoid checkpoint loading issues
+        config_dict = dict(config_train_args)
+        if self.local_rank is not None:
+            if config_dict.get('load_best_model_at_end', False):
+                print(f"[Rank {self.local_rank}] WARNING: Disabling load_best_model_at_end in DDP mode")
+                config_dict['load_best_model_at_end'] = False
+            if config_dict.get('save_on_each_node', False):
+                print(f"[Rank {self.local_rank}] WARNING: save_on_each_node should be False in DDP")
+                config_dict['save_on_each_node'] = False
+
         # os.environ["ACCELERATE_MIXED_PRECISION"] = "no"
         training_args = TrainingArguments(
-            **config_train_args,
-            metric_for_best_model="eval_rmse",  # Metric to use for determining the best model
-            greater_is_better=False,  # Lower eval_rmse is better
+            **config_dict,
+            metric_for_best_model="eval_rmse",
+            greater_is_better=False,
         )
 
         trainer = Trainer(
@@ -225,15 +235,19 @@ class FinetuneLLama:
             args=training_args,
             data_collator=None,
             compute_metrics=self._compute_metrics,
-            tokenizer=self.tokenizer,
+            processing_class=self.tokenizer,
             train_dataset=self.tokenized_dataset["train"],
             eval_dataset=self.tokenized_dataset["test"],
             callbacks=callbacks,
         )
 
-        wandb.log({"Training Arguments": str(config_train_args)})
-        wandb.log({"model_summary": str(self.model)})
+        is_main = self.local_rank is None or self.local_rank == 0
 
+        if is_main:
+            wandb.log({"Training Arguments": str(config_train_args)})
+            wandb.log({"model_summary": str(self.model)})
+
+        # Trainer handles all DDP synchronization automatically
         trainer.train()
         trainer.save_model(
             f"{self.cfg.path.finetuned_modelname}/llamav2-7b-lora-fine-tune"
