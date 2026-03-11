@@ -73,11 +73,24 @@ rule all:
         [output for outputs in FIGURE_OUTPUTS.values() for output in outputs]
 
 
+# Create required directories before running any plots
+rule init_dirs:
+    output:
+        ".snakemake_dirs_created"
+    shell:
+        """
+        mkdir -p {OUTPUT_DIR}
+        mkdir -p logs
+        touch {output}
+        """
+
+
 # Figure 2: Composition vs Geometry contributions (CC-Cliff analysis)
 rule figure_2:
     input:
         script="figure_2.py",
-        commons="commons.py"
+        commons="commons.py",
+        dirs=rules.init_dirs.output
     output:
         FIGURE_OUTPUTS["figure_2"]
     log:
@@ -90,7 +103,8 @@ rule figure_2:
 rule figure_3:
     input:
         script="figure_3.py",
-        commons="commons.py"
+        commons="commons.py",
+        dirs=rules.init_dirs.output
     output:
         FIGURE_OUTPUTS["figure_3"]
     log:
@@ -103,7 +117,8 @@ rule figure_3:
 rule figure_5:
     input:
         script="figure_5.py",
-        commons="commons.py"
+        commons="commons.py",
+        dirs=rules.init_dirs.output
     output:
         FIGURE_OUTPUTS["figure_5"]
     log:
@@ -116,7 +131,8 @@ rule figure_5:
 rule figure_6:
     input:
         script="figure_6.py",
-        commons="commons.py"
+        commons="commons.py",
+        dirs=rules.init_dirs.output
     output:
         FIGURE_OUTPUTS["figure_6"]
     log:
@@ -129,7 +145,8 @@ rule figure_6:
 rule figure_7:
     input:
         script="figure_7.py",
-        commons="commons.py"
+        commons="commons.py",
+        dirs=rules.init_dirs.output
     output:
         FIGURE_OUTPUTS["figure_7"]
     log:
@@ -142,7 +159,8 @@ rule figure_7:
 rule appendix_rt_tokenizer:
     input:
         script="appendix_rt_tokenizer.py",
-        commons="commons.py"
+        commons="commons.py",
+        dirs=rules.init_dirs.output
     output:
         FIGURE_OUTPUTS["appendix_rt_tokenizer"]
     log:
@@ -155,7 +173,8 @@ rule appendix_rt_tokenizer:
 rule appendix_architecture:
     input:
         script="appendix_architecture.py",
-        commons="commons.py"
+        commons="commons.py",
+        dirs=rules.init_dirs.output
     output:
         FIGURE_OUTPUTS["appendix_architecture"]
     log:
@@ -168,7 +187,8 @@ rule appendix_architecture:
 rule appendix_panel_comparison:
     input:
         script="appendix_panel_comparison.py",
-        commons="commons.py"
+        commons="commons.py",
+        dirs=rules.init_dirs.output
     output:
         FIGURE_OUTPUTS["appendix_panel_comparison"]
     log:

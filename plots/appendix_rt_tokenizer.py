@@ -59,7 +59,7 @@ def calculate_percentage_improvement(
     rt_data, normal_data, data_sizes, representations, properties
 ):
     """
-    Calculate percentage improvement: ((Normal_RMSE - RT_RMSE) / Normal_RMSE) * 100
+    Calculate percentage improvement: ((Normal_MAE - RT_MAE) / Normal_MAE) * 100
     Positive values indicate improvement (RT is better).
     """
     results = {}
@@ -71,34 +71,34 @@ def calculate_percentage_improvement(
 
             for rep in representations:
                 try:
-                    # Get RT tokenizer RMSE
+                    # Get RT tokenizer MAE
                     if (
                         size in rt_data
                         and rep in rt_data[size]
                         and prop in rt_data[size][rep]
                     ):
-                        rt_rmse = rt_data[size][rep][prop]["mae"]["mean"]
+                        rt_mae = rt_data[size][rep][prop]["mae"]["mean"]
                     else:
                         results[size][prop][rep] = None
                         continue
 
-                    # Get Normal tokenizer mae
+                    # Get Normal tokenizer MAE
                     if (
                         size in normal_data
                         and rep in normal_data[size]
                         and prop in normal_data[size][rep]
                     ):
-                        normal_rmse = normal_data[size][rep][prop]["mae"]["mean"]
+                        normal_mae = normal_data[size][rep][prop]["mae"]["mean"]
                     else:
                         results[size][prop][rep] = None
                         continue
 
                     # Calculate percentage improvement (positive = RT better)
-                    if normal_rmse != 0:
-                        pct_improvement = ((normal_rmse - rt_rmse) / normal_rmse) * 100
+                    if normal_mae != 0:
+                        pct_improvement = ((normal_mae - rt_mae) / normal_mae) * 100
                         results[size][prop][rep] = pct_improvement
                         print(
-                            f"{size}-{prop}-{rep}: RT={rt_rmse:.4f}, Normal={normal_rmse:.4f}, Improvement={pct_improvement:.1f}%"
+                            f"{size}-{prop}-{rep}: RT={rt_mae:.4f}, Normal={normal_mae:.4f}, Improvement={pct_improvement:.1f}%"
                         )
                     else:
                         results[size][prop][rep] = None
