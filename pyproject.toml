@@ -140,3 +140,10 @@ message = "Version updated from {current_version} to {new_version}"
 
 [tool.bumpversion.parts.dev]
 values = ["release", "post", "dev"]
+
+[dependency-groups]
+dev = [
+    "lama-aesthetics @ git+https://github.com/lamalab-org/lama-aesthetics.git",
+    "snakemake>=7.32.0,<8.0.0",
+    "pulp<2.8.0",
+]

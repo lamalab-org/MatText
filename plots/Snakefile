@@ -1,0 +1,199 @@
+"""
+Snakemake workflow for generating all MatText publication figures.
+
+Usage:
+    snakemake --cores 1                    # Run all plots
+    snakemake figure_2 --cores 1           # Run specific figure
+    snakemake clean                        # Remove all outputs
+"""
+
+# Configuration
+OUTPUT_DIR = "outputs"
+
+# All figure targets
+FIGURES = [
+    "figure_2",
+    "figure_3",
+    "figure_5",
+    "figure_6",
+    "figure_7",
+    "appendix_rt_tokenizer",
+    "appendix_architecture",
+    "appendix_panel_comparison",
+]
+
+# Main targets with their outputs
+FIGURE_OUTPUTS = {
+    "figure_2": [
+        f"{OUTPUT_DIR}/figure_2_panel_c.png",
+        f"{OUTPUT_DIR}/figure_2_panel_c.pdf",
+        f"{OUTPUT_DIR}/figure_2_appendix_2row.png",
+        f"{OUTPUT_DIR}/figure_2_appendix_2row.pdf",
+        f"{OUTPUT_DIR}/figure_2_appendix_1row.png",
+        f"{OUTPUT_DIR}/figure_2_appendix_1row.pdf",
+    ],
+    "figure_3": [
+        f"{OUTPUT_DIR}/figure_3.png",
+        f"{OUTPUT_DIR}/figure_3.pdf",
+    ],
+    "figure_5": [
+        f"{OUTPUT_DIR}/figure_5.png",
+        f"{OUTPUT_DIR}/figure_5.pdf",
+    ],
+    "figure_6": [
+        f"{OUTPUT_DIR}/figure_6.png",
+        f"{OUTPUT_DIR}/figure_6.pdf",
+    ],
+    "figure_7": [
+        f"{OUTPUT_DIR}/figure_7.png",
+        f"{OUTPUT_DIR}/figure_7.pdf",
+    ],
+    "appendix_rt_tokenizer": [
+        f"{OUTPUT_DIR}/appendix_rt_tokenizer.png",
+        f"{OUTPUT_DIR}/appendix_rt_tokenizer.pdf",
+    ],
+    "appendix_architecture": [
+        f"{OUTPUT_DIR}/appendix_architecture_panel_c.png",
+        f"{OUTPUT_DIR}/appendix_architecture_panel_c.pdf",
+        f"{OUTPUT_DIR}/appendix_architecture_2row.png",
+        f"{OUTPUT_DIR}/appendix_architecture_2row.pdf",
+        f"{OUTPUT_DIR}/appendix_architecture_1row.png",
+        f"{OUTPUT_DIR}/appendix_architecture_1row.pdf",
+    ],
+    "appendix_panel_comparison": [
+        f"{OUTPUT_DIR}/appendix_panel_comparison.png",
+        f"{OUTPUT_DIR}/appendix_panel_comparison.pdf",
+    ],
+}
+
+
+# Default rule: generate all figures
+rule all:
+    input:
+        [output for outputs in FIGURE_OUTPUTS.values() for output in outputs]
+
+
+# Figure 2: Composition vs Geometry contributions (CC-Cliff analysis)
+rule figure_2:
+    input:
+        script="figure_2.py",
+        commons="commons.py"
+    output:
+        FIGURE_OUTPUTS["figure_2"]
+    log:
+        "logs/figure_2.log"
+    shell:
+        "uv run python {input.script} 2>&1 | tee {log}"
+
+
+# Figure 3: N-gram binning analysis
+rule figure_3:
+    input:
+        script="figure_3.py",
+        commons="commons.py"
+    output:
+        FIGURE_OUTPUTS["figure_3"]
+    log:
+        "logs/figure_3.log"
+    shell:
+        "uv run python {input.script} 2>&1 | tee {log}"
+
+
+# Figure 5: 30K bar plot results
+rule figure_5:
+    input:
+        script="figure_5.py",
+        commons="commons.py"
+    output:
+        FIGURE_OUTPUTS["figure_5"]
+    log:
+        "logs/figure_5.log"
+    shell:
+        "uv run python {input.script} 2>&1 | tee {log}"
+
+
+# Figure 6: Data and model scaling
+rule figure_6:
+    input:
+        script="figure_6.py",
+        commons="commons.py"
+    output:
+        FIGURE_OUTPUTS["figure_6"]
+    log:
+        "logs/figure_6.log"
+    shell:
+        "uv run python {input.script} 2>&1 | tee {log}"
+
+
+# Figure 7: LLM vs GNN performance wall
+rule figure_7:
+    input:
+        script="figure_7.py",
+        commons="commons.py"
+    output:
+        FIGURE_OUTPUTS["figure_7"]
+    log:
+        "logs/figure_7.log"
+    shell:
+        "uv run python {input.script} 2>&1 | tee {log}"
+
+
+# Appendix: RT tokenizer comparison
+rule appendix_rt_tokenizer:
+    input:
+        script="appendix_rt_tokenizer.py",
+        commons="commons.py"
+    output:
+        FIGURE_OUTPUTS["appendix_rt_tokenizer"]
+    log:
+        "logs/appendix_rt_tokenizer.log"
+    shell:
+        "uv run python {input.script} 2>&1 | tee {log}"
+
+
+# Appendix: Architecture comparison
+rule appendix_architecture:
+    input:
+        script="appendix_architecture.py",
+        commons="commons.py"
+    output:
+        FIGURE_OUTPUTS["appendix_architecture"]
+    log:
+        "logs/appendix_architecture.log"
+    shell:
+        "uv run python {input.script} 2>&1 | tee {log}"
+
+
+# Appendix: Panel comparison
+rule appendix_panel_comparison:
+    input:
+        script="appendix_panel_comparison.py",
+        commons="commons.py"
+    output:
+        FIGURE_OUTPUTS["appendix_panel_comparison"]
+    log:
+        "logs/appendix_panel_comparison.log"
+    shell:
+        "uv run python {input.script} 2>&1 | tee {log}"
+
+
+# Clean up all outputs
+rule clean:
+    shell:
+        """
+        rm -rf {OUTPUT_DIR}/*.png {OUTPUT_DIR}/*.pdf
+        rm -rf logs/*.log
+        echo "Cleaned all outputs and logs"
+        """
+
+
+# Create required directories
+onsuccess:
+    print("✓ All plots generated successfully!")
+    print(f"  Outputs saved to: {OUTPUT_DIR}/")
+    print(f"  Logs saved to: logs/")
+
+
+onerror:
+    print("✗ Error occurred during plot generation")
+    print("  Check logs/ directory for details")
