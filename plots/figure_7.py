@@ -138,17 +138,17 @@ def normalize_property(series):
     valid = series.dropna()
     # If there is 0 or 1 valid value, return a constant normalized value (e.g., 0.5)
     if len(valid) <= 1:
-        return pd.Series(
-            0.5, index=series.index, dtype=float
-        ).where(~series.isna(), other=pd.NA)
+        return pd.Series(0.5, index=series.index, dtype=float).where(
+            ~series.isna(), other=pd.NA
+        )
     min_val = valid.min()
     max_val = valid.max()
     range_val = max_val - min_val
     # If all valid values are identical, map them to a constant normalized value
     if range_val == 0:
-        return pd.Series(
-            0.5, index=series.index, dtype=float
-        ).where(~series.isna(), other=pd.NA)
+        return pd.Series(0.5, index=series.index, dtype=float).where(
+            ~series.isna(), other=pd.NA
+        )
     return (series - min_val) / range_val
 
 
