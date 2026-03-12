@@ -220,3 +220,7 @@ results/
 /notebooks/token_reports/*
 /results/*
 llama_out/
+
+
+.snakemake/
+.snakemake_dirs_created
