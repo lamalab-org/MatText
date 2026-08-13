@@ -202,6 +202,7 @@ wandb/
 results/
 *.png
 !docs/static/logo.png
+!landing-blog/assets/*.png
 multirun/
 multirun/*
 results/
