@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Large language models consistently fail to learn from coordinate information in coordinate-category data, while excelling at category patterns — a limitation that persists across model size, dataset scale, and text representation."
+    />
+    <title>Less can be more for predicting properties with large language models — MatText</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="masthead">
+      <a class="masthead-brand" href="#top"><img src="assets/mattext-logo.png" alt="MatText" /></a>
+      <nav aria-label="Primary">
+        <a href="https://github.com/lamalab-org/MatText" target="_blank" rel="noreferrer">GitHub ↗</a>
+        <a href="docs/">Docs ↗</a>
+        <a href="https://arxiv.org/abs/2406.17295" target="_blank" rel="noreferrer">arXiv ↗</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <!-- ============================== ARTICLE HEADER ============================== -->
+      <article>
+        <header class="article-head" id="top">
+          <p class="kicker reveal-in" style="animation-delay: 0s">
+            <span class="pulse-dot"></span>
+            <a href="https://arxiv.org/abs/2406.17295" target="_blank" rel="noreferrer">arXiv:2406.17295</a> · 2024
+          </p>
+          <h1 class="reveal-in" style="animation-delay: 0.08s">Less can be more for predicting properties with large language models</h1>
+          <p class="byline reveal-in" style="animation-delay: 0.16s">
+            <a href="https://scholar.google.com/citations?user=R7K3xFIAAAAJ&hl=en" target="_blank" rel="noreferrer">Nawaf Alampara</a><sup>1</sup>
+            &nbsp;·&nbsp;
+            <a href="https://scholar.google.com/citations?user=ZV1wVzYAAAAJ&hl=en" target="_blank" rel="noreferrer">Santiago Miret</a><sup>2</sup>
+            &nbsp;·&nbsp;
+            <a href="https://scholar.google.com/citations?user=R2ntI8IAAAAJ&hl=en" target="_blank" rel="noreferrer">Kevin Maik Jablonka</a><sup>1,3,4,5</sup>
+          </p>
+
+          <details class="affil-toggle reveal-in" style="animation-delay: 0.22s">
+            <summary>Affiliations</summary>
+            <p class="affil">
+              <sup>1</sup> Laboratory of Organic and Macromolecular Chemistry (IOMC), Friedrich Schiller University Jena, Humboldtstrasse 10, 07743 Jena, Germany<br />
+              <sup>2</sup> Lila Sciences (work done while at Intel Labs)<br />
+              <sup>3</sup> Center for Energy and Environmental Chemistry Jena (CEEC Jena), Friedrich Schiller University Jena, Philosophenweg 7a, 07743 Jena, Germany<br />
+              <sup>4</sup> Helmholtz Institute for Polymers in Energy Applications Jena (HIPOLE Jena), Lessingstrasse 12-14, 07743 Jena, Germany<br />
+              <sup>5</sup> Jena Center for Soft Matter (JCSM), Friedrich Schiller University Jena, Philosophenweg 7, 07743 Jena, Germany
+            </p>
+          </details>
+
+          <blockquote class="lede-quote reveal-in" style="animation-delay: 0.3s">
+            "LLMs consistently fail to capture coordinate information while excelling at category patterns."
+          </blockquote>
+          <p class="lede-desc reveal-in" style="animation-delay: 0.38s">
+            A benchmarking study of how language models handle crystal structures, using synthetic datasets and
+            MatText, an open framework for representing materials as text.
+          </p>
+
+          <details class="abstract-toggle reveal-in" style="animation-delay: 0.44s">
+            <summary>Read the full abstract</summary>
+            <p>
+              Predicting properties from coordinate-category data — sets of vectors paired with categorical
+              information — is fundamental to computational science, manifesting in materials science as predicting
+              formation energies or elastic moduli from crystal structures. While large language models (LLMs) have
+              increasingly been applied to such tasks, optimal strategies for achieving reliable predictions remain
+              elusive. Here, we report fundamental limitations in LLMs' ability to learn from coordinate information
+              in coordinate-category data. Through systematic experiments using synthetic datasets with tunable
+              coordinate and category contributions, and a comprehensive benchmarking framework (MatText), we find
+              that LLMs consistently fail to capture coordinate information while excelling at category patterns.
+              This geometric blindness persists regardless of model size (up to 70B parameters), dataset scale (up
+              to 2M structures), or text representation strategy. For materials property prediction tasks dominated
+              by structural effects, specialized geometric architectures consistently outperform LLMs, as evidenced
+              by a clear "GNN–LM wall" in performance benchmarks.
+            </p>
+          </details>
+
+          <nav class="toc reveal-in" style="animation-delay: 0.5s" aria-label="Table of contents">
+            <span>Contents</span>
+            <a href="#introduction">1. Introduction</a>
+            <a href="#cliff-section">2.1 Coordinate–category mixtures</a>
+            <a href="#ngram-section">2.2 n-gram models</a>
+            <a href="#implications">2.3 Implications</a>
+            <a href="#discussion">3. Discussion</a>
+            <a href="#code">4. Code &amp; data</a>
+          </nav>
+        </header>
+
+        <!-- ============================== 1. INTRODUCTION ============================== -->
+        <section id="introduction">
+          <h2>1. Introduction</h2>
+          <p>
+            Large language models have matched or exceeded expert performance across scientific domains, prompting
+            their use for materials and chemistry property prediction. But this data typically mixes
+            <b>coordinate information</b> (positions) with <b>category information</b> (discrete labels, like atom
+            type) — and it is unclear whether a language model can learn the coordinate half at all. We show that
+            Transformer-based models, causal and masked alike, systematically fail to learn from coordinate
+            information in coordinate-category data while excelling at category patterns — a gap that persists
+            across architectures, scales, and training strategies.
+          </p>
+        </section>
+
+        <!-- ============================== 2.1 CC MIXTURES ============================== -->
+        <section id="cliff-section">
+          <h2>2. Results</h2>
+          <h3>2.1 Probing LLMs with coordinate–category information mixtures</h3>
+          <p>
+            We built synthetic datasets where each point has 3D coordinates (like atom positions) and a categorical
+            label (like atom type), then computed target values with a hypothetical potential that lets us dial the
+            balance between the two:
+          </p>
+
+          <div class="equation-row">
+            <p class="equation">E(α) = α · E<sub>category</sub> + (1 − α) · E<sub>coordinate</sub>,&nbsp; α ∈ [0, 1]</p>
+            <span class="eq-num">(1)</span>
+          </div>
+
+          <p>
+            At α = 0 the target depends only on coordinates; at α = 1, only on category. We swept α from 0 to 1 and
+            fine-tuned BERT to predict the target at every step.
+          </p>
+
+          <figure class="fig-block" id="fig-1">
+            <div class="fig-panel">
+              <div class="fig-controls">
+                <div class="mode-group" role="group" aria-label="Information mode">
+                  <button class="mode-btn" data-mode="coordinate" type="button" aria-pressed="false">
+                    Coordinate only<small>where things are — no labels</small>
+                  </button>
+                  <button class="mode-btn" data-mode="category" type="button" aria-pressed="false">
+                    Category only<small>what things are — no positions</small>
+                  </button>
+                  <button class="mode-btn" data-mode="both" type="button" aria-pressed="true">
+                    Both, together<small>a real coordinate-category point</small>
+                  </button>
+                </div>
+                <p class="fig-readout" id="fig1-readout">
+                  Real data has both. The open question is whether a language model uses the coordinate half, or
+                  quietly discards it.
+                </p>
+              </div>
+              <div class="fig-stage">
+                <svg id="fig1-svg" viewBox="0 0 460 300" role="img" aria-label="Eighteen data points shown by coordinate position, by category, or both"></svg>
+              </div>
+            </div>
+            <figcaption><b>Figure 1.</b> A data point at various levels of information. Toggle between the three panels above.</figcaption>
+          </figure>
+
+          <p>
+            We call a model's error on coordinate-heavy tasks (α near 0) the <b>coordinate contribution</b> (CoC),
+            and its error on category-heavy tasks (α near 1) the <b>category contribution</b> (CaC). When CoC
+            exceeds CaC, we call this the <b>Coordinate–Category Cliff</b> (CC-Cliff).
+          </p>
+
+          <figure class="fig-block fig-block-dark" id="fig-2">
+            <div class="fig-panel">
+              <div class="fig-controls">
+                <p class="drag-label">Drag the mix</p>
+                <p class="fig-note">
+                  At α = 0 the target depends only on geometry. At α = 1, only on composition. Drag to see where each
+                  model's error actually sits.
+                </p>
+                <label for="alpha-range">Information mix <output id="alpha-value">α = 0.50</output></label>
+                <input id="alpha-range" type="range" min="0" max="1" step="0.01" value="0.5" />
+                <div class="range-labels"><span>pure geometry</span><span>balanced</span><span>pure composition</span></div>
+                <p class="fig-readout" id="cliff-message">
+                  Near the balanced midpoint, both families sit closer to their own best case.
+                </p>
+                <p class="fig-verdict" id="cliff-verdict"></p>
+              </div>
+              <div class="fig-stage">
+                <svg id="cliff-svg" viewBox="0 0 640 300" role="img" aria-label="Relative error of language models versus GNNs across the coordinate-category mix"></svg>
+                <div class="chart-legend">
+                  <span><i class="swatch llm"></i>language model (MatText)</span>
+                  <span><i class="swatch gnn"></i>geometry-aware model (CoGN)</span>
+                </div>
+              </div>
+            </div>
+            <figcaption>
+              <b>Figure 2.</b> Relative error across the α-sweep, normalized per dataset then averaged across six
+              datasets. <i>Source: Figure 2 data.</i>
+            </figcaption>
+          </figure>
+
+          <p>
+            Across every dataset we tested, CoC is consistently and significantly larger than CaC for language
+            models — a clear bias against coordinate information. A graph-based model (CoGN) shows the opposite
+            pattern, and a descriptor-based one (MODNet) sits near zero: the cliff is a property of the
+            architecture, not the task.
+          </p>
+        </section>
+
+        <!-- ============================== 2.2 N-GRAM ============================== -->
+        <section id="ngram-section">
+          <h3>2.2 Comparison with n-gram models</h3>
+          <p>
+            To probe the source of this gap, we ran the same experiments with n-gram models — motivated by prior
+            work showing some LLM behaviors can be explained by treating them as n-grams — while also binning the
+            coordinate-distance term into an increasingly fine-grained classification problem.
+          </p>
+          <p>
+            n-gram models track fine-tuned language models closely across the datasets we analyzed. In principle
+            n-grams can't capture positional information without combinatorially many samples, since encoding
+            positions inflates the token vocabulary by many orders of magnitude — so this tracking suggests language
+            models lean on superficial pattern-matching rather than real geometric understanding, consistent with an
+            attention analysis showing coordinate information isn't meaningfully used at prediction time.
+          </p>
+
+          <figure class="fig-block" id="fig-3">
+            <div class="fig-image">
+              <img src="assets/fig3_ngram_comparison.png" alt="CC-Cliff plotted against the number of bins, on a log scale, for three datasets, comparing transformer models (solid lines) to n-gram models (dotted lines)" />
+            </div>
+            <figcaption>
+              <b>Figure 3.</b> CC-Cliff vs. number of bins (log scale), three datasets. Solid: Transformer models.
+              Dotted: n-gram counterparts. Purple: category-only input. Red: coordinate + category. The two track
+              almost identically.
+            </figcaption>
+          </figure>
+        </section>
+
+        <!-- ============================== 2.3 IMPLICATIONS ============================== -->
+        <section id="implications">
+          <h3>2.3 Implications for materials property predictions</h3>
+          <p>
+            These findings have practical implications. We built <b>MatText</b>, an open framework for representing
+            materials as text, to test them across representation, scale, and architecture.
+          </p>
+
+          <p><b>Representation.</b> MatText implements many text representations, from bare composition to full 3D
+            coordinates. Adding more geometry rarely helps: SLICES outperforms CIF P₁ on every property we tested,
+            and Local-Env matches fully geometric representations for the elastic moduli.
+          </p>
+
+          <figure class="fig-block" id="fig-5">
+            <div class="fig-tabs" role="tablist" aria-label="Property">
+              <button class="tab-btn" data-prop="gvrh" type="button" aria-pressed="true">Shear modulus (μ)</button>
+              <button class="tab-btn" data-prop="kvrh" type="button" aria-pressed="false">Bulk modulus (K)</button>
+              <button class="tab-btn" data-prop="perovskites" type="button" aria-pressed="false">Perovskite Eꜰ</button>
+            </div>
+            <div class="fig-panel">
+              <div class="fig-stage fig-stage-wide">
+                <svg id="rep-svg" viewBox="0 0 560 340" role="img" aria-label="RMSE by text representation"></svg>
+                <div class="rep-legend">
+                  <span><i style="background: #e76f51"></i>compositional</span>
+                  <span><i style="background: #c1121f"></i>local environment</span>
+                  <span><i style="background: #79155b"></i>explicit geometry</span>
+                </div>
+              </div>
+              <div class="fig-preview" id="rep-preview"></div>
+            </div>
+            <figcaption><b>Figure 5.</b> RMSE by text representation. Click a bar to read what the model actually saw. <i>Source: Figure 5 data, 30K structures, 5-fold cross-validation.</i></figcaption>
+          </figure>
+
+          <p><b>Scale.</b> We ablated dataset size (30K → 2M structures) and model size (7B → 70B parameters) across
+            more than 2,000 training runs. Both move RMSE by single digits at most — nowhere near enough to close
+            the gap with GNNs.
+          </p>
+
+          <figure class="fig-block" id="fig-6">
+            <div class="fig-tabs" role="tablist" aria-label="Scaling axis">
+              <button class="tab-btn" data-scale="dataset" type="button" aria-pressed="true">Dataset scale — 30K → 2M structures</button>
+              <button class="tab-btn" data-scale="model" type="button" aria-pressed="false">Model scale — 7B → 70B parameters</button>
+            </div>
+            <div class="scale-grid" id="scale-grid"></div>
+            <figcaption><b>Figure 6.</b> % change in RMSE relative to baseline, averaged across representations. <i>Source: Figure 6 data.</i></figcaption>
+          </figure>
+
+          <p><b>The GNN–LM wall.</b> Scanning the MatBench leaderboard, the pattern holds beyond our own experiments:
+            GNN-based and language-based approaches segregate almost perfectly, with language models consistently
+            at the high-error end.
+          </p>
+
+          <figure class="fig-block" id="fig-8">
+            <div class="wall-legend">
+              <span><i style="background: var(--coord)"></i>graph neural network</span>
+              <span><i style="background: var(--cat)"></i>language-based</span>
+              <span><i style="background: var(--ink-faint)"></i>descriptor-based (MODNet)</span>
+            </div>
+            <div class="wall-panel" id="wall-panel"></div>
+            <div class="wall-scale"><span>best in class</span><span>worst in class</span></div>
+            <figcaption><b>Extended Data Figure 1.</b> Scaled MAE, six material-property tasks. GNNs (COGN, SchNet, DimeNet) consistently outperform language-based approaches (MatText, CrabNet, Robocrystallographer, LLM-Prop).</figcaption>
+          </figure>
+        </section>
+
+        <!-- ============================== 3. DISCUSSION ============================== -->
+        <section id="discussion">
+          <h2>3. Discussion</h2>
+          <p>
+            Language models systematically fail to learn coordinate information in coordinate-category data — a
+            failure that persists across architecture, scale, and training strategy, and that neither more data nor
+            more parameters fixes. They behave like n-gram statistics: fluent with categorical patterns, blind to
+            the geometry. The path forward isn't a universal model, but matching the right architecture to the
+            right problem — language models for compositional patterns, geometric networks for spatial ones.
+          </p>
+
+          <aside class="aside-box">
+            <p class="aside-label">Limitations &amp; future directions</p>
+            <p>
+              This study covers three properties and Transformer architectures up to 70B parameters with
+              parameter-efficient fine-tuning. Multimodal models and coordinate-aware tokenization schemes remain
+              open questions, as does extending the CC-Cliff framework beyond crystalline materials.
+            </p>
+          </aside>
+        </section>
+
+        <!-- ============================== 4. CODE & DATA ============================== -->
+        <section id="code">
+          <h2>4. Code &amp; data availability</h2>
+          <p>MatText is MIT-licensed, documented, and archived on Zenodo; datasets are on Hugging Face.</p>
+          <div class="resource-list">
+            <a href="https://github.com/lamalab-org/MatText" target="_blank" rel="noreferrer">Code repository <span>↗</span></a>
+            <a href="docs/">Documentation <span>↗</span></a>
+            <a href="https://huggingface.co/datasets/n0w0f/MatText" target="_blank" rel="noreferrer">Datasets on Hugging Face <span>↗</span></a>
+            <a href="https://doi.org/10.5281/zenodo.21151839" target="_blank" rel="noreferrer">Code archive, Zenodo <span>↗</span></a>
+          </div>
+
+          <div class="code-card">
+            <div class="code-bar"><i></i><i></i><i></i><small>mattext.py</small></div>
+            <pre><span class="muted">from</span> mattext.representations <span class="muted">import</span> TextRep
+
+representation = TextRep(structure)
+
+<span class="muted"># the same crystal, nine ways</span>
+text = representation.get_requested_text_reps(
+    [<span class="string">"composition"</span>, <span class="string">"slices"</span>, <span class="string">"cif_p1"</span>]
+)</pre>
+          </div>
+        </section>
+
+        <!-- ============================== CITE ============================== -->
+        <section class="cite-section">
+          <p class="aside-label">How to cite</p>
+          <p class="cite-text">
+            Alampara, N., Miret, S. &amp; Jablonka, K. M. Less can be more for predicting properties with large
+            language models. <i>arXiv:2406.17295</i> (2024).
+          </p>
+          <pre class="cite-bibtex">@article{alampara2024lesscanbemore,
+  title   = {Less can be more for predicting properties with large language models},
+  author  = {Alampara, Nawaf and Miret, Santiago and Jablonka, Kevin Maik},
+  year    = {2024},
+  journal = {arXiv preprint arXiv:2406.17295}
+}</pre>
+        </section>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      <a class="footer-brand" href="#top"><img src="assets/mattext-logo.png" alt="MatText" /></a>
+      <div>
+        <a href="https://github.com/lamalab-org/MatText" target="_blank" rel="noreferrer">GitHub ↗</a>
+        <a href="docs/">Documentation ↗</a>
+        <a href="https://arxiv.org/abs/2406.17295" target="_blank" rel="noreferrer">arXiv ↗</a>
+        <a href="#top">Back to top ↑</a>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
