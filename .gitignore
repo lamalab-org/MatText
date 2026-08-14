@@ -225,3 +225,6 @@ llama_out/
 
 .snakemake/
 .snakemake_dirs_created
+
+# manuscript build artifacts (PDF, source data, cover letter) - not for GitHub
+/artifact/

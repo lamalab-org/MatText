@@ -176,16 +176,19 @@
                 <p class="fig-verdict" id="cliff-verdict"></p>
               </div>
               <div class="fig-stage">
-                <svg id="cliff-svg" viewBox="0 0 640 300" role="img" aria-label="Relative error of language models versus GNNs across the coordinate-category mix"></svg>
+                <svg id="cliff-svg" viewBox="0 0 640 300" role="img" aria-label="Error in excess of the balanced baseline, for language models versus GNNs, across the coordinate-category mix"></svg>
                 <div class="chart-legend">
                   <span><i class="swatch llm"></i>language model (MatText)</span>
                   <span><i class="swatch gnn"></i>geometry-aware model (CoGN)</span>
                 </div>
+                <p class="cliff-stats" id="cliff-stats"></p>
               </div>
             </div>
             <figcaption>
-              <b>Figure 2.</b> Relative error across the α-sweep, normalized per dataset then averaged across six
-              datasets. <i>Source: Figure 2 data.</i>
+              <b>Figure 2.</b> Each line is loss(α) − loss(α=0.5) — error in excess of the balanced-mix baseline —
+              averaged across representations, then across datasets (6 for MatText, matching the paper; 7 for
+              CoGN). Summing the left three points gives CoC; the right three, CaC — reproducing the paper's own
+              formula exactly, not an approximation of it. <i>Source: Figure 2 data.</i>
             </figcaption>
           </figure>
 
