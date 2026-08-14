@@ -42,6 +42,9 @@ jobs:
           mkdir -p _site
           cp -r landing-blog/. _site/
 
+      - name: Redirect old root-level docs routes to /docs/
+        run: python3 scripts/generate_docs_redirects.py
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
