@@ -124,18 +124,6 @@
     const LLM = [0.2984, 0.1563, 0.0451, 0.0, -0.0344, -0.0763, -0.0871];
     const GNN = [-0.0194, -0.0371, -0.0211, 0.0, 0.014, 0.0589, 0.1426];
 
-    const STATS = {
-      llm: { coc: 0.4998, cac: -0.1978, cliff: 0.6976 },
-      gnn: { coc: -0.0777, cac: 0.2154, cliff: -0.2931 },
-    };
-    const statsEl = document.getElementById('cliff-stats');
-    if (statsEl) {
-      statsEl.innerHTML = `
-        <span><b>MatText (LLM)</b> CoC ${STATS.llm.coc.toFixed(2)} · CaC ${STATS.llm.cac.toFixed(2)} · CC-Cliff ${STATS.llm.cliff >= 0 ? '+' : ''}${STATS.llm.cliff.toFixed(2)}</span>
-        <span><b>CoGN (GNN)</b> CoC ${STATS.gnn.coc.toFixed(2)} · CaC ${STATS.gnn.cac.toFixed(2)} · CC-Cliff ${STATS.gnn.cliff >= 0 ? '+' : ''}${STATS.gnn.cliff.toFixed(2)}</span>
-      `;
-    }
-
     const M = { left: 50, right: 16, top: 18, bottom: 40 };
     const W = 640, H = 300;
     const plotW = W - M.left - M.right;

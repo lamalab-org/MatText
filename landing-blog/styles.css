@@ -337,18 +337,6 @@ p em { font-style: italic; }
 .cliff-tick { font: 400 11px var(--mono); fill: var(--dark-text-soft); }
 .chart-legend { display: flex; gap: 22px; justify-content: center; font: 400 12px var(--mono); color: var(--dark-text-soft); padding-top: 8px; }
 .chart-legend .swatch { width: 16px; height: 3px; display: inline-block; margin-right: 7px; }
-.cliff-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 22px;
-  justify-content: center;
-  font: 400 11.5px var(--mono);
-  color: var(--dark-text-soft);
-  border-top: 1px solid var(--dark-rule);
-  margin: 10px 0 0;
-  padding-top: 10px;
-}
-.cliff-stats b { color: var(--dark-text); font-weight: 500; }
 .swatch.llm { background: var(--dark-cat); }
 .swatch.gnn { background: var(--dark-coord); }
 
