@@ -21,9 +21,14 @@ already occupied (e.g. the landing page's own index.html).
 from __future__ import annotations
 
 import sys
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import urlsplit
+
+# The sitemap we parse below is one mkdocs just generated from our own docs
+# source in this same job, not untrusted input - but defusedxml (a drop-in
+# replacement for xml.etree.ElementTree that disables external entity
+# resolution and entity-expansion bombs) costs nothing here, so use it.
+import defusedxml.ElementTree as ET
 
 SITE_ROOT = Path("_site")
 SITEMAP = SITE_ROOT / "docs" / "sitemap.xml"
