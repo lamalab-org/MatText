@@ -1,5 +1,5 @@
 site_name: mattext
-site_url: https://lamalab-org.github.io/mattext/
+site_url: https://lamalab-org.github.io/mattext/docs/
 site_description: >-
   A framework for text-based materials modeling
 
@@ -128,6 +128,7 @@ extra:
 
 
 nav:
+  - MatText Home: https://lamalab-org.github.io/mattext/
   - Home: index.md
   - Getting Started: getting_started.md
   - Representations: representations.md

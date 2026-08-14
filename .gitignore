@@ -202,6 +202,7 @@ wandb/
 results/
 *.png
 !docs/static/logo.png
+!landing-blog/assets/*.png
 multirun/
 multirun/*
 results/
@@ -224,3 +225,6 @@ llama_out/
 
 .snakemake/
 .snakemake_dirs_created
+
+# manuscript build artifacts (PDF, source data, cover letter) - not for GitHub
+/artifact/
